@@ -1,0 +1,124 @@
+/* 메인 컨테이너: 동영상 원본 비율 16:9로 고정하기 */
+.main-container {
+  position: relative;
+  width: 100%;          /* 화면 너비에 맞춤 */
+  max-width: 1920px;    /* 원한다면 최대 폭 제한 */
+  aspect-ratio: 16 / 9; /* 동영상 비율에 맞춤 */
+  margin: 0 auto;       /* 가운데 정렬 (선택) */
+  overflow: hidden;
+}
+
+/* 동영상 배경 설정 */
+.video-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  filter: brightness(70%);
+  z-index: 1;
+}
+
+/* 텍스트와 버튼 배치용 오버레이 래퍼 */
+.text-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* 메인 텍스트 */
+.main-text {
+  position: absolute;
+  top: 60%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-size: 2vw; 
+  line-height: 1.2;
+  z-index: 2;
+}
+
+.main-text h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.main-text p {
+  font-size: 1.5rem;
+  line-height: 1.8;
+}
+
+/* 후원 옵션 (오른쪽 배치) */
+.support-options {
+  position: absolute;
+  top: 50%;
+  right: 0%;
+  transform: translateY(-50%);
+  width: 25%;
+  height: auto; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.support-box {
+  background-color: rgba(0, 0, 0, 0);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border: 2px solid white;
+  flex: none;
+  min-height: 182px;
+}
+
+.support-box button {
+  padding: 10px 20px;
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.support-box button:hover {
+  background-color: white;
+  color: black;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .main-text {
+    top: 60%;
+    left: 40%;
+    font-size: 1.5rem; /* 작은 화면에서 폰트 크기 축소 */
+  }
+
+  .support-options {
+    position: absolute;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    right: auto; /* 모바일에서는 왼쪽 오른쪽 고정 대신 전체 너비 사용 */
+    transform: none; /* 중앙정렬이 필요 없을 수도 있으므로 상황에 맞게 조정 */
+    top: 70%;        /* 필요하면 이 위치도 적절히 조정 */
+  }
+
+  .support-box {
+    width: 45%;
+    min-height: auto;
+  }
+
+  .support-box button {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
