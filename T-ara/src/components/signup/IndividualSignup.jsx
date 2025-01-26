@@ -75,6 +75,7 @@ const Individual = () => {
                 중복확인
               </button>
             </div>
+            <p className="infor_message">아이디는 5~10 자리 영문 소문자와 숫자로 입력해 주세요.</p>
           </div>
 
           {/* 비밀번호 */}
@@ -83,6 +84,7 @@ const Individual = () => {
               비밀번호 <span style={{ color: "red" }}>*</span>
             </label>
             <input type="password" className="input" placeholder="비밀번호" />
+            <p className="infor_message">비밀번호는 영문, 숫자 소문자와 숫자로 입력해주세요.</p>
           </div>
 
           {/* 비밀번호 확인 */}
@@ -98,16 +100,20 @@ const Individual = () => {
             <label className="label">사진</label>
             <div className="photo-container">
               <img src="/placeholder.png" alt="프로필" className="photo" />
+              <div className="text-container">
+              <h3>사진 업로드 가이드</h3>
+              <p>권장 사이즈 : 최소 200 x 200 이상</p>
+              <p>파일형식 : JPG,JPEG,PNG</p>
+              <p>최대 용량: 5MB 이하</p>
               <button type="button" className="button button-secondary">
                 사진등록
               </button>
+              </div>
             </div>
-            <p className="text-small">
-              권장 사이즈: 최소 200 x 200 이상 <br />
-              최대 용량: 5MB 이하
-            </p>
           </div>
-
+        </form>
+        </div>
+        <div className="form-box">
           {/* 약관 동의 */}
           <div className="form-group">
             <label className="flex">
@@ -115,18 +121,32 @@ const Individual = () => {
               이용약관, 개인정보 수집 및 이용에 모두 동의합니다.
             </label>
           </div>
+          <hr />
 
-          {/* 버튼 */}
+          <label className="flex">
+              <input type="checkbox" style={{ marginRight: "8px" }} />
+                <span>(필수)</span>서비스 이용약관에 동의합니다.
+                
+            </label>
+
+            <label className="flex">
+              <input type="checkbox" style={{ marginRight: "8px" }} />
+                <span>(필수)</span>개인정보 수집 및 이용에 동의합니다.
+                
+            </label>
+        </div>
+
+        {/* 버튼 */}
+          <div className="button-container">
           <div className="flex" style={{ justifyContent: "space-between" }}>
-            <button type="button" className="button button-secondary">
+            <button type="button" className="cancel-button">
               이전
             </button>
-            <button type="submit" className="button button-primary">
+            <button type="submit" className="submit-button">
               회원가입 완료
             </button>
-          </div>
-        </form>
-      </div>
+          </div>    
+        </div>  
     </div>
   );
 };
