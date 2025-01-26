@@ -1,4 +1,4 @@
-import "./Gigwan.css"
+import "./styles/Gigwan.css"
 
 const Gigwan =()=>{
 

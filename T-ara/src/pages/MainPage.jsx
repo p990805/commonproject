@@ -2,6 +2,8 @@ import MainVideo from "../components/MainVideo"
 import Nanum from "../components/Nanum";
 import Gigwan from "../components/Gigwan";
 
+import "./styles/MainPage.css"
+
 const MainPage =() => {
 
     return(

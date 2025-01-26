@@ -1,4 +1,4 @@
-import "./Nanum.css"
+import "./styles/Nanum.css"
 
 const Nanum =()=>{
     
