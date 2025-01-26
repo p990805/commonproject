@@ -1,0 +1,118 @@
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  .form-box {
+    width: 100%;
+    max-width: 600px;
+    background: #ffffff;
+    padding: 50px;
+    padding-top: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: 20px;;
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+    margin-bottom: 50px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    margin-bottom: 20px; /* 그룹 간 간격 조정 */
+    gap: 8px; /* 내부 요소 간 간격 */
+  }
+  
+  
+  .label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .input {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .flex {
+    display: flex;
+    align-items: center;
+    gap:10px;
+  }
+  
+  .input-flex {
+    flex-grow: 1;
+  }
+  
+  .button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    max-height: 50px;
+  }
+  
+  .button-secondary {
+    background-color: #424242;
+    color: white;
+  }
+  
+  .button-secondary:hover {
+    background-color: #ccc;
+  }
+  
+  .button-primary {
+    background-color: #ff4d4d;
+    color: #fff;
+  }
+  
+  .button-primary:hover {
+    background-color: #e03b3b;
+  }
+  
+  .photo-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .photo {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .text-small {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+  }
+
+  .infor_message{
+    margin-top: 0px;
+    font-size: 10px;
+    color:#aaa9a9
+  }
+  

@@ -1,4 +1,4 @@
-import "./MainVideo.css";
+import "./styles/MainVideo.css";
 
 const MainVideo = () => {
   return (
