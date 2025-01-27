@@ -95,7 +95,7 @@ const Institution =() =>{
                                 required
                                 />
 
-                                <button className="whitespace-nowrap bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                                <button className="whitespace-nowrap bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-600 cursor-pointer">
                                     중복확인
                                 </button>
                             </div>
@@ -147,7 +147,7 @@ const Institution =() =>{
                                         파일 양식: JPG,JPEG,PNG<br/>
                                         최대 용량: 5MB 이하
                                     </p>
-                                    <button className="whitespace-nowrap bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mt-[5px]">
+                                    <button className="whitespace-nowrap bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-600 mt-[5px]  cursor-pointer">
                                     사진 업로드
                                     </button>
 
@@ -193,7 +193,7 @@ const Institution =() =>{
                 <div className="flex justify-between">
                 <button
                   type="button"
-                  className="w-70 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-400"
+                  className="w-70 bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-600 cursor-pointer"
                 >
                   이전
                 </button>
