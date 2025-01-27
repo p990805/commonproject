@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import Individual from './components/signup/IndividualSignup'
 import Institution from './components/signup/InstitutionSignup'
+import SuccessfulSignup from './components/signup/SuccessfulSignup'
 
 
 import { Routes, Route } from 'react-router-dom'
@@ -22,6 +23,7 @@ function App() {
         <Route path="/login" element={<LoginPage/>} />
         <Route path="/signup/individual" element={<Individual />} />
         <Route path="/signup/institution" element={<Institution />} />
+        <Route path="/signup/successfulsignup" element={<SuccessfulSignup />} />
       </Routes>
       <Footer />
     </>
