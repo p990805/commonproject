@@ -35,7 +35,7 @@ const Header = () => {
           후원하기
         </Link>
         <Link
-          to="/news"
+          to="/community"
           className="text-gray-700 hover:text-black transition"
         >
           소식
