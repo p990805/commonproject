@@ -17,31 +17,34 @@ const SwiperComponent = () => {
   ];
 
   return (
-    <Swiper
-      modules={[Navigation, Pagination, Scrollbar, A11y]}
-      spaceBetween={10}
-      slidesPerView={4}
-      navigation
-      pagination={{ clickable: true }}
-      scrollbar={{ draggable: true }}
-      className="rounded-lg"
-    >
-      {slides.map((slide) => (
-        <SwiperSlide key={slide.id}>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img
-              src={slide.img}
-              alt={slide.title}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-800">{slide.title}</h3>
-              <p className="text-gray-600 text-sm">{slide.description}</p>
-            </div>
-          </div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <div className="w-full max-w-5xl mx-auto"> {/* Swiper를 감싸는 컨테이너 추가 */}
+      <Swiper
+  modules={[Navigation, Pagination, Scrollbar, A11y]}
+  spaceBetween={20}
+  slidesPerView={4}
+  navigation
+  pagination={{ clickable: true }}
+  scrollbar={{ draggable: true }}
+  className="rounded-lg"
+>
+  {slides.map((slide) => (
+    <SwiperSlide key={slide.id} className="flex justify-center">
+      <div className="w-72 bg-white rounded-lg shadow-md overflow-hidden">
+        <img
+          src={slide.img}
+          alt={slide.title}
+          className="w-full h-48 object-cover"
+        />
+        <div className="p-4">
+          <h3 className="text-lg font-semibold text-gray-800">{slide.title}</h3>
+          <p className="text-gray-600 text-sm">{slide.description}</p>
+        </div>
+      </div>
+    </SwiperSlide>
+  ))}
+</Swiper>
+
+    </div>
   );
 };
 
