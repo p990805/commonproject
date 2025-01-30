@@ -10,6 +10,7 @@ import SuccessfulSignup from './components/signup/SuccessfulSignup'
 import ShelterPage from './pages/ShelterPage'
 import LocationsPage from './pages/LocationsPage'
 import CommunityPage from './pages/CommunityPage'
+import MyPage from './pages/MyPage'
 
 
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/signup/successfulsignup" element={<SuccessfulSignup />} />
         <Route path="/locations" element={<LocationsPage />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/mypage" element={<MyPage />} />
       </Routes>
       <Footer />
     </>
