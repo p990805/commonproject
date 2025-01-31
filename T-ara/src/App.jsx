@@ -12,8 +12,6 @@ import LocationsPage from './pages/LocationsPage'
 import CommunityPage from './pages/CommunityPage'
 import MyPage from './pages/MyPage'
 
-
-
 import { Routes, Route } from 'react-router-dom'
 
 function App() {
