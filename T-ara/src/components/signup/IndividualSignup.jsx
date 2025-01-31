@@ -15,6 +15,8 @@ const Individual = () => {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
+  const [isLoadingNickname, setIsLoadingNickname] = useState(false);
+  const [isLoadingUserId, setIsLoadingUserId] = useState(false);
 
   // 이미지 업로드
   const [profilePreview, setProfilePreview] = useState("/assets/placeholder.png");
@@ -29,49 +31,88 @@ const Individual = () => {
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [isUserIdChecked, setIsUserIdChecked] = useState(false);
 
-  // 닉네임 중복확인
   const handleCheckNickname = async () => {
-    if (!nickname) {
-      alert("닉네임을 입력해 주세요.");
+    if (!nickname || typeof nickname !== "string") {
+      alert("닉네임을 올바르게 입력해 주세요.");
       return;
     }
 
-    try {
-      // GET 요청으로 닉네임 중복 확인
-      const response = await axios.get(`/member/nickcheck/${encodeURIComponent(nickname)}`);
+    if (isLoadingNickname) return; // 중복 요청 방지
+    setIsLoadingNickname(true);
 
-      if (response.data.success) {
-        alert(response.data.message || "사용 가능한 닉네임입니다.");
+    try {
+      const response = await axios.get(`/member/join/nickcheck/${encodeURIComponent(nickname)}`);
+      
+      console.log("닉네임 확인 응답:", response.data);
+
+      if (!response.data || response.data.nicknameCnt === undefined) {
+        throw new Error("유효하지 않은 응답 데이터입니다.");
+      }
+
+      const nicknameCount = parseInt(response.data.nicknameCnt, 10);
+      if (isNaN(nicknameCount)) {
+        throw new Error("닉네임 데이터가 올바르지 않습니다.");
+      }
+
+      if (nicknameCount === 0) {
+        alert("사용 가능한 닉네임입니다.");
         setIsNicknameChecked(true);
       } else {
-        alert(response.data.message || "이미 사용 중인 닉네임입니다.");
+        alert("이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해 주세요.");
         setIsNicknameChecked(false);
       }
     } catch (error) {
       console.error("닉네임 중복 확인 오류:", error);
       alert("닉네임 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setIsNicknameChecked(false);
+    } finally {
+      setIsLoadingNickname(false);
     }
-  };
+};
 
-  // 아이디 중복확인 (예시)
+
   const handleCheckUserId = async () => {
     if (!userId) {
       alert("아이디를 입력해 주세요.");
       return;
     }
+
+    setIsLoadingUserId(true); // 아이디 확인 로딩 시작
     try {
-      // const response = await axios.post('/api/check-id', { userId });
-      const response = { data: { success: true, message: "사용 가능한 아이디입니다." } }; // 데모
-      if (response.data.success) {
-        alert(response.data.message);
-        setIsUserIdChecked(true);
+      // 실제 API 요청
+      const response = await axios.get(`/member/join/idcheck/${encodeURIComponent(userId)}`);
+
+      // 응답 데이터 확인
+      console.log("아이디 확인 응답:", response.data);
+
+      if (response.status === 200) {
+        const { idCnt } = response.data;
+        const idCount = parseInt(idCnt, 10); // 문자열을 숫자로 변환
+
+        if (isNaN(idCount)) {
+          throw new Error("유효하지 않은 응답 데이터입니다.");
+        }
+
+        if (idCount === 0) {
+          alert("사용 가능한 아이디입니다.");
+          setIsUserIdChecked(true);
+        } else {
+          alert("이미 사용 중인 아이디입니다. 다른 아이디를 선택해 주세요.");
+          setIsUserIdChecked(false);
+        }
       } else {
-        alert(response.data.message);
+        // 예상치 못한 상태 코드 처리
+        console.error(`Unexpected response status: ${response.status}`);
+        alert("아이디 중복 확인 중 예상치 못한 오류가 발생했습니다.");
         setIsUserIdChecked(false);
       }
     } catch (error) {
-      console.error(error);
-      alert("아이디 중복 확인 중 오류가 발생했습니다.");
+      console.error("아이디 중복 확인 오류:", error);
+      // 서버 오류 또는 네트워크 오류 처리
+      alert("아이디 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setIsUserIdChecked(false);
+    } finally {
+      setIsLoadingUserId(false); // 아이디 확인 로딩 종료
     }
   };
 
