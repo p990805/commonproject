@@ -36,24 +36,36 @@ const Individual = () => {
       alert("닉네임을 올바르게 입력해 주세요.");
       return;
     }
-
+  
     if (isLoadingNickname) return; // 중복 요청 방지
     setIsLoadingNickname(true);
-
+  
     try {
-      const response = await axios.get(`/member/join/nickcheck/${encodeURIComponent(nickname)}`);
-      
+      const response = await axios.get(`/member/join/nickcheck/${nickname}`);
       console.log("닉네임 확인 응답:", response.data);
-
-      if (!response.data || response.data.nicknameCnt === undefined) {
+  
+      // 응답 데이터가 문자열이면 JSON으로 파싱합니다.
+      let data;
+      if (typeof response.data === "string") {
+        try {
+          data = JSON.parse(response.data);
+        } catch (err) {
+          throw new Error("응답 데이터를 JSON으로 파싱할 수 없습니다.");
+        }
+      } else {
+        data = response.data;
+      }
+  
+      // 백엔드에서 반환하는 프로퍼티 이름이 idCnt이므로 확인합니다.
+      if (!data || data.nicknameCnt === undefined) {
         throw new Error("유효하지 않은 응답 데이터입니다.");
       }
-
-      const nicknameCount = parseInt(response.data.nicknameCnt, 10);
+  
+      const nicknameCount = parseInt(data.nicknameCnt, 10);
       if (isNaN(nicknameCount)) {
         throw new Error("닉네임 데이터가 올바르지 않습니다.");
       }
-
+  
       if (nicknameCount === 0) {
         alert("사용 가능한 닉네임입니다.");
         setIsNicknameChecked(true);
@@ -68,7 +80,8 @@ const Individual = () => {
     } finally {
       setIsLoadingNickname(false);
     }
-};
+  };
+  
 
 
   const handleCheckUserId = async () => {
@@ -76,46 +89,53 @@ const Individual = () => {
       alert("아이디를 입력해 주세요.");
       return;
     }
-
+  
     setIsLoadingUserId(true); // 아이디 확인 로딩 시작
     try {
-      // 실제 API 요청
+      // 실제 API 요청 (encodeURIComponent로 URL 인코딩)
       const response = await axios.get(`/member/join/idcheck/${encodeURIComponent(userId)}`);
-
+  
       // 응답 데이터 확인
       console.log("아이디 확인 응답:", response.data);
-
-      if (response.status === 200) {
-        const { idCnt } = response.data;
-        const idCount = parseInt(idCnt, 10); // 문자열을 숫자로 변환
-
-        if (isNaN(idCount)) {
-          throw new Error("유효하지 않은 응답 데이터입니다.");
-        }
-
-        if (idCount === 0) {
-          alert("사용 가능한 아이디입니다.");
-          setIsUserIdChecked(true);
-        } else {
-          alert("이미 사용 중인 아이디입니다. 다른 아이디를 선택해 주세요.");
-          setIsUserIdChecked(false);
+  
+      // 응답 데이터가 문자열이면 JSON으로 파싱합니다.
+      let data;
+      if (typeof response.data === "string") {
+        try {
+          data = JSON.parse(response.data);
+        } catch (err) {
+          throw new Error("응답 데이터를 JSON으로 파싱할 수 없습니다.");
         }
       } else {
-        // 예상치 못한 상태 코드 처리
-        console.error(`Unexpected response status: ${response.status}`);
-        alert("아이디 중복 확인 중 예상치 못한 오류가 발생했습니다.");
+        data = response.data;
+      }
+  
+      // 백엔드에서 반환하는 프로퍼티가 idCnt인지 확인합니다.
+      if (!data || data.idCnt === undefined) {
+        throw new Error("유효하지 않은 응답 데이터입니다.");
+      }
+  
+      const idCount = parseInt(data.idCnt, 10);
+      if (isNaN(idCount)) {
+        throw new Error("유효하지 않은 응답 데이터입니다.");
+      }
+  
+      if (idCount === 0) {
+        alert("사용 가능한 아이디입니다.");
+        setIsUserIdChecked(true);
+      } else {
+        alert("이미 사용 중인 아이디입니다. 다른 아이디를 선택해 주세요.");
         setIsUserIdChecked(false);
       }
     } catch (error) {
       console.error("아이디 중복 확인 오류:", error);
-      // 서버 오류 또는 네트워크 오류 처리
       alert("아이디 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
       setIsUserIdChecked(false);
     } finally {
       setIsLoadingUserId(false); // 아이디 확인 로딩 종료
     }
   };
-
+  
   // 이미지 업로드
   const handleImageChange = (e) => {
     const file = e.target.files[0];
