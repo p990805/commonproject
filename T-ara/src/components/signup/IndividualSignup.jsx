@@ -151,6 +151,15 @@ const Individual = () => {
     reader.readAsDataURL(file);
   };
 
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // 약관 전체 동의
   const handleAgreeAll = (checked) => {
     setAgreeAll(checked);
@@ -166,10 +175,10 @@ const Individual = () => {
     setAgreeAll(checked && agreeTerm);
   };
 
-  // 회원가입 제출
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 간단한 유효성 검사
+  
+    // 필수 정보 유효성 검사
     if (!name || !birth || !nickname || !phone || !emailLocal || !userId || !password || !confirmPw) {
       alert("필수 정보를 모두 입력해주세요.");
       return;
@@ -190,36 +199,48 @@ const Individual = () => {
       alert("필수 약관에 동의해주세요.");
       return;
     }
-
+  
     // 이메일 조합
     const email = `${emailLocal}@${emailDomain || ""}`;
-
-    // 서버에 전송할 데이터
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("birth", birth);
-    formData.append("nickname", nickname);
-    formData.append("phone", phone);
-    formData.append("email", email);
-    formData.append("userId", userId);
-    formData.append("password", password);
+  
+    // 전송할 데이터 객체 생성
+    const payload = {
+      name,
+      birth,
+      nickname,
+      phone,
+      email,
+      loginId: userId,
+      password,
+      // 프로필 이미지는 선택 사항이므로, 없으면 포함하지 않습니다.
+    };
+  
+    // 프로필 이미지가 선택된 경우, base64 문자열로 변환 후 payload에 추가
     if (profileImage) {
-      formData.append("profileImage", profileImage);
+      try {
+        const base64Image = await fileToBase64(profileImage);
+        payload.profileImage = base64Image;
+      } catch (error) {
+        console.error("이미지 인코딩 오류:", error);
+        alert("프로필 이미지 처리 중 오류가 발생했습니다.");
+        return;
+      }
     }
-
-    // 실제 회원가입 요청 (예시)
-    axios.post("/api/register", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+  
+    // JSON 형식으로 회원가입 요청 전송 (Content-Type은 브라우저가 자동으로 올바르게 설정하도록 합니다.)
+    axios.post("/member/join/user", payload, {
+      headers: { "Content-Type": "application/json" },
     })
       .then(res => {
         alert("회원가입이 완료되었습니다.");
-        navigate("/login");
+        navigate("/signup/successfulsignup");
       })
-      .catch(err => console.error(err));
-
-    alert("회원가입 완료 (데모용)");
-    navigate("/");
+      .catch(err => {
+        console.error("회원가입 오류:", err);
+        alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+      });
   };
+  
 
   return (
     <div className="flex-grow">
