@@ -1,6 +1,14 @@
+import CommonComponent from "./CommonComponent";
+
 const MyHome =()=>{
     return(
-        <div>마이페이지 홈</div>
+
+        <div className="grid grid-row-2">
+            <CommonComponent />
+            <div>
+                마이 홈페이지 아래쪽
+            </div>
+        </div>
     )
 }
 export default MyHome;
