@@ -92,7 +92,7 @@ const MyPage = () => {
         </aside>
 
         {/* Main Section */}
-        <main className="flex-1 p-8 bg-white shadow-lg rounded-lg m-6">
+        <main className="flex-1 p-8 bg-gray-100 rounded-lg m-6">
           <div className="max-w-6xl mx-auto">
             {activeTab === 'checkpassword' ? (
               <CheckPassword onPasswordChecked={handlePasswordCheckSuccess} />
