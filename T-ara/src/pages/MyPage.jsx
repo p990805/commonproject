@@ -47,7 +47,7 @@ const MyPage = () => {
   // *
   // * */
   const handleTabChange = (tab) => {
-    if (tab === 'withdraw') {
+    if (tab === 'Needfix') {
       setPendingTab(tab); // 확인 후 이동할 탭 저장
       setActiveTab('checkpassword'); // 비밀번호 확인 화면으로 전환
     } else {
@@ -197,7 +197,7 @@ const MyPage = () => {
 
 
         {/* Main Section */}
-        <main className="flex-1 p-5 bg-gray-100 rounded-lg w-full">
+        <main className="flex-1 p-5 bg-gray-100 rounded-lg max-w-full">
           <div>
             {activeTab === 'checkpassword' ? (
               <CheckPassword onPasswordChecked={handlePasswordCheckSuccess} />
