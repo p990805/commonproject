@@ -11,7 +11,8 @@ html, body {
 
 #root {
     background-color: white;
-    max-width: 1500px;
+    max-width: 1920px;
+    max-height: 1080px;
     margin: 0 auto;
     
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
