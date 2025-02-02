@@ -25,27 +25,27 @@ const LoginPage = ({ onLoginSuccess }) => {
       // 백엔드 로그인 API 호출
       const response = await axios.post(
         "http://localhost:8090/member/login/user",
+        { loginId, password },
         {
-          loginId,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
       // 로그인 성공 시 응답 데이터 처리
       console.log("로그인 성공:", response.data);
+      
+      // 응답 데이터의 속성명에 맞게 구조 분해합니다.
+      const { accessToken, name, userProfile } = response.data;
+      // userProfile이 백엔드 응답에 없다면, 기본값을 지정할 수 있습니다.
+      const profileImage = userProfile || "/assets/default-profile.png";
 
-      const { token, userName, userProfile } = response.data; // 백엔드 응답 데이터 기반
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userName", userName);
-      localStorage.setItem("userProfile", userProfile);
+      // localStorage에 저장 (키 이름은 App에서 사용하는 것과 일치시킵니다)
+      localStorage.setItem("authToken", accessToken);
+      localStorage.setItem("userName", name);
+      localStorage.setItem("userProfile", profileImage);
 
       // 상위 컴포넌트(App.js)에 로그인 성공 알림
-      onLoginSuccess(token, userName, userProfile);
+      onLoginSuccess(accessToken, name, profileImage);
 
       // 메인 페이지로 이동
       navigate("/");
