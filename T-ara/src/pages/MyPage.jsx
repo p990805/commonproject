@@ -67,33 +67,138 @@ const MyPage = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
-      <div className="flex">
+      <div className="flex px-20">
         {/* Sidebar */}
-        <aside className="w-90 h-[890px] bg-white shadow-lg p-5 m-6">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-700 mb-6">마이페이지</h2>
-            <ul className="space-y-3">
-              {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => handleTabChange(item.id)}
-                    className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                      activeTab === item.id
-                        ? 'bg-red-500 text-white'
-                        : 'hover:bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <aside className="w-90 h-[890px] bg-white shadow-md p-5 m-6">
+  <div className="p-6">
+    <h2 className="text-2xl font-bold text-gray-700 mb-6">마이페이지</h2>
+    <ul className="space-y-3">
+      {/* MY 홈 */}
+      <li>
+        <button
+          onClick={() => handleTabChange('myhome')}
+          className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'myhome'
+              ? 'bg-red-500 text-white'
+              : 'hover:bg-gray-100 text-gray-600'
+          }`}
+        >
+          MY 홈
+        </button>
+      </li>
+
+      {/* 나의 정보 */}
+      <li>
+        <h3 className="text-lg font-bold text-gray-700 mt-6 mb-2">나의 정보</h3>
+        <ul className="space-y-2">
+          <li>
+            <button
+              onClick={() => handleTabChange('myinformation')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'myinformation'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              회원정보
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => handleTabChange('withdraw')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'withdraw'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              회원탈퇴
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      {/* 나의 후원내역 */}
+      <li>
+        <h3 className="text-lg font-bold text-gray-700 mt-6 mb-2">나의 후원내역</h3>
+        <ul className="space-y-2">
+          <li>
+            <button
+              onClick={() => handleTabChange('myregularspon')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'myregularspon'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              정기후원
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => handleTabChange('mytemporaryspon')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'mytemporaryspon'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              일시후원
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => handleTabChange('mycampaignspon')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'mycampaignspon'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              캠페인 후원
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      {/* 나의 후원동물 */}
+      <li>
+        <h3 className="text-lg font-bold text-gray-700 mt-6 mb-2">나의 후원동물</h3>
+        <ul className="space-y-2">
+          <li>
+            <button
+              onClick={() => handleTabChange('myworkjournal')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'myworkjournal'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              활동일지
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => handleTabChange('myphotocard')}
+              className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'myphotocard'
+                  ? 'bg-red-500 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'
+              }`}
+            >
+              포토카드
+            </button>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
         </aside>
 
+
         {/* Main Section */}
-        <main className="flex-1 p-8 bg-gray-100 rounded-lg m-6">
-          <div className="max-w-6xl mx-auto">
+        <main className="flex-1 p-5 bg-gray-100 rounded-lg max-w-full">
+          <div className="mx-auto">
             {activeTab === 'checkpassword' ? (
               <CheckPassword onPasswordChecked={handlePasswordCheckSuccess} />
             ) : (

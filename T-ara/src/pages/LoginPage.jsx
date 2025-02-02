@@ -37,7 +37,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       // 응답 데이터의 속성명에 맞게 구조 분해합니다.
       const { accessToken, name, userProfile } = response.data;
       // userProfile이 백엔드 응답에 없다면, 기본값을 지정할 수 있습니다.
-      const profileImage = userProfile || "/assets/default-profile.png";
+      const profileImage = userProfile || "/assets/cats.png";
 
       // localStorage에 저장 (키 이름은 App에서 사용하는 것과 일치시킵니다)
       localStorage.setItem("authToken", accessToken);
