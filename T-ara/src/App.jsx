@@ -15,6 +15,8 @@ import CommunityPage from "./pages/CommunityPage";
 import MyPage from "./pages/MyPage";
 import ShelterDonation from "./components/shelter/ShelterDonation";
 
+import Withdraw from "./components/mypage/Withdraw";
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
   const [userName, setUserName] = useState(""); // 사용자 이름
@@ -86,6 +88,7 @@ function App() {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/shelter" element={<ShelterDonation />} />
+        <Route path="/withdraw" element={<Withdraw />} />
       </Routes>
       <Footer />
     </>
