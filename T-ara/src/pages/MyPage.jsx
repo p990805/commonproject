@@ -67,9 +67,9 @@ const MyPage = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
-      <div className="flex px-20">
+      <div className="flex px-5">
         {/* Sidebar */}
-        <aside className="w-90 h-[890px] bg-white shadow-md p-5 m-6">
+        <aside className="w-80 h-[890px] bg-white shadow-md p-5 m-6">
   <div className="p-6">
     <h2 className="text-2xl font-bold text-gray-700 mb-6">마이페이지</h2>
     <ul className="space-y-3">
@@ -197,8 +197,8 @@ const MyPage = () => {
 
 
         {/* Main Section */}
-        <main className="flex-1 p-5 bg-gray-100 rounded-lg max-w-full">
-          <div className="mx-auto">
+        <main className="flex-1 p-5 bg-gray-100 rounded-lg w-full">
+          <div>
             {activeTab === 'checkpassword' ? (
               <CheckPassword onPasswordChecked={handlePasswordCheckSuccess} />
             ) : (
