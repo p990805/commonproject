@@ -20,13 +20,13 @@ const MyRegularSpon=()=>{
         <div className="grid grid-row-3 gap-4">
             <CommonComponent />
             <div className="w-full bg-white p-6 row-span-2 shadow-md rounded">
-                <div className="flex items-center justify-between mt-3 mb-4">
+                <div className="flex items-center justify-between mt-3 mb-4 gap-2">
                     <h1 className="font-black text-3xl">정기 후원</h1>
-                    <input type="text" placeholder="검색어를 입력해주세요" className="shadow-sm w-[450px] p-2 placeholder:text-gray-500 placeholder:italic"/>
+                    {/* <input type="text" placeholder="검색어를 입력해주세요" className="shadow-sm w-[400px] p-2 placeholder:text-gray-500 placeholder:italic"/> */}
                     <div className="flex items-center gap-3">
-                        <input type="date" className="p-2 border border-gray-200 shadow-sm w-[150px]"/>
+                        <input type="date" className="p-2 border border-gray-200 shadow-sm w-[130px]"/>
                         <span>-</span>
-                        <input type="date" className="p-2 border border-gray-200 shadow-sm w-[150px]"/>
+                        <input type="date" className="p-2 border border-gray-200 shadow-sm w-[130px]"/>
                     </div>
                     <div className="flex items-center justify-center gap-1">
                         <button
