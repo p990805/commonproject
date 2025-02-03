@@ -70,7 +70,6 @@ const MyCampaignSpon =()=>{
                         <p className="bg-red-500 text-white rounded-2xl py-1 text-[14px] w-[80px] flex items-center justify-center">입금완료</p>
                         <p>입금이 완료된 내역입니다.</p>
                      </div>
-
                </div>
             </div>
 
