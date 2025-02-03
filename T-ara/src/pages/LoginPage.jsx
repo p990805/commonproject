@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../api"; // API 설정 파일
 
 const LoginPage = ({ onLoginSuccess }) => {
   const [memberType, setMemberType] = useState("personal");
@@ -14,46 +15,65 @@ const LoginPage = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // 기본 유효성 검사
+  
     if (!loginId || !password) {
       alert("아이디와 비밀번호를 입력해주세요.");
       return;
     }
-
+  
+    console.log("💡 [프론트] 로그인 요청 데이터:", { loginId, password });
+  
     try {
-      // 백엔드 로그인 API 호출
-      const response = await axios.post(
+      // 로그인 요청
+      // 배포 했는데 오류나면 여기 고칠 것
+      const response = await api.post(
         "http://localhost:8090/member/login/user",
         { loginId, password },
         {
           headers: { "Content-Type": "application/json" },
+          withCredentials: true, // 쿠키 기반 인증 시 필요
         }
       );
-
-      // 로그인 성공 시 응답 데이터 처리
-      console.log("로그인 성공:", response.data);
+      console.log("응답 헤더:", response.headers);
+  
+      console.log("✅ [프론트] 서버 응답 데이터:", response.data);
+  
+      const { name, userProfile } = response.data; // 응답 데이터에서 필요한 값 추출
+      const token = response.headers.authorization || response.headers["Authorization"]; // 응답 헤더에서 토큰 추출
       
-      // 응답 데이터의 속성명에 맞게 구조 분해합니다.
-      const { accessToken, name, userProfile } = response.data;
-      // userProfile이 백엔드 응답에 없다면, 기본값을 지정할 수 있습니다.
-      const profileImage = userProfile || "/assets/cats.png";
-
-      // localStorage에 저장 (키 이름은 App에서 사용하는 것과 일치시킵니다)
-      localStorage.setItem("authToken", accessToken);
+      if(!token){
+        console.error("Authorization 헤더가 없습니다.")
+      } else{
+        console.log("토큰", token)
+      }
+      // 로컬 스토리지에 토큰 및 사용자 정보 저장
+      localStorage.setItem("authToken", token);
       localStorage.setItem("userName", name);
-      localStorage.setItem("userProfile", profileImage);
-
-      // 상위 컴포넌트(App.js)에 로그인 성공 알림
-      onLoginSuccess(accessToken, name, profileImage);
-
-      // 메인 페이지로 이동
+      localStorage.setItem("userProfile", userProfile);
+  
+      const profileImage = userProfile || "/assets/cats.png";
+  
+      // onLoginSuccess 함수 호출
+      onLoginSuccess(token, name, profileImage);
+  
+      // 홈 화면으로 이동
       navigate("/");
     } catch (error) {
-      console.error("로그인 실패:", error);
-      alert("로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.");
+      console.error("❌ [프론트] 요청 실패:", error);
+  
+      if (error.response) {
+        console.error("🛑 [프론트] 서버 응답 에러 데이터:", error.response.data);
+        alert(error.response.data.message || "로그인 실패. 다시 시도하세요.");
+      } else if (error.request) {
+        console.error("🚨 [프론트] 요청이 보내지지 않음:", error.request);
+        alert("서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
+      } else {
+        console.error("⚠️ [프론트] 기타 오류:", error.message);
+        alert("알 수 없는 오류가 발생했습니다.");
+      }
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 min-h-[calc(100vh-200px)]">

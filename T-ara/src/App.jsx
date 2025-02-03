@@ -14,8 +14,10 @@ import LocationsPage from "./pages/LocationsPage";
 import CommunityPage from "./pages/CommunityPage";
 import MyPage from "./pages/MyPage";
 import ShelterDonation from "./components/shelter/ShelterDonation";
-
-import Withdraw from "./components/mypage/Withdraw";
+import ShelterDonationUsage from "./components/shelter/ShelterDonationUsage";
+import ShelterAnimal from "./components/shelter/ShelterAnimal";
+import ShelterWalkReservation from "./components/shelter/ShelterWalkReservation";
+import ShelterFinder from "./components/map/ShelterFinder";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
@@ -58,10 +60,7 @@ function App() {
         handleLogout={handleLogout}
       />
       <Routes>
-        <Route
-          path="/"
-          element={<MainPage />}
-        />
+        <Route path="/" element={<MainPage />} />
         <Route
           path="/login"
           element={
@@ -88,7 +87,10 @@ function App() {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/shelter" element={<ShelterDonation />} />
-        <Route path="/withdraw" element={<Withdraw />} />
+        <Route path="/shelter/usage" element={<ShelterDonationUsage />} />
+        <Route path="/shelter/animal" element={<ShelterAnimal />} />
+        <Route path="/shelter/walk" element={<ShelterWalkReservation />} />
+        <Route path="/shelterFinder" element={<ShelterFinder />} />
       </Routes>
       <Footer />
     </>

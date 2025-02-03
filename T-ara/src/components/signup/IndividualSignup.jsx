@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../../api";
 
 const Individual = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const Individual = () => {
     setIsLoadingNickname(true);
   
     try {
-      const response = await axios.get(`/member/join/nickcheck/${nickname}`);
+      const response = await api.get(`/member/join/nickcheck/${nickname}`);
       console.log("닉네임 확인 응답:", response.data);
   
       // 응답 데이터가 문자열이면 JSON으로 파싱합니다.
@@ -93,7 +94,7 @@ const Individual = () => {
     setIsLoadingUserId(true); // 아이디 확인 로딩 시작
     try {
       // 실제 API 요청 (encodeURIComponent로 URL 인코딩)
-      const response = await axios.get(`/member/join/idcheck/${encodeURIComponent(userId)}`);
+      const response = await api.get(`/member/join/idcheck/${userId}`);
   
       // 응답 데이터 확인
       console.log("아이디 확인 응답:", response.data);
@@ -228,7 +229,7 @@ const Individual = () => {
     }
   
     // JSON 형식으로 회원가입 요청 전송 (Content-Type은 브라우저가 자동으로 올바르게 설정하도록 합니다.)
-    axios.post("/member/join/user", payload, {
+    api.post("/member/join/user", payload, {
       headers: { "Content-Type": "application/json" },
     })
       .then(res => {
