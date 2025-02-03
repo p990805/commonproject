@@ -1,6 +1,7 @@
 import SidebarNavigation from "../SidebarNavigation";
+import QuillEditor from "../QuillEditor";
 
-const ShelterDonation = () => {
+const ShelterDonationUsage = () => {
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
       {/* Sidebar */}
@@ -12,7 +13,7 @@ const ShelterDonation = () => {
           {/* Dashboard Title */}
           <div className="mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
-              후원금 대시보드
+              후원금 사용 대시보드
             </h1>
           </div>
           {/* Dashboard Stats */}
@@ -20,7 +21,7 @@ const ShelterDonation = () => {
             {/* Today's Donation Amount */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 후원받은 금액
+                오늘 사용한 금액
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
@@ -33,7 +34,7 @@ const ShelterDonation = () => {
             {/* Total Donation Amount */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                총 후원받은 금액
+                총 사용한 금액
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
@@ -97,38 +98,14 @@ const ShelterDonation = () => {
               <div className="flex">
                 <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
                   <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    분류
+                    지출 카테고리
                   </span>
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        캠페인
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        일반
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        정기
-                      </span>
-                    </label>
+                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
+                      <option>전체</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -163,7 +140,7 @@ const ShelterDonation = () => {
           </div>
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
-            후원 전체 목록
+            후원금 사용 전체 목록
           </div>
 
           {/* Donation List Table */}
@@ -201,7 +178,7 @@ const ShelterDonation = () => {
             <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
               <div className="flex">
                 <div className="w-16 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 코드
+                  지출 코드
                 </div>
                 <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
                   후원자명
@@ -247,4 +224,4 @@ const ShelterDonation = () => {
   );
 };
 
-export default ShelterDonation;
+export default ShelterDonationUsage;
