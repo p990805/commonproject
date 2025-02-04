@@ -44,6 +44,13 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
         >
           소식
         </Link>
+        <Link
+          to="/reservation"
+          className="text-gray-700 hover:text-black transition"
+        >
+          산책예약
+        </Link>
+
       </nav>
 
       {/* 사용자 정보 및 드롭다운 */}
