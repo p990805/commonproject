@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import api from "../../api";
 
 const Individual = () => {
@@ -8,7 +7,7 @@ const Individual = () => {
 
   // 폼 데이터 상태들
   const [name, setName] = useState("");
-  const [birth, setBirth] = useState("");
+  const [birth, setBirth] = useState(""); // DB에 반영하지 않는다면 나중에 제거 가능
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
   const [emailLocal, setEmailLocal] = useState("");
@@ -37,36 +36,29 @@ const Individual = () => {
       alert("닉네임을 올바르게 입력해 주세요.");
       return;
     }
-  
+
     if (isLoadingNickname) return; // 중복 요청 방지
     setIsLoadingNickname(true);
-  
+
     try {
       const response = await api.get(`/member/join/nickcheck/${nickname}`);
       console.log("닉네임 확인 응답:", response.data);
-  
-      // 응답 데이터가 문자열이면 JSON으로 파싱합니다.
-      let data;
-      if (typeof response.data === "string") {
-        try {
-          data = JSON.parse(response.data);
-        } catch (err) {
-          throw new Error("응답 데이터를 JSON으로 파싱할 수 없습니다.");
-        }
-      } else {
-        data = response.data;
+
+      let data = response.data;
+      // 응답 데이터가 문자열이면 JSON으로 파싱
+      if (typeof data === "string") {
+        data = JSON.parse(data);
       }
-  
-      // 백엔드에서 반환하는 프로퍼티 이름이 idCnt이므로 확인합니다.
+
       if (!data || data.nicknameCnt === undefined) {
         throw new Error("유효하지 않은 응답 데이터입니다.");
       }
-  
+
       const nicknameCount = parseInt(data.nicknameCnt, 10);
       if (isNaN(nicknameCount)) {
         throw new Error("닉네임 데이터가 올바르지 않습니다.");
       }
-  
+
       if (nicknameCount === 0) {
         alert("사용 가능한 닉네임입니다.");
         setIsNicknameChecked(true);
@@ -82,45 +74,32 @@ const Individual = () => {
       setIsLoadingNickname(false);
     }
   };
-  
-
 
   const handleCheckUserId = async () => {
     if (!userId) {
       alert("아이디를 입력해 주세요.");
       return;
     }
-  
-    setIsLoadingUserId(true); // 아이디 확인 로딩 시작
+
+    setIsLoadingUserId(true);
     try {
-      // 실제 API 요청 (encodeURIComponent로 URL 인코딩)
       const response = await api.get(`/member/join/idcheck/${userId}`);
-  
-      // 응답 데이터 확인
       console.log("아이디 확인 응답:", response.data);
-  
-      // 응답 데이터가 문자열이면 JSON으로 파싱합니다.
-      let data;
-      if (typeof response.data === "string") {
-        try {
-          data = JSON.parse(response.data);
-        } catch (err) {
-          throw new Error("응답 데이터를 JSON으로 파싱할 수 없습니다.");
-        }
-      } else {
-        data = response.data;
+
+      let data = response.data;
+      if (typeof data === "string") {
+        data = JSON.parse(data);
       }
-  
-      // 백엔드에서 반환하는 프로퍼티가 idCnt인지 확인합니다.
+
       if (!data || data.idCnt === undefined) {
         throw new Error("유효하지 않은 응답 데이터입니다.");
       }
-  
+
       const idCount = parseInt(data.idCnt, 10);
       if (isNaN(idCount)) {
         throw new Error("유효하지 않은 응답 데이터입니다.");
       }
-  
+
       if (idCount === 0) {
         alert("사용 가능한 아이디입니다.");
         setIsUserIdChecked(true);
@@ -133,18 +112,16 @@ const Individual = () => {
       alert("아이디 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
       setIsUserIdChecked(false);
     } finally {
-      setIsLoadingUserId(false); // 아이디 확인 로딩 종료
+      setIsLoadingUserId(false);
     }
   };
-  
-  // 이미지 업로드
+
+  // 이미지 업로드 핸들러
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setProfileImage(file);
 
-    // 미리보기
     const reader = new FileReader();
     reader.onload = () => {
       setProfilePreview(reader.result);
@@ -152,16 +129,17 @@ const Individual = () => {
     reader.readAsDataURL(file);
   };
 
+  // 파일을 base64 문자열로 변환
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
-  // 약관 전체 동의
+  // 약관 동의 핸들러
   const handleAgreeAll = (checked) => {
     setAgreeAll(checked);
     setAgreeTerm(checked);
@@ -178,9 +156,9 @@ const Individual = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // 필수 정보 유효성 검사
-    if (!name || !birth || !nickname || !phone || !emailLocal || !userId || !password || !confirmPw) {
+    if (!name || !nickname || !phone || !emailLocal || !emailDomain || !userId || !password || !confirmPw) {
       alert("필수 정보를 모두 입력해주세요.");
       return;
     }
@@ -200,23 +178,24 @@ const Individual = () => {
       alert("필수 약관에 동의해주세요.");
       return;
     }
-  
+
     // 이메일 조합
-    const email = `${emailLocal}@${emailDomain || ""}`;
-  
+    const email = `${emailLocal}@${emailDomain}`;
+
     // 전송할 데이터 객체 생성
-    const payload = {
+    let payload = {
       name,
-      birth,
-      nickname,
-      phone,
+      // birth: 생년월일 필드가 DB에 없으면 제거 (혹은 필요시 추가)
       email,
       loginId: userId,
       password,
-      // 프로필 이미지는 선택 사항이므로, 없으면 포함하지 않습니다.
+      phone,
+      nickname,
+      profileImage
+      // profileImage 필드는 아래에서 처리
     };
-  
-    // 프로필 이미지가 선택된 경우, base64 문자열로 변환 후 payload에 추가
+
+    // 프로필 이미지 처리: 이미지가 있으면 base64 변환 후 추가, 없으면 해당 필드 제거
     if (profileImage) {
       try {
         const base64Image = await fileToBase64(profileImage);
@@ -226,22 +205,31 @@ const Individual = () => {
         alert("프로필 이미지 처리 중 오류가 발생했습니다.");
         return;
       }
+    } else {
+      // 프로필 이미지가 없으면 해당 필드를 아예 포함시키지 않음
+      delete payload.profileImage;
     }
-  
-    // JSON 형식으로 회원가입 요청 전송 (Content-Type은 브라우저가 자동으로 올바르게 설정하도록 합니다.)
-    api.post("/member/join/user", payload, {
-      headers: { "Content-Type": "application/json" },
-    })
-      .then(res => {
-        alert("회원가입이 완료되었습니다.");
-        navigate("/signup/successfulsignup");
-      })
-      .catch(err => {
-        console.error("회원가입 오류:", err);
-        alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+
+    // 디버깅: 실제 전송되는 payload 확인
+    console.log("전송할 payload:", payload);
+
+    // 회원가입 요청 전송
+    try {
+      const res = await api.post("/member/join/user", payload, {
+        headers: { "Content-Type": "application/json" },
       });
+      console.log("회원가입 응답:", res.data);
+      alert("회원가입이 완료되었습니다.");
+      navigate("/signup/successfulsignup");
+    } catch (err) {
+      console.error("회원가입 오류:", err);
+      // 응답 에러 데이터가 있을 경우 출력
+      if (err.response && err.response.data) {
+        console.error("서버 응답 에러 데이터:", err.response.data);
+      }
+      alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
   };
-  
 
   return (
     <div className="flex-grow">
@@ -266,8 +254,8 @@ const Individual = () => {
               />
             </div>
 
-            {/* 생년월일 */}
-            <div>
+            {/* 생년월일 - DB에 필요하지 않다면 제거 */}
+            {/* <div>
               <label className="block font-medium mb-1">
                 생년월일 <span className="text-red-500">*</span>
               </label>
@@ -278,7 +266,7 @@ const Individual = () => {
                 onChange={(e) => setBirth(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* 닉네임 */}
             <div>
@@ -445,8 +433,10 @@ const Individual = () => {
                 <div className="flex flex-col">
                   <h3 className="font-bold">사진 업로드 가이드</h3>
                   <p className="text-gray-400 text-xs">
-                    권장 해상도: 200 x 200(px)<br />
-                    파일 양식: JPG, JPEG, PNG<br />
+                    권장 해상도: 200 x 200(px)
+                    <br />
+                    파일 양식: JPG, JPEG, PNG
+                    <br />
                     최대 용량: 5MB 이하
                   </p>
                   <label
