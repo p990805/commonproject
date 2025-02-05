@@ -7,7 +7,7 @@ const Payment = () => {
 
     IMP.request_pay(
       {
-        pg: "html5_inicis", // PG사
+        pg: "uplus", // PG사
         pay_method: "card", // 결제 방법
         merchant_uid: `mid_${new Date().getTime()}`, // 주문번호
         name: "테스트 상품",
@@ -30,21 +30,7 @@ const Payment = () => {
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>포트원 일반 결제 테스트</h1>
-      <button
-        onClick={handlePayment}
-        style={{
-          padding: "10px 20px",
-          fontSize: "18px",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginTop: "20px",
-        }}
-      >
-        테스트 결제하기
-      </button>
+      <button onClick={handlePayment}>테스트 결제하기</button>
     </div>
   );
 };
