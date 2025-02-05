@@ -19,7 +19,10 @@ const DailyLive = () => {
       {/* 진행중인 라이브 제목과 검색창 */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">진행중인 일상 라이브</h1>
-        <input type="text" className="border p-1" placeholder="검색" />
+        <div className="relative">
+          <input type="text" className="border p-1 absolute right-3" placeholder="검색" />
+          <img src="/assets/search-icon.png" alt="검색" className="w-4 h-4 relative right-5 top-2 cursor-pointer" />
+        </div>
       </div>
 
       {/* 필터 */}
