@@ -33,7 +33,7 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
           라이브
         </Link>
         <Link
-          to="/donate"
+          to="/donation"
           className="text-gray-700 hover:text-black transition"
         >
           후원하기
@@ -50,7 +50,6 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
         >
           산책예약
         </Link>
-
       </nav>
 
       {/* 사용자 정보 및 드롭다운 */}

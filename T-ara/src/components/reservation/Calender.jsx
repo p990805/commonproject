@@ -1,17 +1,18 @@
 // src/components/Calendar.jsx
 import React, { useState } from "react";
 
-function Calendar() {
+function CalendarModule({ onSelectDate }) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1); // JS는 0~11이므로 +1
+  const [selectedDay, setSelectedDay] = useState(null);
 
-  // 이번 달 1일, 요일, 마지막 날짜 계산
+  // 이번 달 1일의 요일과 마지막 날짜 계산
   const firstDayDate = new Date(year, month - 1, 1);
   const firstDay = firstDayDate.getDay(); // 0=일, 6=토
   const lastDate = new Date(year, month, 0).getDate();
 
-  // 달력 배열 만들기
+  // 달력에 표시할 배열 생성 (빈 칸 포함)
   const daysArray = [];
   for (let i = 0; i < firstDay; i++) {
     daysArray.push(null);
@@ -20,13 +21,13 @@ function Calendar() {
     daysArray.push(d);
   }
 
-  // 7일씩 끊어서 weeks 생성
+  // 7일씩 끊어서 weeks 배열 생성
   const weeks = [];
   for (let i = 0; i < daysArray.length; i += 7) {
     weeks.push(daysArray.slice(i, i + 7));
   }
 
-  // 이전/다음 달 이동
+  // 이전/다음 달 이동 (달 이동 시 선택된 날짜 초기화)
   const goToPrevMonth = () => {
     let newMonth = month - 1;
     let newYear = year;
@@ -36,6 +37,7 @@ function Calendar() {
     }
     setYear(newYear);
     setMonth(newMonth);
+    setSelectedDay(null);
   };
 
   const goToNextMonth = () => {
@@ -47,15 +49,15 @@ function Calendar() {
     }
     setYear(newYear);
     setMonth(newMonth);
+    setSelectedDay(null);
   };
 
-  // 예시: 24, 25일은 예약 불가능(빨간색), 나머지는 가능(파란색)이라고 가정
-  // 실제로는 props나 API 데이터로 받아서 처리하시면 됩니다.
+  // 예시로 24, 25일은 예약 불가능한 날짜로 가정
   const unavailableDays = [24, 25];
 
   return (
     <div className="max-w-sm mx-auto p-4">
-      {/* 헤더 (년/월, 이전/다음 버튼) */}
+      {/* 헤더: 연도/월, 이전/다음 버튼 */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={goToPrevMonth}
@@ -74,7 +76,7 @@ function Calendar() {
         </button>
       </div>
 
-      {/* 요일 표기 */}
+      {/* 요일 표시 */}
       <div className="grid grid-cols-7 text-center font-bold mb-2">
         {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
           <div key={day} className="text-gray-600">
@@ -86,11 +88,10 @@ function Calendar() {
       {/* 날짜 영역 */}
       <div className="grid grid-cols-7 text-center gap-y-2">
         {weeks.map((week, wi) => (
-          // React.Fragment 대신 <> 짧은 문법 사용
           <React.Fragment key={wi}>
             {week.map((day, di) => {
               if (!day) {
-                // 빈 칸(null)
+                // 빈 칸 처리
                 return (
                   <div key={di} className="h-10 flex items-center justify-center">
                     <div className="w-8 h-8" />
@@ -99,17 +100,23 @@ function Calendar() {
               }
 
               const isUnavailable = unavailableDays.includes(day);
+              const isSelected = selectedDay === day;
 
               return (
                 <div key={di} className="h-10 flex items-center justify-center">
                   <div
-                    className={`
-                      w-8 h-8 flex items-center justify-center rounded-full
-                      ${
-                        isUnavailable
-                          ? "bg-red-100 text-red-500"
-                          : "bg-blue-100 text-blue-600"
+                    onClick={() => {
+                      // 예약 불가능한 날짜는 클릭 불가 처리
+                      if (!isUnavailable) {
+                        setSelectedDay(day);
+                        // 선택된 날짜 정보를 Date 객체로 부모에 전달
+                        onSelectDate && onSelectDate(new Date(year, month - 1, day));
                       }
+                    }}
+                    className={`
+                      w-8 h-8 flex items-center justify-center rounded-full cursor-pointer
+                      ${isSelected ? "ring ring-offset-2 ring-blue-500" : ""}
+                      ${isUnavailable ? "bg-red-100 text-red-500" : "bg-blue-100 text-blue-600"}
                     `}
                   >
                     {day}
@@ -124,4 +131,4 @@ function Calendar() {
   );
 }
 
-export default Calendar;
+export default CalendarModule;

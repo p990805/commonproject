@@ -18,10 +18,9 @@ import ShelterDonationUsage from "./components/shelter/ShelterDonationUsage";
 import ShelterAnimal from "./components/shelter/ShelterAnimal";
 import ShelterWalkReservation from "./components/shelter/ShelterWalkReservation";
 import ShelterFinder from "./components/map/ShelterFinder";
-import Payment from "./components/payment/Payment";
-import RegularPaymentPage from "./pages/RegularPaymentPage";
 import WalkReservationPage from "./pages/WalkReservationPage";
 import LivePage from "./pages/LivePage";
+import DonationPage from "./pages/DonationPage";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
@@ -95,8 +94,7 @@ function App() {
         <Route path="/shelter/animal" element={<ShelterAnimal />} />
         <Route path="/shelter/walk" element={<ShelterWalkReservation />} />
         <Route path="/shelterFinder" element={<ShelterFinder />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/regular-payment" element={<RegularPaymentPage />} />
+        <Route path="/donation" element={<DonationPage />} />
         <Route path="/reservation" element={<WalkReservationPage />} />
         <Route path="/live" element={<LivePage />} />
       </Routes>

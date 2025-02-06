@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import DonationFieldSelect from "../components/payment/DonationFieldSelect";
 import PatronInformation from "../components/payment/PatronInformation";
 
-const RegularPaymentPage = () => {
+const DonationPage = () => {
   const [selectedAmount, setSelectedAmount] = useState(30000);
   const [customAmount, setCustomAmount] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [paymentDay, setPaymentDay] = useState(5);
-  const [selectedMethod, setSelectedMethod] = useState("card");
+  const [paymentDay, setPaymentDay] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState("");
   const [donationType, setDonationType] = useState("shelter"); // 'shelter' or 'individual'
+  const [donationMode, setDonationMode] = useState("regular");
 
   const amounts = [10000, 30000, 50000, 100000];
 
@@ -18,37 +19,22 @@ const RegularPaymentPage = () => {
     email: "p990805@naver.com",
   };
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://cdn.iamport.kr/v1/iamport.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  const handlePayment = () => {
+  // 정기결제 처리 함수
+  const handleRegularPayment = () => {
     const { IMP } = window;
     IMP.init("imp18166354");
 
     const paymentData = {
+      pg: selectedMethod === "card" ? "tosspayments" : "kakaopay.TCSUBSCRIP",
       pay_method: "card",
       merchant_uid: `billing_${new Date().getTime()}`,
       name: "정기후원 결제수단 등록",
-      amount: selectedAmount,
+      amount: 0,
       customer_uid: "user_1234",
       buyer_email: donor.email,
       buyer_name: donor.name,
       buyer_tel: donor.phone,
     };
-
-    if (selectedMethod === "card") {
-      paymentData.pg = "tosspayments";
-    } else if (selectedMethod === "kakaopay") {
-      paymentData.pg = "kakaopay.TCSUBSCRIP";
-    }
 
     IMP.request_pay(paymentData, (response) => {
       if (response.success) {
@@ -59,19 +45,99 @@ const RegularPaymentPage = () => {
     });
   };
 
+  const handleSinglePayment = () => {
+    const { IMP } = window;
+    IMP.init("imp18166354");
+
+    const paymentData = {
+      pg: selectedMethod === "card" ? "uplus" : "kakaopay",
+      pay_method: selectedMethod === "card" ? "card" : "kakaopay",
+      merchant_uid: `mid_${new Date().getTime()}`,
+      name: "일반후원 결제",
+      amount: selectedAmount,
+      buyer_email: donor.email,
+      buyer_name: donor.name,
+      buyer_tel: donor.phone,
+    };
+
+    IMP.request_pay(paymentData, async (response) => {
+      console.log("포트원 응답:", response); // 포트원 응답 확인
+
+      if (response.success) {
+        try {
+          const serverData = {
+            ...response, // 기존 response 데이터 유지
+            dataSource: donationType === "shelter" ? "shelter" : "animal",
+            relationalId: donationType === "shelter" ? 10 : 41,
+          };
+
+          const token = localStorage.getItem("token"); // 저장된 JWT 토큰 가져오기
+
+          console.log("서버로 전송할 데이터:", serverData); // 전송 데이터 확인
+
+          const result = await fetch("/general", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // JWT 토큰 추가
+            },
+            body: JSON.stringify(serverData),
+          });
+
+          console.log("서버 응답 상태:", result.status); // 응답 상태 확인
+
+          if (!result.ok) {
+            const errorText = await result.text();
+            console.error("서버 에러 응답:", errorText); // 에러 응답 확인
+            throw new Error(`서버 응답 오류 (${result.status}): ${errorText}`);
+          }
+
+          const resultData = await result.json();
+          console.log("서버 성공 응답:", resultData); // 성공 응답 확인
+
+          alert("✅ 결제가 완료되었습니다!");
+        } catch (error) {
+          console.error("상세 에러 정보:", {
+            message: error.message,
+            stack: error.stack,
+          });
+          alert(`결제 처리 중 오류가 발생했습니다.\n${error.message}`);
+        }
+      } else {
+        alert("❌ 결제 실패: " + response.error_msg);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 pt-10">
       <div className="max-w-6xl mx-auto">
-        <div className="flex">
-          <button className="flex-1 py-3 bg-red-500 text-white font-medium">
+        {/* 탭 버튼 */}
+        <div className="flex pb-5">
+          <button
+            className={`flex-1 py-3 font-medium ${
+              donationMode === "regular"
+                ? "bg-red-500 text-white"
+                : "bg-white text-gray-600"
+            }`}
+            onClick={() => setDonationMode("regular")}
+          >
             정기후원
           </button>
-          <button className="flex-1 py-3 bg-gray-100 text-gray-600 font-medium">
+          <button
+            className={`flex-1 py-3 font-medium ${
+              donationMode === "single"
+                ? "bg-red-500 text-white"
+                : "bg-white text-gray-600"
+            }`}
+            onClick={() => setDonationMode("single")}
+          >
             일시후원
           </button>
         </div>
 
-        <div className="flex gap-6 p-4 mt-6">
+        {/* 내용 부분 */}
+        <div className="flex gap-6 p-4">
           {/* Left Column */}
           <div className="flex-1 space-y-4">
             {/* Main Form */}
@@ -202,26 +268,27 @@ const RegularPaymentPage = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
               <h2 className="text-lg font-medium mb-4">결제수단</h2>
 
-              {/* 정기결제일 선택 */}
-              <div className="mb-6">
-                <h3 className="text-base font-medium mb-3">정기후원일</h3>
-                <div className="flex gap-2">
-                  {[5, 15, 25].map((day) => (
-                    <button
-                      key={day}
-                      onClick={() => setPaymentDay(day)}
-                      className={`flex-1 py-2 rounded-md border ${
-                        paymentDay === day
-                          ? "bg-red-500 text-white border-red-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      {day}일
-                    </button>
-                  ))}
+              {/* 정기결제일 선택 - 정기후원일 때만 표시 */}
+              {donationMode === "regular" && (
+                <div className="mb-6">
+                  <h3 className="text-base font-medium mb-3">정기후원일</h3>
+                  <div className="flex gap-2">
+                    {[5, 15, 25].map((day) => (
+                      <button
+                        key={day}
+                        onClick={() => setPaymentDay(day)}
+                        className={`flex-1 py-2 rounded-md border ${
+                          paymentDay === day
+                            ? "bg-red-500 text-white border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {day}일
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
+              )}
               {/* 결제수단 선택 */}
               <div className="space-y-4">
                 {/* 신용카드 */}
@@ -244,8 +311,15 @@ const RegularPaymentPage = () => {
                   </div>
                   {selectedMethod === "card" && (
                     <p className="text-sm text-gray-600 mt-2">
-                      매월 {paymentDay}일에 {selectedAmount.toLocaleString()}
-                      원이 자동으로 결제됩니다.
+                      {donationMode === "regular" ? (
+                        <>
+                          매월 {paymentDay}일에{" "}
+                          {selectedAmount.toLocaleString()}원이 자동으로
+                          결제됩니다.
+                        </>
+                      ) : (
+                        <>{selectedAmount.toLocaleString()}원이 결제됩니다.</>
+                      )}
                     </p>
                   )}
                 </div>
@@ -270,8 +344,15 @@ const RegularPaymentPage = () => {
                   </div>
                   {selectedMethod === "kakaopay" && (
                     <p className="text-sm text-gray-600 mt-2">
-                      매월 {paymentDay}일에 {selectedAmount.toLocaleString()}
-                      원이 자동으로 결제됩니다.
+                      {donationMode === "regular" ? (
+                        <>
+                          매월 {paymentDay}일에{" "}
+                          {selectedAmount.toLocaleString()}원이 자동으로
+                          결제됩니다.
+                        </>
+                      ) : (
+                        <>{selectedAmount.toLocaleString()}원이 결제됩니다.</>
+                      )}
                     </p>
                   )}
                 </div>
@@ -337,7 +418,11 @@ const RegularPaymentPage = () => {
 
                 {/* 결제하기 버튼 */}
                 <button
-                  onClick={handlePayment}
+                  onClick={
+                    donationMode === "regular"
+                      ? handleRegularPayment
+                      : handleSinglePayment
+                  }
                   className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors mt-6"
                 >
                   {selectedMethod === "kakaopay"
@@ -349,11 +434,11 @@ const RegularPaymentPage = () => {
           </div>
 
           {/* Right Column */}
-          <div className="w-80">
+          <div className="w-80 sticky top-4 h-fit">
             <DonationFieldSelect
               amount={selectedAmount}
+              donationMode={donationMode}
               donationType={donationType}
-              searchTerm={searchTerm}
             />
             <PatronInformation donor={donor} />
           </div>
@@ -363,4 +448,4 @@ const RegularPaymentPage = () => {
   );
 };
 
-export default RegularPaymentPage;
+export default DonationPage;
