@@ -10,8 +10,11 @@ import Withdraw from "../components/mypage/Withdraw";
 import CheckPassword from '../components/mypage/CheckPassword';
 
 const MyPage = () => {
-  const [activeTab, setActiveTab] = useState('myhome');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("activeTab") || "myhome";
+  });
   const [pendingTab, setPendingTab] = useState(null); // 비밀번호 확인 후 이동할 탭
+
 
   const components = {
     myhome: MyHome,
@@ -48,10 +51,11 @@ const MyPage = () => {
   // * */
   const handleTabChange = (tab) => {
     if (tab === 'Needfix') {
-      setPendingTab(tab); // 확인 후 이동할 탭 저장
-      setActiveTab('checkpassword'); // 비밀번호 확인 화면으로 전환
+      setPendingTab(tab);
+      setActiveTab('checkpassword');
     } else {
-      setActiveTab(tab); // 일반적인 탭 변경
+      setActiveTab(tab);
+      localStorage.setItem("activeTab", tab); // 🔥 새로고침 시 유지하도록 저장
     }
   };
 
@@ -59,7 +63,8 @@ const MyPage = () => {
   const handlePasswordCheckSuccess = () => {
     if (pendingTab) {
       setActiveTab(pendingTab);
-      setPendingTab(null); // 확인 완료 후 초기화
+      localStorage.setItem("activeTab", pendingTab);
+      setPendingTab(null);
     }
   };
 

@@ -1,6 +1,6 @@
 const ShelterPage =() => {
     return(
-        <div>
+        <div> 
             지도
         </div>
     )

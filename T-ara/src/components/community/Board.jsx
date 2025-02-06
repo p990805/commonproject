@@ -1,13 +1,34 @@
+import { useState } from "react";
+import AddBoard from "./AddBoard";
+
 const Board =() => {
 
+      const [showAddBoard, setShowAddBoard] = useState(false);
+
+      if(showAddBoard){
+        return(
+            <AddBoard
+            onCancel={()=>setShowAddBoard(false)}
+            />
+        )
+      }
+
     return(
-        <div className="w-full bg-white rounded-md shadow-md">
-            <div className="px-6 py-4 border-y">
-                <p className="text-lg font-bold text-gray-900">자유 게시판</p>
+        <div className="w-full p-6 bg-white rounded-md shadow-md">
+             <div className="flex items-center justify-between mb-6">
+                <h1 className="text-3xl font-bold">자유 게시판</h1>
+                <button
+                onClick={() => setShowAddBoard(true)} // 상태 변경
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                >
+                게시글 작성하기
+                </button>
             </div>
 
+            <hr className="border-gray-300" />
+
             
-            <ul role="list" className="divide-y divide-black">
+            <ul role="list" className="divide-y divide-gray-300">
                 
                 <li className="flex justify-between items-start gap-x-6 px-6 py-5">
                 

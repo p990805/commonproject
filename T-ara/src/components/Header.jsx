@@ -17,23 +17,38 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
       {/* 로고 */}
       <div className="flex items-center">
         <Link to="/">
-          <img className="w-10 h-10" src="/assets/dog-icon.png" alt="로고" />
+          <img className="w-45 h-10" src="/assets/logo.png" alt="로고" />
         </Link>
       </div>
 
       {/* 네비게이션 */}
       <nav className="flex space-x-8 text-lg font-medium">
-        <Link to="/shelters" className="text-gray-700 hover:text-black transition">
+        <Link
+          to="/shelterFinder"
+          className="text-gray-700 hover:text-black transition"
+        >
           보호소 찾기
         </Link>
         <Link to="/live" className="text-gray-700 hover:text-black transition">
           라이브
         </Link>
-        <Link to="/donate" className="text-gray-700 hover:text-black transition">
+        <Link
+          to="/donation"
+          className="text-gray-700 hover:text-black transition"
+        >
           후원하기
         </Link>
-        <Link to="/community" className="text-gray-700 hover:text-black transition">
+        <Link
+          to="/community"
+          className="text-gray-700 hover:text-black transition"
+        >
           소식
+        </Link>
+        <Link
+          to="/reservation"
+          className="text-gray-700 hover:text-black transition"
+        >
+          산책예약
         </Link>
       </nav>
 
@@ -42,8 +57,15 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
         {isLoggedIn ? (
           <>
             {/* 프로필 및 드롭다운 토글 */}
-            <div className="flex items-center space-x-2 cursor-pointer" onClick={toggleDropdown}>
-              <img src={userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={toggleDropdown}
+            >
+              <img
+                src={userProfile}
+                alt="프로필"
+                className="w-8 h-8 rounded-full"
+              />
               <span className="text-gray-700">{userName}님</span>
               <p className="text-xl">▼</p>
             </div>

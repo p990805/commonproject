@@ -58,8 +58,19 @@ const MyCampaignSpon =()=>{
             </div> 
             <hr />
 
-            <div className="flex w-full items-center justify-center my-5">
+            <div className="flex w-full my-5">
                {/* 여기에다가 결제완료/ 입금완료 그거 확인하는거 만들 거거*/}
+               <div className="flex gap-10">
+                     <div className="flex items-center gap-3">
+                        <p className="text-[14px] text-red-500 font-bold border-2 border-red-500 rounded-3xl py-1 w-[80px] flex items-center justify-center">결제완료</p>
+                        <p>후원 신청 후, 입금 확인까지 최대 7일 소요됩니다.</p>
+                     </div>
+
+                     <div className="flex items-center gap-3">
+                        <p className="bg-red-500 text-white rounded-2xl py-1 text-[14px] w-[80px] flex items-center justify-center">입금완료</p>
+                        <p>입금이 완료된 내역입니다.</p>
+                     </div>
+               </div>
             </div>
 
             <hr />
