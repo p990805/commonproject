@@ -17,7 +17,7 @@ const SwiperComponent = () => {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto"> {/* Swiper를 감싸는 컨테이너 추가 */}
+    <div className="w-full max-w-[1100px] mx-auto"> {/* Swiper를 감싸는 컨테이너 추가 */}
       <Swiper
   modules={[Navigation, Pagination, Scrollbar, A11y]}
   spaceBetween={20}

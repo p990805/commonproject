@@ -2,7 +2,7 @@ import "./styles/Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer">
+    <footer className="footer flex items-center justify-center">
       <div className="footer-content">
         {/* 왼쪽: 후원 정보 */}
         <div className="footer-left">

@@ -11,6 +11,8 @@ const DonationPage = () => {
   const [donationType, setDonationType] = useState("shelter"); // 'shelter' or 'individual'
   const [donationMode, setDonationMode] = useState("regular");
 
+  const token = localStorage.getItem("token"); // 저장된 JWT 토큰 가져오기
+
   const amounts = [10000, 30000, 50000, 100000];
 
   const donor = {
@@ -67,15 +69,14 @@ const DonationPage = () => {
         try {
           const serverData = {
             ...response, // 기존 response 데이터 유지
+            donationType: "general",
             dataSource: donationType === "shelter" ? "shelter" : "animal",
             relationalId: donationType === "shelter" ? 10 : 41,
           };
 
-          const token = localStorage.getItem("token"); // 저장된 JWT 토큰 가져오기
-
           console.log("서버로 전송할 데이터:", serverData); // 전송 데이터 확인
 
-          const result = await fetch("/general", {
+          const result = await fetch("/donation/general/register", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SidebarNavigation from "../SidebarNavigation";
+import SidebarNavigation from "./SidebarNavigation";
 
 const ShelterWalkReservation = () => {
   // 예시 데이터 - 나중에 DB에서 가져올 데이터

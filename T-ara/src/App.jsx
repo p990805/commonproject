@@ -21,6 +21,8 @@ import ShelterFinder from "./components/map/ShelterFinder";
 import WalkReservationPage from "./pages/WalkReservationPage";
 import LivePage from "./pages/LivePage";
 import DonationPage from "./pages/DonationPage";
+import CampaignPage from "./pages/CampaignPage";
+import CampaignDetail from "./components/campaign/CampaignDetail";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
@@ -97,6 +99,8 @@ function App() {
         <Route path="/donation" element={<DonationPage />} />
         <Route path="/reservation" element={<WalkReservationPage />} />
         <Route path="/live" element={<LivePage />} />
+        <Route path="/campaign" element={<CampaignPage />} />
+        <Route path="/campaign/:id" element={<CampaignDetail />} />
       </Routes>
       <Footer />
     </>
