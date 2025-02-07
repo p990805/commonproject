@@ -7,8 +7,8 @@ const Nanum = () => {
     <div className="flex flex-col justify-center items-center py-10 px-4 max-w-[1500px] h-[700px] my-auto mx-auto">
     {/* 제목 영역 */}
     <div className="flex justify-between items-center mb-6 w-full">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-800">나눔이야기</h2>
+      <div className="mb-10 flex flex-col gap-5">
+        <h2 className="text-4xl font-bold text-gray-800">나눔이야기</h2>
         <p className="text-gray-500">유기동물과 함께한 추억과 후원자님들의 이야기를 전합니다.</p>
       </div>
       <Link
