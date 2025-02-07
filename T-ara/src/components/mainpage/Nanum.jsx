@@ -1,9 +1,10 @@
 import SwiperComponent from "./SwiperComponent";
 import { Link } from "react-router-dom";
+import { FaPlus } from "react-icons/fa6";
 
 const Nanum = () => {
   return (
-    <div className="flex flex-col justify-start items-center py-10 px-4 max-w-7xl mx-auto">
+    <div className="flex flex-col justify-center items-center py-10 px-4 max-w-[1500px] h-[700px] my-auto mx-auto">
     {/* 제목 영역 */}
     <div className="flex justify-between items-center mb-6 w-full">
       <div>
@@ -12,10 +13,13 @@ const Nanum = () => {
       </div>
       <Link
         to="/community"
-        className="text-red-500 font-bold hover:underline flex items-center space-x-1"
+        className="text-gray-400 font-bold hover:underline flex items-center space-x-1"
       >
-        더보기
-      </Link>
+        <span className="flex gap-1 items-center">
+          더보기 <FaPlus className="align-middle mb-[2.5px]" />
+        </span>
+    </Link>
+
     </div>
   
     {/* Swiper 컴포넌트 */}

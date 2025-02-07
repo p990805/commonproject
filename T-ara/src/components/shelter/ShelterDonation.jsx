@@ -1,4 +1,4 @@
-import SidebarNavigation from "../SidebarNavigation";
+import SidebarNavigation from "./SidebarNavigation";
 
 const ShelterDonation = () => {
   return (

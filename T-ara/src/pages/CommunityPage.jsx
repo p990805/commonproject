@@ -42,7 +42,7 @@ const CommunityPage = () => {
   return (
     <div className="w-full bg-white">
       {/* 배너 영역 */}
-      <div className="relative w-full">
+      <div className="relative max-w-7xl mx-auto">
         {/* 배너 이미지 (흐름 속) */}
         <img
           src="./assets/banner.png"
@@ -56,8 +56,10 @@ const CommunityPage = () => {
           <span className="font-bold text-lg md:text-xl">입양</span>,{" "}
           <span className="font-bold text-lg md:text-xl">보호소</span>들의
           <br />
-          <span className="font-bold text-lg md:text-xl">중요한 정보</span>와{" "}
-          <span className="font-bold text-lg md:text-xl">소식</span>을 안내드립니다.
+          <span className="font-bold text-lg md:text-xl">
+            중요한 정보
+          </span>와 <span className="font-bold text-lg md:text-xl">소식</span>을
+          안내드립니다.
         </div>
       </div>
 
@@ -74,26 +76,34 @@ const CommunityPage = () => {
           <aside className="hidden md:block w-1/4 mr-6">
             <nav className="bg-white rounded border border-gray-300 p-4">
               <ul>
-                {["공지사항", "게시판", "자주묻는 질문", "1:1 문의"].map((menu) => (
-                  <li className="mb-2" key={menu}>
-                    <button
-                      className={`
+                {["공지사항", "게시판", "자주묻는 질문", "1:1 문의"].map(
+                  (menu) => (
+                    <li className="mb-2" key={menu}>
+                      <button
+                        className={`
                         w-full text-left px-3 py-2 rounded hover:bg-gray-100 transition
-                        ${activeTab === menu ? "bg-red-500 text-white" : "bg-white"}
+                        ${
+                          activeTab === menu
+                            ? "bg-red-500 text-white"
+                            : "bg-white"
+                        }
                         cursor-pointer
                       `}
-                      onClick={() => handleTabClick(menu)}
-                    >
-                      {menu}
-                    </button>
-                  </li>
-                ))}
+                        onClick={() => handleTabClick(menu)}
+                      >
+                        {menu}
+                      </button>
+                    </li>
+                  )
+                )}
               </ul>
             </nav>
           </aside>
 
           {/* 우측 메인 콘텐츠 */}
-          <section className="flex-1 border-y border-gray-300">{renderContent()}</section>
+          <section className="flex-1 border-y border-gray-300">
+            {renderContent()}
+          </section>
         </div>
       </div>
     </div>

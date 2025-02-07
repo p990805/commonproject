@@ -13,7 +13,7 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
   };
 
   return (
-    <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md">
+    <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md mx-auto my-auto">
       {/* 로고 */}
       <div className="flex items-center">
         <Link to="/">
