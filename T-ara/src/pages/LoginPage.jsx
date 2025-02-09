@@ -25,9 +25,8 @@ const LoginPage = ({ onLoginSuccess }) => {
   
     try {
       // 로그인 요청
-      // 배포 했는데 오류나면 여기 고칠 것
       const response = await api.post(
-        "http://localhost:8090/member/login/user",
+        "/member/login/user",
         { loginId, password },
         {
           headers: { "Content-Type": "application/json" },
@@ -35,6 +34,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         }
       );
       console.log("응답 헤더:", response.headers);
+      console.log(response)
   
       console.log("✅ [프론트] 서버 응답 데이터:", response.data);
   
@@ -112,7 +112,8 @@ const LoginPage = ({ onLoginSuccess }) => {
         </div>
 
         {/* 로그인 폼 */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit}  className="space-y-4">
           <input
             type="text"
             placeholder="아이디"

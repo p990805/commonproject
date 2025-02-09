@@ -9,7 +9,7 @@ const DonationFieldSelect = ({ amount, donationMode, donationType }) => {
           <span className="text-gray-600">후원분야</span>
           <div className="text-right">
             <span className="text-red-500">
-              {donationMode === "regular" ? "정기" : "일시"}
+              {donationMode === "monthly" ? "정기" : "일시"}
             </span>
             <span className="ml-2">
               {donationType === "shelter"

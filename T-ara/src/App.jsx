@@ -23,6 +23,8 @@ import LivePage from "./pages/LivePage";
 import DonationPage from "./pages/DonationPage";
 import CampaignPage from "./pages/CampaignPage";
 import CampaignDetail from "./components/campaign/CampaignDetail";
+import AnimalPage from "./pages/AnimalPage";
+import AnimalDetail from "./components/animal/AnimalDetail";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
@@ -101,6 +103,8 @@ function App() {
         <Route path="/live" element={<LivePage />} />
         <Route path="/campaign" element={<CampaignPage />} />
         <Route path="/campaign/:id" element={<CampaignDetail />} />
+        <Route path="/animal" element={<AnimalPage />} />
+        <Route path="/animal/:id" element={<AnimalDetail />} />
       </Routes>
       <Footer />
     </>

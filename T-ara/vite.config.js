@@ -8,12 +8,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/member": {
-        target: "http://localhost:8090", // 백엔드 서버 주소
+        target: "https://i12c201.duckdns.org:8090", // 백엔드 서버 주소
         changeOrigin: true,
         secure: false,
       },
       "/api": {
-        target: "http://localhost:8090",
+        target: "https://i12c201.duckdns.org:8090",
         changeOrigin: true,
         secure: false,
       },
