@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DonationFieldSelect from "../components/payment/DonationFieldSelect";
 import PatronInformation from "../components/payment/PatronInformation";
 
@@ -6,10 +6,10 @@ const DonationPage = () => {
   const [selectedAmount, setSelectedAmount] = useState(30000);
   const [customAmount, setCustomAmount] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [paymentDay, setPaymentDay] = useState(null);
+  const [paymentDay, setPaymentDay] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [donationType, setDonationType] = useState("shelter"); // 'shelter' or 'individual'
-  const [donationMode, setDonationMode] = useState("regular");
+  const [donationMode, setDonationMode] = useState("monthly");
 
   const token = localStorage.getItem("authToken"); // 저장된 JWT 토큰 가져오기
 
@@ -21,8 +21,11 @@ const DonationPage = () => {
     email: "p990805@naver.com",
   };
 
+  // customer_uid를 고유하게 생성
+  const customer_uid = `${donor.id}_${new Date().getTime()}`;
+
   // 정기결제 처리 함수
-  const handleRegularPayment = () => {
+  const handleMonthlyPayment = () => {
     const { IMP } = window;
     IMP.init("imp18166354");
 
@@ -32,22 +35,64 @@ const DonationPage = () => {
       merchant_uid: `billing_${new Date().getTime()}`,
       name: "정기후원 결제수단 등록",
       amount: 0,
-      customer_uid: "user_1234",
+      customer_uid: customer_uid,
       buyer_email: donor.email,
       buyer_name: donor.name,
       buyer_tel: donor.phone,
     };
 
-    IMP.request_pay(paymentData, (response) => {
+    IMP.request_pay(paymentData, async (response) => {
+      console.log("포트원 응답:", response);
+
       if (response.success) {
-        alert("✅ 결제수단 등록 성공!\n" + JSON.stringify(response));
+        try {
+          const serverData = {
+            ...response,
+            donationType: "monthly",
+            dataSource: donationType === "shelter" ? "shelter" : "animal",
+            relationalId: donationType === "shelter" ? 10 : 41,
+          };
+
+          console.log("서버로 전송할 데이터:", serverData);
+
+          const result = await fetch(
+            "http://localhost:8090/donation/monthly/register",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${token}`,
+              },
+              body: JSON.stringify(serverData),
+            }
+          );
+
+          console.log("서버 응답 상태:", result.status);
+
+          if (!result.ok) {
+            const errorText = await result.text();
+            console.error("서버 에러 응답:", errorText);
+            throw new Error(`서버 응답 오류 (${result.status}): ${errorText}`);
+          }
+
+          const resultData = await result.json();
+          console.log("서버 성공 응답:", resultData);
+
+          alert("✅ 결제수단 등록이 완료되었습니다!");
+        } catch (error) {
+          console.error("상세 에러 정보:", {
+            message: error.message,
+            stack: error.stack,
+          });
+          alert(`결제수단 등록 중 오류가 발생했습니다.\n${error.message}`);
+        }
       } else {
         alert("❌ 결제수단 등록 실패: " + response.error_msg);
       }
     });
   };
 
-  const handleSinglePayment = () => {
+  const handleGeneralPayment = () => {
     const { IMP } = window;
     IMP.init("imp18166354");
 
@@ -76,14 +121,17 @@ const DonationPage = () => {
 
           console.log("서버로 전송할 데이터:", serverData); // 전송 데이터 확인
 
-          const result = await fetch("http://localhost:8090/donation/general/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${token}`, // JWT 토큰 추가
-            },
-            body: JSON.stringify(serverData),
-          });
+          const result = await fetch(
+            "http://i12c201.duckdns.org/donation/general/register",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${token}`, // JWT 토큰 추가
+              },
+              body: JSON.stringify(serverData),
+            }
+          );
 
           console.log("서버 응답 상태:", result.status); // 응답 상태 확인
 
@@ -117,21 +165,21 @@ const DonationPage = () => {
         <div className="flex pb-5">
           <button
             className={`flex-1 py-3 font-medium ${
-              donationMode === "regular"
+              donationMode === "monthly"
                 ? "bg-red-500 text-white"
                 : "bg-white text-gray-600"
             }`}
-            onClick={() => setDonationMode("regular")}
+            onClick={() => setDonationMode("monthly")}
           >
             정기후원
           </button>
           <button
             className={`flex-1 py-3 font-medium ${
-              donationMode === "single"
+              donationMode === "general"
                 ? "bg-red-500 text-white"
                 : "bg-white text-gray-600"
             }`}
-            onClick={() => setDonationMode("single")}
+            onClick={() => setDonationMode("general")}
           >
             일시후원
           </button>
@@ -270,7 +318,7 @@ const DonationPage = () => {
               <h2 className="text-lg font-medium mb-4">결제수단</h2>
 
               {/* 정기결제일 선택 - 정기후원일 때만 표시 */}
-              {donationMode === "regular" && (
+              {donationMode === "monthly" && (
                 <div className="mb-6">
                   <h3 className="text-base font-medium mb-3">정기후원일</h3>
                   <div className="flex gap-2">
@@ -312,7 +360,7 @@ const DonationPage = () => {
                   </div>
                   {selectedMethod === "card" && (
                     <p className="text-sm text-gray-600 mt-2">
-                      {donationMode === "regular" ? (
+                      {donationMode === "monthly" ? (
                         <>
                           매월 {paymentDay}일에{" "}
                           {selectedAmount.toLocaleString()}원이 자동으로
@@ -345,7 +393,7 @@ const DonationPage = () => {
                   </div>
                   {selectedMethod === "kakaopay" && (
                     <p className="text-sm text-gray-600 mt-2">
-                      {donationMode === "regular" ? (
+                      {donationMode === "monthly" ? (
                         <>
                           매월 {paymentDay}일에{" "}
                           {selectedAmount.toLocaleString()}원이 자동으로
@@ -420,9 +468,9 @@ const DonationPage = () => {
                 {/* 결제하기 버튼 */}
                 <button
                   onClick={
-                    donationMode === "regular"
-                      ? handleRegularPayment
-                      : handleSinglePayment
+                    donationMode === "monthly"
+                      ? handleMonthlyPayment
+                      : handleGeneralPayment
                   }
                   className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors mt-6"
                 >
