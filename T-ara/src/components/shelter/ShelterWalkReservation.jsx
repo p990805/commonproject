@@ -245,93 +245,104 @@ const ShelterWalkReservation = () => {
             </div>
 
             {/* 테이블 */}
-            <div className="overflow-x-auto pb-8">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[#fbfcfc] text-xs text-[#667084]">
-                    <th className="px-6 py-3 font-medium text-left">
-                      신청일자
-                    </th>
-                    <th className="px-6 py-3 font-medium text-left">
-                      유기동물명
-                    </th>
-                    <th className="px-6 py-3 font-medium text-left">
-                      예약일자
-                    </th>
-                    <th className="px-6 py-3 font-medium text-left">
-                      신청자명
-                    </th>
-                    <th className="px-6 py-3 font-medium text-left">
-                      승인 상태
-                    </th>
-                    <th className="px-6 py-3 font-medium text-left">
-                      거절사유
-                    </th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reservations.map((reservation, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-[#eaecf0] cursor-pointer hover:bg-gray-50"
-                      onClick={() => setSelectedReservation(reservation)}
-                    >
-                      <td className="px-6 py-3 text-sm text-[#667085]">
-                        {reservation.applicationDate}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-[#667084]">
-                        {reservation.animalName}
-                      </td>
-                      <td className="px-6 py-3 text-sm font-bold">
-                        {reservation.reservationDate}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-[#667084]">
-                        {reservation.applicantName}
-                      </td>
-                      <td className="px-6 py-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-2xl ${getStatusStyle(
-                            reservation.status
-                          )}`}
-                        >
-                          <span className="w-2 h-2 mr-1.5 rounded-full bg-current"></span>
-                          {reservation.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-sm text-[#667084]">
-                        {reservation.rejectReason}
-                      </td>
-                      <td className="px-6 py-3">
-                        <button className="w-4 h-4">
-                          <span className="sr-only">더보기</span>
-                        </button>
-                      </td>
+            {/* Table Container */}
+            <div className="bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
+              <div className="overflow-x-auto pb-8">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#fbfcfc] text-xs text-[#667084]">
+                      <th className="px-6 py-3 font-medium text-left">
+                        신청일자
+                      </th>
+                      <th className="px-6 py-3 font-medium text-left">
+                        유기동물명
+                      </th>
+                      <th className="px-6 py-3 font-medium text-left">
+                        예약일자
+                      </th>
+                      <th className="px-6 py-3 font-medium text-left">
+                        신청자명
+                      </th>
+                      <th className="px-6 py-3 font-medium text-left">
+                        승인 상태
+                      </th>
+                      <th className="px-6 py-3 font-medium text-left">
+                        거절사유
+                      </th>
+                      <th className="px-6 py-3"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {reservations.map((reservation, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-[#eaecf0] cursor-pointer hover:bg-gray-50"
+                        onClick={() => setSelectedReservation(reservation)}
+                      >
+                        <td className="px-6 py-3 text-sm text-[#667085]">
+                          {reservation.applicationDate}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-[#667084]">
+                          {reservation.animalName}
+                        </td>
+                        <td className="px-6 py-3 text-sm font-bold">
+                          {reservation.reservationDate}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-[#667084]">
+                          {reservation.applicantName}
+                        </td>
+                        <td className="px-6 py-3">
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-2xl ${getStatusStyle(
+                              reservation.status
+                            )}`}
+                          >
+                            <span className="w-2 h-2 mr-1.5 rounded-full bg-current"></span>
+                            {reservation.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm text-[#667084]">
+                          {reservation.rejectReason}
+                        </td>
+                        <td className="px-6 py-3">
+                          <button className="w-4 h-4">
+                            <span className="sr-only">더보기</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* 상세 정보 섹션 */}
             {selectedReservation && (
               <div className="mt-6 mx-6 pb-6">
                 <div className="border border-[#dee1e8]">
-                  <div className="grid grid-cols-[160px,1fr]">
-                    <div className="bg-[#f0f3fc] p-4 text-[10px] border-b border-r border-[#dee1e8]">
-                      받으시는 분
+                  {/* 받으시는 분 */}
+                  <div className="flex">
+                    <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
+                      <span className="ml-5 !text-[#191919] text-[10.31px] font-normal">
+                        받으시는 분
+                      </span>
                     </div>
-                    <div className="p-4 text-sm text-[#667084] border-b border-[#dee1e8]">
-                      {selectedReservation.applicantName} 님
+                    <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
+                      <div className="ml-5 text-sm text-[#667084]">
+                        {selectedReservation.applicantName} 님
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[160px,1fr]">
-                    <div className="bg-[#f0f3fc] p-4 text-[10px] border-b border-r border-[#dee1e8]">
-                      승인 여부
+                  {/* 승인 여부 */}
+                  <div className="flex">
+                    <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
+                      <span className="ml-5 !text-[#191919] text-[10.31px] font-normal">
+                        승인 여부
+                      </span>
                     </div>
-                    <div className="p-4 border-b border-[#dee1e8]">
-                      <div className="flex gap-6">
+                    <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
+                      <div className="flex gap-6 ml-5">
                         <label className="flex items-center gap-2">
                           <input
                             type="radio"
@@ -346,7 +357,6 @@ const ShelterWalkReservation = () => {
                                 rejectReason: "",
                               });
                             }}
-                            //   disabled={selectedReservation.status === "미확인"}
                           />
                           <span className="text-[11px] text-[#575757]">
                             승인
@@ -365,7 +375,6 @@ const ShelterWalkReservation = () => {
                                 status: "취소",
                               });
                             }}
-                            //   disabled={selectedReservation.status === "미확인"}
                           />
                           <span className="text-[11px] text-[#575757]">
                             거절
@@ -375,22 +384,27 @@ const ShelterWalkReservation = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[160px,1fr]">
-                    <div className="bg-[#f0f3fc] p-4 text-[10px] border-r border-[#dee1e8]">
-                      거절 사유
+                  {/* 거절 사유 */}
+                  <div className="flex">
+                    <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
+                      <span className="ml-5 !text-[#191919] text-[10.31px] font-normal">
+                        거절 사유
+                      </span>
                     </div>
-                    <div className="p-4">
-                      <input
-                        type="text"
-                        className="w-60 h-7 px-2 border border-[#cccccc]"
-                        value={selectedReservation.rejectReason}
-                        onChange={(e) => {
-                          setSelectedReservation({
-                            ...selectedReservation,
-                            rejectReason: e.target.value,
-                          });
-                        }}
-                      />
+                    <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
+                      <div className="ml-5">
+                        <input
+                          type="text"
+                          className="w-60 h-7 px-2 border border-[#cccccc]"
+                          value={selectedReservation.rejectReason}
+                          onChange={(e) => {
+                            setSelectedReservation({
+                              ...selectedReservation,
+                              rejectReason: e.target.value,
+                            });
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

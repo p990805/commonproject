@@ -1,6 +1,6 @@
 import SidebarNavigation from "./SidebarNavigation";
 
-const ShelterDonation = () => {
+const ShelterAnimalDiary = () => {
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
       {/* Sidebar */}
@@ -9,63 +9,11 @@ const ShelterDonation = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
-          {/* Dashboard Title */}
           <div className="mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
-              후원금 대시보드
+              동물 일지 관리
             </h1>
           </div>
-          {/* Dashboard Stats */}
-          <div className="w-full h-[130px] relative bg-gradient-to-r from-[#5e9dfc] via-[#6085ef] to-[#5c6efe] rounded-[10px] shadow-[3px_3px_10px_0px_rgba(151,152,159,0.25)] flex items-center justify-between px-16 mb-12">
-            {/* Today's Donation Amount */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 후원받은 금액
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">
-                  503,165
-                </span>
-                <span className="!text-white/70 text-lg ml-2">원</span>
-              </div>
-            </div>
-
-            {/* Total Donation Amount */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                총 후원받은 금액
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">
-                  623,503,165
-                </span>
-                <span className="!text-white/70 text-lg ml-2">원</span>
-              </div>
-            </div>
-
-            {/* Today's Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">15</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
-              </div>
-            </div>
-
-            {/* Total Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                전체 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">255</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
-              </div>
-            </div>
-          </div>
-
           {/* Search Filters */}
           <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
             <div className="border border-[#dee1e8]">
@@ -73,7 +21,7 @@ const ShelterDonation = () => {
               <div className="flex">
                 <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
                   <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    기간
+                    등록 기간
                   </span>
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
@@ -97,38 +45,14 @@ const ShelterDonation = () => {
               <div className="flex">
                 <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
                   <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    분류
+                    동물 카테고리
                   </span>
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        캠페인
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        일반
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
-                        정기
-                      </span>
-                    </label>
+                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
+                      <option>전체</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -163,7 +87,7 @@ const ShelterDonation = () => {
           </div>
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
-            후원 전체 목록
+            동물 일지 전체 목록
           </div>
 
           {/* Donation List Table */}
@@ -249,4 +173,4 @@ const ShelterDonation = () => {
   );
 };
 
-export default ShelterDonation;
+export default ShelterAnimalDiary;

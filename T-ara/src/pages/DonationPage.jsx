@@ -8,8 +8,13 @@ const DonationPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentDay, setPaymentDay] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
-  const [donationType, setDonationType] = useState("shelter"); // 'shelter' or 'individual'
+  const [donationType, setDonationType] = useState("shelter");
   const [donationMode, setDonationMode] = useState("monthly");
+  const [agreements, setAgreements] = useState({
+    all: false,
+    terms: false,
+    privacy: false,
+  });
 
   const token = localStorage.getItem("authToken"); // 저장된 JWT 토큰 가져오기
 
@@ -24,8 +29,75 @@ const DonationPage = () => {
   // customer_uid를 고유하게 생성
   const customer_uid = `${donor.id}_${new Date().getTime()}`;
 
+  // 유효성 검사 함수
+  const validateDonation = () => {
+    // 공통 검증 사항
+    if (!donationType) {
+      alert("후원 분야를 선택해주세요.");
+      return false;
+    }
+
+    if (!selectedAmount || selectedAmount <= 0) {
+      alert("올바른 후원 금액을 입력해주세요.");
+      return false;
+    }
+
+    // 정기후원 전용 검증
+    if (donationMode === "monthly") {
+      if (!paymentDay) {
+        alert("정기후원일을 선택해주세요.");
+        return false;
+      }
+    }
+
+    if (!selectedMethod) {
+      alert("결제 수단을 선택해주세요.");
+      return false;
+    }
+
+    if (!agreements.terms || !agreements.privacy) {
+      alert("필수 약관에 동의해주세요.");
+      return false;
+    }
+
+    // 후원 분야별 검증
+    // if (donationType === "shelter" && !searchTerm.trim()) {
+    //   alert("후원할 보호소를 선택해주세요.");
+    //   return false;
+    // }
+
+    // if (donationType === "individual" && !searchTerm.trim()) {
+    //   alert("후원할 유기동물을 선택해주세요.");
+    //   return false;
+    // }
+
+    return true;
+  };
+
+  // 약관 동의 처리 함수
+  const handleAgreementChange = (type) => {
+    if (type === "all") {
+      const newValue = !agreements.all;
+      setAgreements({
+        all: newValue,
+        terms: newValue,
+        privacy: newValue,
+      });
+    } else {
+      const newAgreements = {
+        ...agreements,
+        [type]: !agreements[type],
+      };
+      // all 체크 상태 업데이트
+      newAgreements.all = newAgreements.terms && newAgreements.privacy;
+      setAgreements(newAgreements);
+    }
+  };
+
   // 정기결제 처리 함수
   const handleMonthlyPayment = () => {
+    if (!validateDonation()) return;
+
     const { IMP } = window;
     IMP.init("imp18166354");
 
@@ -93,6 +165,8 @@ const DonationPage = () => {
   };
 
   const handleGeneralPayment = () => {
+    if (!validateDonation()) return;
+
     const { IMP } = window;
     IMP.init("imp18166354");
 
@@ -160,7 +234,7 @@ const DonationPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pt-10">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* 탭 버튼 */}
         <div className="flex pb-5">
           <button
@@ -414,8 +488,9 @@ const DonationPage = () => {
                       <input
                         type="checkbox"
                         id="allAgree"
+                        checked={agreements.all}
+                        onChange={() => handleAgreementChange("all")}
                         className="w-5 h-5 border-gray-300 rounded"
-                        onChange={() => {}}
                       />
                       <label htmlFor="allAgree" className="text-gray-900">
                         모두 동의합니다.
@@ -428,8 +503,9 @@ const DonationPage = () => {
                       <input
                         type="checkbox"
                         id="termsAgree"
+                        checked={agreements.terms}
+                        onChange={() => handleAgreementChange("terms")}
                         className="w-5 h-5 border-gray-300 rounded"
-                        onChange={() => {}}
                       />
                       <label htmlFor="termsAgree" className="flex items-center">
                         <span className="text-red-500">(필수)</span>
@@ -446,8 +522,9 @@ const DonationPage = () => {
                       <input
                         type="checkbox"
                         id="privacyAgree"
+                        checked={agreements.privacy}
+                        onChange={() => handleAgreementChange("privacy")}
                         className="w-5 h-5 border-gray-300 rounded"
-                        onChange={() => {}}
                       />
                       <label
                         htmlFor="privacyAgree"
@@ -474,9 +551,7 @@ const DonationPage = () => {
                   }
                   className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors mt-6"
                 >
-                  {selectedMethod === "kakaopay"
-                    ? "카카오페이로 시작하기"
-                    : "카드 등록하기"}
+                  후원하기
                 </button>
               </div>
             </div>

@@ -28,6 +28,7 @@ const SidebarNavigation = () => {
     "/shelter/usage-register": "후원금 사용 등록",
     "/shelter/campaign": "캠페인 후원",
     "/shelter/animal": "전체 유기 동물",
+    "/shelter/animal-register": "전체 유기 동물",
     "/shelter/animal-diary": "동물 일지",
     "/shelter/walk": "산책 예약",
     "/shelter/notices": "전체 공지사항",
@@ -64,7 +65,7 @@ const SidebarNavigation = () => {
   };
 
   return (
-    <div className="w-[200px] h-[1080px] px-4 bg-[#f5f4fd] flex-col justify-start items-start gap-4 inline-flex">
+    <div className="w-[200px] h-[1080px] px-4 bg-[#f5f4fd] flex-col justify-start items-start gap-4 inline-flex pt-10">
       {Object.entries(navigationItems).map(([section, items]) => (
         <div
           key={section}
