@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CampaignDetailHeader = ({ campaign }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -14,6 +15,12 @@ const CampaignDetailHeader = ({ campaign }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/campaign/donation`);
+  };
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -100,7 +107,10 @@ const CampaignDetailHeader = ({ campaign }) => {
               </div>
 
               {/* 후원하기 버튼 */}
-              <button className="w-full bg-red-500 text-white py-4 rounded-md font-bold hover:bg-red-600 transition-colors">
+              <button
+                onClick={handleClick}
+                className="w-full bg-red-500 text-white py-4 rounded-md font-bold hover:bg-red-600 transition-colors"
+              >
                 캠페인 후원하기
               </button>
 

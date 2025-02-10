@@ -144,9 +144,9 @@ const ShelterDonationUsage = () => {
           </div>
 
           {/* Donation List Table */}
-          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)]">
+          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
             {/* List Header */}
-            <div className="px-7 py-7 border-b border-[#dee1e8]">
+            <div className="px-3 py-3 border-b border-[#dee1e8]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
@@ -161,7 +161,6 @@ const ShelterDonationUsage = () => {
                       건
                     </span>
                   </div>
-
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     ]
                   </span>
@@ -174,32 +173,35 @@ const ShelterDonationUsage = () => {
               </div>
             </div>
 
-            {/* Table Header */}
-            <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-              <div className="flex">
-                <div className="w-16 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  지출 코드
-                </div>
-                <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원자명
-                </div>
-                <div className="w-28 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원자 아이디
-                </div>
-                <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 분류
-                </div>
-                <div className="flex-1 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 프로젝트 명
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 대상
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 금액
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원일시
+            {/* Table Container with margin */}
+            <div className="mx-4 my-4">
+              {/* Table Header */}
+              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
+                <div className="flex">
+                  <div className="w-16 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    지출 코드
+                  </div>
+                  <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원자명
+                  </div>
+                  <div className="w-28 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원자 아이디
+                  </div>
+                  <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 분류
+                  </div>
+                  <div className="flex-1 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 프로젝트 명
+                  </div>
+                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 대상
+                  </div>
+                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 금액
+                  </div>
+                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원일시
+                  </div>
                 </div>
               </div>
             </div>

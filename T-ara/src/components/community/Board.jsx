@@ -1,89 +1,125 @@
-import { useState } from "react";
+// Board.jsx
+import { useState, useEffect } from "react";
 import AddBoard from "./AddBoard";
+import api from "../../api";
+// 유틸 함수 import
+import { deltaToHtml } from "../../utils/quillParser";
 
-const Board =() => {
+const Board = ({ onSelectPost }) => {
+  const [showAddBoard, setShowAddBoard] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-      const [showAddBoard, setShowAddBoard] = useState(false);
+  useEffect(() => {
+    setLoading(true);
+    const searchCriteria = {
+      communityCategory: "all",
+      category: "all",
+      keyword: "",
+      pageNum: "0",
+    };
 
-      if(showAddBoard){
-        return(
-            <AddBoard
-            onCancel={()=>setShowAddBoard(false)}
-            />
-        )
-      }
+    api
+      .post("/community/list", searchCriteria)
+      .then((response) => {
+        console.log("API 응답 데이터:", response.data);
+        const rawPosts = response.data.communityList || [];
+        // 중복 게시글 제거: 같은 communityId를 가진 게시글은 한 번만 사용
+        const uniquePosts = rawPosts.filter(
+          (post, index, self) =>
+            index === self.findIndex((p) => p.communityId === post.communityId)
+        );
+        setPosts(uniquePosts);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("API 호출 오류:", err);
+        setError(err);
+        setLoading(false);
+      });
+  }, []);
 
-    return(
-        <div className="w-full p-6 bg-white rounded-md shadow-md">
-             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">자유 게시판</h1>
-                <button
-                onClick={() => setShowAddBoard(true)} // 상태 변경
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                >
-                게시글 작성하기
-                </button>
-            </div>
+  if (showAddBoard) {
+    return <AddBoard onCancel={() => setShowAddBoard(false)} />;
+  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
-            <hr className="border-gray-300" />
+  return (
+    <div className="w-full p-6 bg-white rounded-md shadow-md">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">자유 게시판</h1>
+        <button
+          onClick={() => setShowAddBoard(true)}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+        >
+          게시글 작성하기
+        </button>
+      </div>
+      <hr className="border-gray-300" />
+      {posts.length === 0 ? (
+        <div className="p-4 text-center text-gray-500">게시글 없음</div>
+      ) : (
+        <ul role="list" className="divide-y divide-gray-300">
+          {posts.map((post) => {
+            console.log("POST 객체:", post);
+            const postId = post.communityId;
+            // Quill Delta를 HTML로 변환
+            const convertedHtml = deltaToHtml(post.content || "");
 
-            
-            <ul role="list" className="divide-y divide-gray-300">
-                
-                <li className="flex justify-between items-start gap-x-6 px-6 py-5">
-                
+            return (
+              <li
+                key={postId}
+                className="flex justify-between items-start gap-x-6 px-6 py-5 cursor-pointer"
+                onClick={() => onSelectPost(postId)}
+              >
                 <div className="flex flex-col gap-4 w-full">
-                    
-                    <div className="flex items-center gap-x-4">
+                  <div className="flex items-center gap-x-4">
                     <img
-                        src="/assets/nanum1.png"
-                        alt="작성자 프로필"
-                        className="w-10 h-10 rounded-full"
+                      src="/assets/nanum1.png"
+                      alt="작성자 프로필"
+                      className="w-10 h-10 rounded-full"
                     />
                     <div>
-                        <p className="text-sm font-bold text-gray-900">광주 동물보호센터</p>
-                        <p className="text-xs text-gray-500">2시간 전</p>
+                      <p className="text-sm font-bold text-gray-900">
+                        {post.userName || "작성자"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {post.createdAt || "시간정보"}
+                      </p>
                     </div>
-                    </div>
-
-                    
-                    <div>
+                  </div>
+                  <div>
                     <h2 className="text-base font-bold text-gray-900 mb-2">
-                        내 사랑스러운 고양이 자랑 : 다미의 일상!
+                      {post.title || "제목 없음"}
                     </h2>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                        고양이 카페에 갔다가 다미를 만났는데, 그 큰 눈과 부드러운 털에
-                        반해버렸어요! 보호소에서 처음 왔을 때, 진짜 "이건 운명이다!" 싶었답니다.
-                        다미는 장난감과가 친구예요. 하루 종일 놀아나며, 벽에 있는 그림을
-                        차단하면서 지저귀며 고개를 좌우로 흔드는 모습이 너무 귀여워요.{" "}
-                        <span className="text-gray-500">#해시태그</span>
-                    </p>
-                    </div>
-
-                    
-                    <div className="flex items-center gap-x-6 text-xs text-gray-500">
-                    <span>조회수 190</span>
-                    <span>좋아요 12</span>
-                    <span>댓글 8</span>
-                    </div>
+                    {/* Quill Delta → HTML 렌더링 */}
+                    <div
+                      className="text-sm text-gray-700 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: convertedHtml }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-x-6 text-xs text-gray-500">
+                    <span>조회수 {post.viewCount || 0}</span>
+                    <span>좋아요 {post.likeCount || 0}</span>
+                    <span>댓글 {post.commentCount || 0}</span>
+                  </div>
                 </div>
-
-                
-                <img
-                    src="/assets/nanum2.png"
+                {post.imageUrl && (
+                  <img
+                    src={post.imageUrl}
                     alt="게시글 이미지"
                     className="w-40 h-45 object-cover rounded-md"
-                />
-                </li>
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+};
 
-                
-                <li className="flex justify-between items-start gap-x-6 px-6 py-5">
-                
-                <p>테스트 게시글2</p>
-                </li>
-            </ul>
-            </div>
-
-    )
-}
 export default Board;

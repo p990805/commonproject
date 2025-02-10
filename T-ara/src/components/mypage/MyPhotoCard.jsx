@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaTrash, FaDownload, FaMagic, FaImage } from "react-icons/fa";
+import MyPhotoCardImageUpload from './MyPhotoCardImageUpload';  // 이미지 업로드 컴포넌트 import
 
 const MyPhotoCard = () => {
+  const [showImageUpload, setShowImageUpload] = useState(false);
+
   // 샘플 카드 데이터
   const cards = [
     { id: 1, date: '2025-01-25', title: '별이와 박주찬의 포토카드' },
@@ -22,12 +25,20 @@ const MyPhotoCard = () => {
     </button>
   );
 
+  // 이미지 업로드 컴포넌트가 표시되면 메인 화면 대신 보여줌
+  if (showImageUpload) {
+    return <MyPhotoCardImageUpload onClose={() => setShowImageUpload(false)} />;
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
       {/* 헤더 섹션 */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">포토카드</h1>
-        <button className={`${buttonBaseStyle} px-4 py-2`}>
+        <button 
+          className={`${buttonBaseStyle} px-4 py-2`}
+          onClick={() => setShowImageUpload(true)}  // 클릭 핸들러 수정
+        >
           <FaImage className="text-red-500" size={16} />
           <span className="text-sm text-gray-700">포토카드 만들기</span>
         </button>

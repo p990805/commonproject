@@ -6,7 +6,7 @@ import { FaPlus } from "react-icons/fa6";
 const Campaign2 =()=>{
 
     return (
-        <div className="flex flex-col justify-center items-center   px-4 max-w-[1500px] h-[700px] my-auto mx-auto">
+        <div className="flex flex-col justify-center items-center   px-4 max-w-[1000px] h-[700px] my-auto mx-auto">
         {/* 제목 영역 */}
         <div className="flex justify-between items-center mb-3 w-full p-7">
           <div className="mb-10 flex flex-col gap-4">
