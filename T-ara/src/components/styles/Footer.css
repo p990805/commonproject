@@ -1,0 +1,135 @@
+.footer {
+  background-color: #333; /* 다크 배경 */
+  color: #fff;
+  padding: 20px 40px;
+  font-size: 11px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* ========== 왼쪽 섹션 ========== */
+.footer-left > h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* 파이 차트 컨테이너 */
+.pie-chart {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  margin-top: 10px;
+
+  /* conic-gradient: 83% 빨강, 15% 파랑, 2% 노랑 */
+  background: conic-gradient(
+    #ff4d4d 0% 83%, 
+    #4d88ff 83% 98%, 
+    #ffc107 98% 100%
+  );
+}
+
+/* 파이 차트 중앙 텍스트 */
+.pie-center-text {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 통계 리스트 */
+.footer-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-stats li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* 색상 점(원) 표시 */
+.stat-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.stat-circle.red {
+  background-color: #ff4d4d;
+}
+
+.stat-circle.blue {
+  background-color: #4d88ff;
+}
+
+.stat-circle.yellow {
+  background-color: #ffc107;
+}
+
+/* ========== 중앙 섹션 ========== */
+.footer-center {
+  text-align: center;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.footer-links li {
+  cursor: pointer;
+}
+
+.footer-links li:hover {
+  text-decoration: underline;
+}
+
+/* ========== 오른쪽 섹션 ========== */
+.footer-right {
+  text-align: right;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  background-color: #555;
+  border-radius: 50%;
+  /* 아이콘 이미지가 있다면 background-image로 설정 */
+  /* background-image: url('/path-to-icons/facebook-icon.png');
+  background-size: cover; */
+}
+
+.dropdowns select {
+  display: block;
+  margin-bottom: 10px;
+  padding: 5px;
+  background-color: #444;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+}

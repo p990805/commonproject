@@ -1,0 +1,80 @@
+
+.signup-container {
+    display: flex;               
+    flex-direction: column;       
+    align-items: center;          
+    
+    padding: 50px;
+    height: auto;
+    box-sizing: border-box;
+  }
+  
+  .context-container {
+    text-align: center;
+    /* margin-bottom: 30px;   */
+  }
+  
+  
+  .choosebox-container {
+    display: flex;              
+    justify-content: center;   
+    gap: 20px;                   
+    max-width: 1200px;           
+    width: 100%;                
+  }
+  
+  .choosebox-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;         /* 수평 중앙 */
+    justify-content: center;     /* 수직 중앙 */
+    
+    width: 400px;                /* 가로 폭 고정 (예시) */
+    height: 400px;               /* 높이 고정 */
+    
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  
+  
+
+  .choosebox-option p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+  }
+  .choosebox-option h3 {
+    margin: 20;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .choosebox-option button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    border: 1px solid rgb(180, 177, 177);
+    background-color: white; 
+    color: black;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    width:70%;
+    height:26%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap:10px;
+  }
+
+  .choosebox-option button:hover{
+    background-color: #ff5c5c;
+  }
+  
+  .icon{
+    background-color: white;
+  }
