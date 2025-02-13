@@ -1,4 +1,4 @@
-import SidebarNavigation from "../SidebarNavigation";
+import SidebarNavigation from "./SidebarNavigation";
 
 const ShelterAnimal = () => {
   return (
@@ -9,10 +9,18 @@ const ShelterAnimal = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
-          <div className="mb-6">
+          <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
               전체 유기 동물
             </h1>
+            <button
+              onClick={() =>
+                (window.location.href = "/shelter/animal-register")
+              }
+              className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+            >
+              유기동물 등록하기
+            </button>
           </div>
 
           {/* Search Filters */}
@@ -92,9 +100,9 @@ const ShelterAnimal = () => {
           </div>
 
           {/* Donation List Table */}
-          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)]">
+          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
             {/* List Header */}
-            <div className="px-7 py-7 border-b border-[#dee1e8]">
+            <div className="px-3 py-3 border-b border-[#dee1e8]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
@@ -109,7 +117,6 @@ const ShelterAnimal = () => {
                       건
                     </span>
                   </div>
-
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     ]
                   </span>
@@ -122,44 +129,47 @@ const ShelterAnimal = () => {
               </div>
             </div>
 
-            {/* Table Header */}
-            <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-              <div className="flex">
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  등록 코드
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  등록 이름
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  동물 종류
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  동물 품종
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  성별
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  생년월일
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  중성화 상태
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  체중
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  색깔
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  등록일시
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  동물상태
-                </div>
-                <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  보호소
+            {/* Table Container with margin */}
+            <div className="mx-4 my-4">
+              {/* Table Header */}
+              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
+                <div className="flex">
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    등록 코드
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    등록 이름
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    동물 종류
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    동물 품종
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    성별
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    생년월일
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    중성화 상태
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    체중
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    색깔
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    등록일시
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    동물상태
+                  </div>
+                  <div className="flex-1 p-3 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    보호소
+                  </div>
                 </div>
               </div>
             </div>

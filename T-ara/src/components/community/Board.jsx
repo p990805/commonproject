@@ -1,89 +1,187 @@
-import { useState } from "react";
+// Board.jsx
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 추가
 import AddBoard from "./AddBoard";
+import api from "../../api";
+import { deltaToHtml } from "../../utils/quillParser";
 
-const Board =() => {
+const Board = () => {
+  const navigate = useNavigate(); // navigate 훅 사용
+  const [showAddBoard, setShowAddBoard] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-      const [showAddBoard, setShowAddBoard] = useState(false);
+  // pagination 관련 state
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 15;
 
-      if(showAddBoard){
-        return(
-            <AddBoard
-            onCancel={()=>setShowAddBoard(false)}
-            />
-        )
-      }
+  // 게시글 불러오기
+  const fetchPosts = () => {
+    setLoading(true);
+    const searchCriteria = {
+      communityCategory: "all",
+      category: "all",
+      keyword: "",
+      pageNum: "0",
+    };
 
-    return(
-        <div className="w-full p-6 bg-white rounded-md shadow-md">
-             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">자유 게시판</h1>
-                <button
-                onClick={() => setShowAddBoard(true)} // 상태 변경
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                >
-                게시글 작성하기
-                </button>
-            </div>
+    api
+      .post("/community/list", searchCriteria)
+      .then((response) => {
+        const rawPosts = response.data.communityList || [];
+        // 중복 제거: 같은 communityId를 가진 게시글은 한 번만 사용
+        const uniquePosts = rawPosts.filter(
+          (post, idx, self) =>
+            idx === self.findIndex((p) => p.communityId === post.communityId)
+        );
+        // 최신순 정렬 (생성일 기준 내림차순)
+        uniquePosts.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(uniquePosts);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
-            <hr className="border-gray-300" />
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-            
-            <ul role="list" className="divide-y divide-gray-300">
-                
-                <li className="flex justify-between items-start gap-x-6 px-6 py-5">
-                
-                <div className="flex flex-col gap-4 w-full">
-                    
-                    <div className="flex items-center gap-x-4">
-                    <img
-                        src="/assets/nanum1.png"
-                        alt="작성자 프로필"
-                        className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                        <p className="text-sm font-bold text-gray-900">광주 동물보호센터</p>
-                        <p className="text-xs text-gray-500">2시간 전</p>
-                    </div>
-                    </div>
+  // 게시글 작성 화면 표시
+  if (showAddBoard) {
+    return (
+      <AddBoard
+        onCancel={() => setShowAddBoard(false)}
+        onSuccess={() => {
+          setShowAddBoard(false);
+          fetchPosts();
+        }}
+      />
+    );
+  }
 
-                    
-                    <div>
-                    <h2 className="text-base font-bold text-gray-900 mb-2">
-                        내 사랑스러운 고양이 자랑 : 다미의 일상!
-                    </h2>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                        고양이 카페에 갔다가 다미를 만났는데, 그 큰 눈과 부드러운 털에
-                        반해버렸어요! 보호소에서 처음 왔을 때, 진짜 "이건 운명이다!" 싶었답니다.
-                        다미는 장난감과가 친구예요. 하루 종일 놀아나며, 벽에 있는 그림을
-                        차단하면서 지저귀며 고개를 좌우로 흔드는 모습이 너무 귀여워요.{" "}
-                        <span className="text-gray-500">#해시태그</span>
-                    </p>
-                    </div>
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
-                    
-                    <div className="flex items-center gap-x-6 text-xs text-gray-500">
-                    <span>조회수 190</span>
-                    <span>좋아요 12</span>
-                    <span>댓글 8</span>
-                    </div>
-                </div>
+  // 현재 페이지에 해당하는 게시글들 계산
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(posts.length / postsPerPage);
 
-                
-                <img
-                    src="/assets/nanum2.png"
-                    alt="게시글 이미지"
-                    className="w-40 h-45 object-cover rounded-md"
-                />
-                </li>
+  // 페이지 번호 클릭 핸들러
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
-                
-                <li className="flex justify-between items-start gap-x-6 px-6 py-5">
-                
-                <p>테스트 게시글2</p>
-                </li>
-            </ul>
-            </div>
+  // 페이지네이션 버튼 렌더링 함수
+  const renderPagination = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => paginate(i)}
+          className={`px-3 py-1 border rounded-md mx-1 ${
+            i === currentPage ? "bg-red-500 text-white" : "bg-white text-gray-700"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pageNumbers;
+  };
 
-    )
-}
+  return (
+    <div className="w-full p-6 bg-white rounded-md shadow-md">
+      {/* 상단 타이틀 및 게시글 작성 버튼 */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">자유 게시판</h1>
+        <button
+          onClick={() => setShowAddBoard(true)}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          게시글 작성하기
+        </button>
+      </div>
+      <hr className="border-gray-300 mb-4" />
+
+      {/* 게시글이 없을 경우 */}
+      {posts.length === 0 ? (
+        <div className="p-4 text-center text-gray-500">게시글 없음</div>
+      ) : (
+        <>
+          <table className="table-auto w-full text-sm text-gray-700">
+            <thead>
+              <tr className="border-b bg-gray-100 text-gray-600">
+                <th className="px-4 py-2 text-left w-1/2">제목</th>
+                <th className="px-4 py-2 text-center w-1/6">글쓴이</th>
+                <th className="px-4 py-2 text-center w-1/6">날짜</th>
+                <th className="px-4 py-2 text-center w-1/12">조회</th>
+                <th className="px-4 py-2 text-center w-1/12">추천</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentPosts.map((post) => {
+                const {
+                  communityId,
+                  title,
+                  userName,
+                  createdAt,
+                  viewCount,
+                  likeCount,
+                } = post;
+                return (
+                  <tr
+                    key={communityId}
+                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    // 게시글 클릭 시 community/board/:communityId 로 이동
+                    onClick={() => navigate(`/community/board/${communityId}`)}
+                  >
+                    <td className="px-4 py-2">
+                      <div className="font-semibold">{title || "제목 없음"}</div>
+                    </td>
+                    <td className="px-4 py-2 text-center">{userName || "작성자"}</td>
+                    <td className="px-4 py-2 text-center">
+                      {createdAt ? createdAt.slice(0, 16) : "시간정보"}
+                    </td>
+                    <td className="px-4 py-2 text-center">{viewCount || 0}</td>
+                    <td className="px-4 py-2 text-center">{likeCount || 0}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {/* 페이지네이션 컨트롤 */}
+          <div className="flex justify-center items-center mt-4">
+            <button
+              onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+              className="px-3 py-1 border rounded-md mx-1"
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            {renderPagination()}
+            <button
+              onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
+              className="px-3 py-1 border rounded-md mx-1"
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export default Board;

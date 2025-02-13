@@ -1,104 +1,92 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
-
+// src/App.jsx
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import Header from "./components/Header";
-import MainPage from "./pages/MainPage";
 import Footer from "./components/Footer";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import Individual from "./components/signup/IndividualSignup";
-import Institution from "./components/signup/InstitutionSignup";
-import SuccessfulSignup from "./components/signup/SuccessfulSignup";
-import ShelterPage from "./pages/ShelterPage";
-import LocationsPage from "./pages/LocationsPage";
-import CommunityPage from "./pages/CommunityPage";
-import MyPage from "./pages/MyPage";
-import ShelterDonation from "./components/shelter/ShelterDonation";
-import ShelterDonationUsage from "./components/shelter/ShelterDonationUsage";
-import ShelterAnimal from "./components/shelter/ShelterAnimal";
-import ShelterWalkReservation from "./components/shelter/ShelterWalkReservation";
-import ShelterFinder from "./components/map/ShelterFinder";
-import WalkReservationPage from "./pages/WalkReservationPage";
-import LivePage from "./pages/LivePage";
-import DonationPage from "./pages/DonationPage";
+import AppRouter from "./Router";
+import api from "./api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { loginSuccess, logout } from "./features/auth/authSlice";
+import { jwtDecode} from "jwt-decode"; // npm install jwt-decode
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
-  const [userName, setUserName] = useState(""); // 사용자 이름
-  const [userProfile, setUserProfile] = useState(""); // 사용자 프로필 이미지
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isLoggedIn, userName, userProfile, role } = useSelector(
+    (state) => state.auth
+  );
 
-  // 로그인 상태 초기화 (로컬 스토리지에서 가져오기)
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
+      const decoded = jwtDecode(token);
+      const userRole = decoded.role; // 예: "ROLE_SHELTER" 또는 "ROLE_USER"
       const storedUserName = localStorage.getItem("userName") || "사용자";
       const storedUserProfile =
         localStorage.getItem("userProfile") || "/assets/default-profile.png";
-      setIsLoggedIn(true);
-      setUserName(storedUserName);
-      setUserProfile(storedUserProfile);
+      dispatch(
+        loginSuccess({
+          token,
+          userName: storedUserName,
+          userProfile: storedUserProfile,
+          role: userRole,
+        })
+      );
+      // 현재 경로가 shelter 하위가 아니라면 리다이렉트 수행
+      if (
+        userRole === "ROLE_SHELTER" &&
+        !location.pathname.startsWith("/shelter")
+      ) {
+        navigate("/shelter");
+      }
     }
-  }, []);
+  }, [dispatch, navigate, location.pathname]);
+  
 
-  // 로그아웃 처리 함수
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userProfile");
-    setIsLoggedIn(false);
-    setUserName("");
-    setUserProfile("");
-    alert("로그아웃 되었습니다.");
-    navigate("/");
+    api
+      .get("/member/logout")
+      .then((response) => {
+        toast.success("로그아웃이 완료되었습니다.");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userProfile");
+        dispatch(logout());
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("로그아웃 오류:", error);
+        toast.error("로그아웃 중 오류가 발생했습니다.");
+      });
   };
+
+  // 사용자가 보호소 계정이면 Header, Footer를 렌더링하지 않음
+  const showLayout = !(isLoggedIn && role === "ROLE_SHELTER");
 
   return (
     <>
-      {/* Header에 상태와 핸들러 전달 */}
-      <Header
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        userProfile={userProfile}
-        handleLogout={handleLogout}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route
-          path="/login"
-          element={
-            <LoginPage
-              onLoginSuccess={(token, userName, userProfile) => {
-                // 로그인 성공 시 상태 업데이트
-                localStorage.setItem("authToken", token);
-                localStorage.setItem("userName", userName);
-                localStorage.setItem("userProfile", userProfile);
-                setIsLoggedIn(true);
-                setUserName(userName);
-                setUserProfile(userProfile);
-                navigate("/");
-              }}
-            />
-          }
+      {showLayout && (
+        <Header
+          isLoggedIn={isLoggedIn}
+          userName={userName}
+          userProfile={userProfile}
+          handleLogout={handleLogout}
         />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/signup/individual" element={<Individual />} />
-        <Route path="/signup/institution" element={<Institution />} />
-        <Route path="/signup/successfulsignup" element={<SuccessfulSignup />} />
-        <Route path="/shelters" element={<ShelterPage />} />
-        <Route path="/locations" element={<LocationsPage />} />
-        <Route path="/community" element={<CommunityPage />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/shelter" element={<ShelterDonation />} />
-        <Route path="/shelter/usage" element={<ShelterDonationUsage />} />
-        <Route path="/shelter/animal" element={<ShelterAnimal />} />
-        <Route path="/shelter/walk" element={<ShelterWalkReservation />} />
-        <Route path="/shelterFinder" element={<ShelterFinder />} />
-        <Route path="/donation" element={<DonationPage />} />
-        <Route path="/reservation" element={<WalkReservationPage />} />
-        <Route path="/live" element={<LivePage />} />
-      </Routes>
-      <Footer />
+      )}
+      <AppRouter />
+      {showLayout && <Footer />}
     </>
   );
 }

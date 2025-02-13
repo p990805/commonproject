@@ -1,18 +1,42 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api"; // axios 인스턴스 등
 
 const CommonComponent = () => {
   const nav = useNavigate();
 
   const [userName, setUserName] = useState("사용자");
   const [userProfile, setUserProfile] = useState("/assets/default-profile.png");
+  const [joinDays, setJoinDays] = useState(null);
 
   useEffect(() => {
+    // localStorage에서 기본 프로필 정보를 불러옵니다.
     const storedName = localStorage.getItem("userName");
     const storedProfile = localStorage.getItem("userProfile");
 
     if (storedName) setUserName(storedName);
     if (storedProfile) setUserProfile(storedProfile);
+
+    // 서버의 /myinfo API를 호출하여 회원 정보를 가져옵니다.
+    const authHeader = { Authorization: localStorage.getItem("authToken") };
+
+    api
+      .get("member/myinfo", { headers: authHeader })
+      .then((response) => {
+        // 서버 응답 데이터 구조: { user: { createdAt, ... } }
+        if (response.data.user && response.data.user.createdAt) {
+          const createdAtString = response.data.user.createdAt; // "2025-02-04 06:53:38"
+          const joinDate = new Date(createdAtString);
+          const today = new Date();
+          // 두 날짜 사이의 차이를 밀리초 단위로 계산 후 일(day)로 변환합니다.
+          const diffTime = Math.abs(today - joinDate);
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          setJoinDays(diffDays);
+        }
+      })
+      .catch((error) => {
+        console.error("회원 정보 불러오기 오류: ", error);
+      });
   }, []);
 
   const goDonate = () => {
@@ -38,7 +62,11 @@ const CommonComponent = () => {
           </h1>
         </div>
         <p>
-          티아라와 함께한지 <span className="font-bold">100</span>일
+          티아라와 함께한지{" "}
+          <span className="font-bold">
+            {joinDays !== null ? joinDays : "?"}
+          </span>
+          일
         </p>
       </div>
 

@@ -1,6 +1,33 @@
-import SidebarNavigation from "../SidebarNavigation";
+// src/components/shelter/ShelterDonation.jsx
+import React from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../api";
+import { logout } from "../../features/auth/authSlice";
+import SidebarNavigation from "./SidebarNavigation";
 
 const ShelterDonation = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    api
+      .get("/member/logout") // 백엔드의 @GetMapping("/logout") 엔드포인트 호출
+      .then((response) => {
+        toast.success("로그아웃이 완료되었습니다.");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userProfile");
+        dispatch(logout());
+        navigate("/"); // 로그아웃 후 홈 또는 로그인 페이지로 이동
+      })
+      .catch((error) => {
+        console.error("로그아웃 오류:", error);
+        toast.error("로그아웃 중 오류가 발생했습니다.");
+      });
+  };
+
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
       {/* Sidebar */}
@@ -108,15 +135,6 @@ const ShelterDonation = () => {
                         className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
                       />
                       <span className="!text-[#575757] text-xs font-medium">
-                        캠페인
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-[13px] h-[13px] border border-[#767676] rounded-sm"
-                      />
-                      <span className="!text-[#575757] text-xs font-medium">
                         일반
                       </span>
                     </label>
@@ -161,15 +179,16 @@ const ShelterDonation = () => {
               </button>
             </div>
           </div>
+
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
             후원 전체 목록
           </div>
 
           {/* Donation List Table */}
-          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)]">
+          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
             {/* List Header */}
-            <div className="px-7 py-7 border-b border-[#dee1e8]">
+            <div className="px-3 py-3 border-b border-[#dee1e8]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
@@ -184,7 +203,6 @@ const ShelterDonation = () => {
                       건
                     </span>
                   </div>
-
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     ]
                   </span>
@@ -197,49 +215,46 @@ const ShelterDonation = () => {
               </div>
             </div>
 
-            {/* Table Header */}
-            <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-              <div className="flex">
-                <div className="w-16 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 코드
-                </div>
-                <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원자명
-                </div>
-                <div className="w-28 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원자 아이디
-                </div>
-                <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 분류
-                </div>
-                <div className="flex-1 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 프로젝트 명
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 대상
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원 금액
-                </div>
-                <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                  후원일시
+            {/* Table Container with margin */}
+            <div className="mx-4 my-4">
+              {/* Table Header */}
+              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
+                <div className="flex">
+                  <div className="w-[4%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center flex justify-center items-center">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 border border-[#767676] rounded-sm"
+                    />
+                  </div>
+                  <div className="w-[8%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 번호
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원자명
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원자 아이디
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 분류
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 대상
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원 금액
+                  </div>
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    후원일시
+                  </div>
+                  <div className="w-[16%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    담당 보호소
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center py-5 gap-4">
-              <button className="w-3.5 h-3.5 rotate-180">◀</button>
-              <div className="flex gap-5">
-                <span className="!text-[#235fd9] text-[13px] font-bold">1</span>
-                <span className="!text-[#5a738e] text-[13px]">2</span>
-                <span className="!text-[#5a738e] text-[13px]">3</span>
-                <span className="!text-[#5a738e] text-[13px]">4</span>
-                <span className="!text-[#5a738e] text-[13px]">5</span>
-                <span className="!text-[#5a738e] text-[13px]">6</span>
-              </div>
-              <button className="w-3.5 h-3.5">▶</button>
-            </div>
           </div>
         </div>
       </div>
