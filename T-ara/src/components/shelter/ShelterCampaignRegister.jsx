@@ -77,6 +77,7 @@ const ShelterCampaignRegister = () => {
                 onChange={handleInputChange}
                 placeholder="캠페인에 대한 간단한 설명을 입력해주세요"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
@@ -142,6 +143,7 @@ const ShelterCampaignRegister = () => {
                   value={formData.started_at}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
               <div>
@@ -154,6 +156,7 @@ const ShelterCampaignRegister = () => {
                   value={formData.ended_at}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
             </div>

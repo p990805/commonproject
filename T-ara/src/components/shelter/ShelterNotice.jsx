@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import SidebarNavigation from "./SidebarNavigation";
+import QuillEditor from "../QuillEditor";
 
-const ShelterCampaign = () => {
+const ShelterNotice = () => {
   // 체크된 항목들을 관리하는 상태
   const [selectedItems, setSelectedItems] = useState([]);
   // 임시 데이터 (나중에 DB에서 가져올 데이터)
@@ -56,69 +57,22 @@ const ShelterCampaign = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
+          {/* Dashboard Title */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
-              캠페인 후원 대시보드
+              전체 공지사항
             </h1>
             <button
               onClick={() =>
-                (window.location.href = "/shelter/campaign-register")
+                (window.location.href = "/shelter/notice-register")
               }
-              className="flex items-center justify-center px-5 h-10 bg-[#2f69dd] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+              className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
             >
-              캠페인 후원 등록하기
+              공지사항 등록하기
             </button>
           </div>
-          {/* Dashboard Stats */}
-          <div className="w-full h-[130px] relative bg-gradient-to-r from-[#5e9dfc] via-[#6085ef] to-[#5c6efe] rounded-[10px] shadow-[3px_3px_10px_0px_rgba(151,152,159,0.25)] flex items-center justify-between px-16 mb-12">
-            {/* Today's Donation Amount */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 사용한 금액
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">
-                  503,165
-                </span>
-                <span className="!text-white/70 text-lg ml-2">원</span>
-              </div>
-            </div>
 
-            {/* Total Donation Amount */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                총 사용한 금액
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">
-                  623,503,165
-                </span>
-                <span className="!text-white/70 text-lg ml-2">원</span>
-              </div>
-            </div>
-
-            {/* Today's Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">15</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
-              </div>
-            </div>
-
-            {/* Total Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                전체 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">255</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
-              </div>
-            </div>
-          </div>
+          {/* Search Filters */}
           <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
             <div className="border border-[#dee1e8]">
               {/* Period Filter */}
@@ -154,9 +108,6 @@ const ShelterCampaign = () => {
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
-                    </select>
                     <input
                       type="text"
                       className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
@@ -173,10 +124,9 @@ const ShelterCampaign = () => {
               </button>
             </div>
           </div>
-
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
-            캠페인 후원 전체 목록
+            공지사항 전체 목록
           </div>
 
           {/* Donation List Table */}
@@ -232,28 +182,28 @@ const ShelterCampaign = () => {
                       onChange={handleSelectAll}
                     />
                   </div>
-                  <div className="w-[10%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    캠페인 후원 번호
+                  <div className="w-[8%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    사용 번호
                   </div>
-                  <div className="w-[20%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    제목
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    사용 카테고리
                   </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    목표금액
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    사용 금액
                   </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    달성금액
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    사용 일자
                   </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    시작일시
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    등록 일시
                   </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    마감일시
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    사용처
                   </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    달성상태
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
+                    영수증 사진
                   </div>
-                  <div className="w-[14%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
+                  <div className="w-[16%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
                     담당 보호소
                   </div>
                 </div>
@@ -272,10 +222,10 @@ const ShelterCampaign = () => {
                       onChange={() => handleSelectItem(donation.id)}
                     />
                   </div>
-                  <div className="w-[10%] p-4 border-r border-[#dee1e8] text-center">
+                  <div className="w-[8%] p-4 border-r border-[#dee1e8] text-center">
                     {donation.id}
                   </div>
-                  <div className="w-[20%] p-4 border-r border-[#dee1e8] text-center">
+                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
                     {donation.category}
                   </div>
                   <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
@@ -293,7 +243,7 @@ const ShelterCampaign = () => {
                   <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
                     {donation.receipt}
                   </div>
-                  <div className="w-[14%] p-4 border-r border-[#dee1e8] text-center">
+                  <div className="w-[16%] p-4 border-r border-[#dee1e8] text-center">
                     {donation.shelter}
                   </div>
                 </div>
@@ -306,4 +256,4 @@ const ShelterCampaign = () => {
   );
 };
 
-export default ShelterCampaign;
+export default ShelterNotice;

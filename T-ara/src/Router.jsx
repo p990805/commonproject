@@ -1,51 +1,96 @@
 // src/Router.jsx
 import { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import ShelterProtectedRoute from "./components/ShelterProtectedRoute";
 
 // 필요한 페이지들을 lazy 로딩합니다.
 const MainPage = lazy(() => import("./pages/MainPage"));
-// const LoginPage = lazy(() => import("./pages/LoginPage"));
 const LoginPageWrapper = lazy(() => import("./pages/LoginPageWrapper"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
-const IndividualSignup = lazy(() => import("./components/signup/IndividualSignup"));
-const InstitutionSignup = lazy(() => import("./components/signup/InstitutionSignup"));
-const SuccessfulSignup = lazy(() => import("./components/signup/SuccessfulSignup"));
+const IndividualSignup = lazy(() =>
+  import("./components/signup/IndividualSignup")
+);
+const InstitutionSignup = lazy(() =>
+  import("./components/signup/InstitutionSignup")
+);
+const SuccessfulSignup = lazy(() =>
+  import("./components/signup/SuccessfulSignup")
+);
 const ShelterPage = lazy(() => import("./pages/ShelterPage"));
-const LocationsPage = lazy(() => import("./pages/LocationsPage"));
-//const CommunityPage = lazy(() => import("./pages/CommunityPage"));
+//const LocationsPage = lazy(() => import("./pages/LocationsPage"));
 const NoticePage = lazy(() => import("./pages/community/NoticePage"));
 const BoardPage = lazy(() => import("./pages/community/BoardPage"));
 const FAQPage = lazy(() => import("./pages/community/FAQPage"));
 const InquiryPage = lazy(() => import("./pages/community/InquiryPage"));
-const ModifyInquiryPage = lazy(() => import("./pages/community/ModifyInquiryPage"));
+const ModifyInquiryPage = lazy(() =>
+  import("./pages/community/ModifyInquiryPage")
+);
 const BoardDetailPage = lazy(() => import("./pages/community/BoardDetailPage"));
-const BoardEditPage = lazy(() => import("./pages/community/BoardEditPage"))
-
-
+const BoardEditPage = lazy(() => import("./pages/community/BoardEditPage"));
 const MyPage = lazy(() => import("./pages/MyPage"));
-const ShelterDonation = lazy(() => import("./components/shelter/ShelterDonation"));
-const ShelterDonationUsage = lazy(() => import("./components/shelter/ShelterDonationUsage"));
-const ShelterCampaign = lazy(() => import("./components/shelter/ShelterCampaign"));
-const ShelterCampaignRegister = lazy(() => import("./components/shelter/ShelterCampaignRegister"));
+const ShelterDonation = lazy(() =>
+  import("./components/shelter/ShelterDonation")
+);
+const ShelterDonationUsage = lazy(() =>
+  import("./components/shelter/ShelterDonationUsage")
+);
+const ShelterUsageRegister = lazy(() =>
+  import("./components/shelter/ShelterUsageRegister")
+);
+const ShelterCampaign = lazy(() =>
+  import("./components/shelter/ShelterCampaign")
+);
+const ShelterCampaignRegister = lazy(() =>
+  import("./components/shelter/ShelterCampaignRegister")
+);
 const ShelterAnimal = lazy(() => import("./components/shelter/ShelterAnimal"));
-const ShelterAnimalRegister = lazy(() => import("./components/shelter/ShelterAnimalResiter"));
-const ShelterAnimalDiary = lazy(() => import("./components/shelter/ShelterAnimalDiary"));
-const ShelterWalkReservation = lazy(() => import("./components/shelter/ShelterWalkReservation"));
+const ShelterAnimalRegister = lazy(() =>
+  import("./components/shelter/ShelterAnimalRegister")
+);
+const ShelterAnimalDiary = lazy(() =>
+  import("./components/shelter/ShelterAnimalDiary")
+);
+const ShelterAnimalDiaryRegister = lazy(() =>
+  import("./components/shelter/ShelterAnimalDiaryRegister")
+);
+const ShelterWalkReservation = lazy(() =>
+  import("./components/shelter/ShelterWalkReservation")
+);
+const ShelterPhotoUpload = lazy(() =>
+  import("./components/shelter/ShelterPhotoUpload")
+);
+const ShelterNotice = lazy(() => import("./components/shelter/ShelterNotice"));
+const ShelterNoticeRegister = lazy(() =>
+  import("./components/shelter/ShelterNoticeRegister")
+);
+const ShelterInfo = lazy(() => import("./components/shelter/ShelterInfo"));
 const ShelterFinder = lazy(() => import("./components/map/ShelterFinder"));
 const ShelterDetailPage = lazy(() => import("./pages/ShelterDetailPage"));
 const WalkReservationPage = lazy(() => import("./pages/WalkReservationPage"));
 const LivePage = lazy(() => import("./pages/LivePage"));
 const DonationPage = lazy(() => import("./pages/DonationPage"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
-const CampaignDetail = lazy(() => import("./components/campaign/CampaignDetail"));
-const CampaignDonation = lazy(() => import("./components/campaign/CampaignDonation"));
-const CampaignDonationSuccess = lazy(() => import("./components/campaign/CampaignDonationSuccess"));
+const CampaignDetail = lazy(() =>
+  import("./components/campaign/CampaignDetail")
+);
+const CampaignDonation = lazy(() =>
+  import("./components/campaign/CampaignDonation")
+);
+const CampaignDonationSuccess = lazy(() =>
+  import("./components/campaign/CampaignDonationSuccess")
+);
 const AnimalPage = lazy(() => import("./pages/AnimalPage"));
 const AnimalDetail = lazy(() => import("./components/animal/AnimalDetail"));
-const CommunityDetail = lazy(() => import("./components/community/CommunityDetail"));
+const CommunityDetail = lazy(() =>
+  import("./components/community/CommunityDetail")
+);
 const AlertPage = lazy(() => import("./pages/AlertPage"));
+const StartLive = lazy(() => import("./components/shelter/streaming/StartLive"))
+const DailyLivePage = lazy(() => import("./pages/live/DailyLivePage"));
+const MySponLivePage =lazy(() => import("./pages/live/MySponLivePage"));
+const LivePlayer = lazy(() => import("./components/live/LivePlayer"));
+
 
 const AppRouter = () => {
   return (
@@ -58,14 +103,23 @@ const AppRouter = () => {
         <Route path="/signup/institution" element={<InstitutionSignup />} />
         <Route path="/signup/successfulsignup" element={<SuccessfulSignup />} />
         <Route path="/shelters" element={<ShelterPage />} />
-        <Route path="/locations" element={<LocationsPage />} />
         <Route path="/community/notice" element={<NoticePage />} />
         <Route path="/community/board" element={<BoardPage />} />
         <Route path="/community/faq" element={<FAQPage />} />
         <Route path="/community/inquiry" element={<InquiryPage />} />
-        <Route path="/community/inquiry/modifyinfo/:inquiryId" element={<ModifyInquiryPage />} />
-        <Route path="/community/board/:communityId" element={<BoardDetailPage />} />
-        <Route path="/community/board/:communityId/edit" element={<BoardEditPage />} />
+        <Route
+          path="/community/inquiry/modifyinfo/:inquiryId"
+          element={<ModifyInquiryPage />}
+        />
+        <Route
+          path="/community/board/:communityId"
+          element={<BoardDetailPage />}
+        />
+        <Route
+          path="/community/board/:communityId/edit"
+          element={<BoardEditPage />}
+        />
+
         {/* 로그인한 사용자만 접근 가능한 페이지 */}
         <Route
           path="/mypage"
@@ -75,14 +129,129 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/shelter" element={<ShelterDonation />} />
-        <Route path="/shelter/usage" element={<ShelterDonationUsage />} />
-        <Route path="/shelter/campaign" element={<ShelterCampaign />} />
-        <Route path="/shelter/campaign-register" element={<ShelterCampaignRegister />} />
-        <Route path="/shelter/animal" element={<ShelterAnimal />} />
-        <Route path="/shelter/animal-register" element={<ShelterAnimalRegister />} />
-        <Route path="/shelter/animal-diary" element={<ShelterAnimalDiary />} />
-        <Route path="/shelter/walk" element={<ShelterWalkReservation />} />
+
+        {/* 보호소 관련 페이지는 ShelterProtectedRoute로 보호 */}
+        <Route
+          path="/shelter"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterDonation />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/usage"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterDonationUsage />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/usage-register"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterUsageRegister />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/campaign"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterCampaign />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/campaign-register"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterCampaignRegister />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/animal"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterAnimal />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/animal-register"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterAnimalRegister />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/animal-diary"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterAnimalDiary />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/diary-register"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterAnimalDiaryRegister />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/walk"
+          element={
+            // <ShelterProtectedRoute>
+              <ShelterWalkReservation />
+            // </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/photo"
+          element={
+            // <ShelterProtectedRoute>
+              <ShelterPhotoUpload />
+            // </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/notice"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterNotice />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/notice-register"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterNoticeRegister />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/live"
+          element={
+            <ShelterProtectedRoute>
+              <StartLive />
+            </ShelterProtectedRoute>
+          }
+        />
+        <Route
+          path="/shelter/info"
+          element={
+            <ShelterProtectedRoute>
+              <ShelterInfo />
+            </ShelterProtectedRoute>
+          }
+        />
+
         <Route path="/shelter-finder" element={<ShelterFinder />} />
         <Route path="/shelter/:id" element={<ShelterDetailPage />} />
         <Route path="/donation" element={<DonationPage />} />
@@ -96,6 +265,12 @@ const AppRouter = () => {
         <Route path="/animal/:id" element={<AnimalDetail />} />
         <Route path="/community/detail/:id" element={<CommunityDetail />} />
         <Route path="/alert" element={<AlertPage />} />
+        <Route path="/live/daily" element={<DailyLivePage />} />
+        <Route path="/live/myanimal" element={<MySponLivePage />} />
+        <Route path="/live/:streamId" element={<LivePlayer />} />
+
+        {/* 만약 존재하지 않는 경로라면 메인 페이지로 리다이렉트 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );

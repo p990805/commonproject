@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api"; // api.js import 추가
+import api from "../../api";
 
 const CampaignDonation = () => {
   const [selectedMethod, setSelectedMethod] = useState("");
@@ -101,6 +101,7 @@ const CampaignDonation = () => {
         try {
           const serverData = {
             ...response,
+            paidAmount: 0,
             donationType: "campaign",
             relationalId: 1, // 캠페인 ID
             amount: selectedAmount, // 선택된 후원 금액 명시적 추가
@@ -108,7 +109,10 @@ const CampaignDonation = () => {
 
           console.log("서버로 전송할 데이터:", serverData);
 
-          const result = await api.post("/campaign/register", serverData);
+          const result = await api.post(
+            "/donation/campaign/register",
+            serverData
+          );
           console.log("서버 성공 응답:", result.data);
 
           alert("✅ 결제가 완료되었습니다!");

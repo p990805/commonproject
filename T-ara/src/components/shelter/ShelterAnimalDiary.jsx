@@ -9,10 +9,16 @@ const ShelterAnimalDiary = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
-          <div className="mb-6">
+          <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
               동물 일지 관리
             </h1>
+            <button
+              onClick={() => (window.location.href = "/shelter/diary-register")}
+              className="flex items-center justify-center px-5 h-10 bg-[#2f69dd] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+            >
+              동물일지 작성하기
+            </button>
           </div>
           {/* Search Filters */}
           <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">

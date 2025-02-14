@@ -1,6 +1,33 @@
+// src/components/shelter/ShelterDonation.jsx
+import React from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../api";
+import { logout } from "../../features/auth/authSlice";
 import SidebarNavigation from "./SidebarNavigation";
 
 const ShelterDonation = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    api
+      .get("/member/logout") // 백엔드의 @GetMapping("/logout") 엔드포인트 호출
+      .then((response) => {
+        toast.success("로그아웃이 완료되었습니다.");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userProfile");
+        dispatch(logout());
+        navigate("/"); // 로그아웃 후 홈 또는 로그인 페이지로 이동
+      })
+      .catch((error) => {
+        console.error("로그아웃 오류:", error);
+        toast.error("로그아웃 중 오류가 발생했습니다.");
+      });
+  };
+
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
       {/* Sidebar */}
@@ -152,6 +179,7 @@ const ShelterDonation = () => {
               </button>
             </div>
           </div>
+
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
             후원 전체 목록

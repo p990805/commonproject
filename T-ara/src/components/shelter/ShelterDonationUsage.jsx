@@ -58,10 +58,16 @@ const ShelterDonationUsage = () => {
       <div className="flex-1 p-8">
         <div className="mx-4">
           {/* Dashboard Title */}
-          <div className="mb-6">
+          <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
               후원금 사용 대시보드
             </h1>
+            <button
+              onClick={() => (window.location.href = "/shelter/usage-register")}
+              className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+            >
+              후원금 사용 등록하기
+            </button>
           </div>
           {/* Dashboard Stats */}
           <div className="w-full h-[130px] relative bg-gradient-to-r from-[#5e9dfc] via-[#6085ef] to-[#5c6efe] rounded-[10px] shadow-[3px_3px_10px_0px_rgba(151,152,159,0.25)] flex items-center justify-between px-16 mb-12">

@@ -17,7 +17,7 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
     setEditing(false);
   };
 
-  // 수정 저장: PUT /comment/modify 호출
+  // 수정 저장: PUT /community/comment/modify 호출
   const handleSaveEdit = async () => {
     if (!editedContent.trim()) {
       alert("댓글 내용을 입력해주세요.");
@@ -31,9 +31,9 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
     // 백엔드가 요구하는 ModifyComment 객체 형식으로 요청 페이로드 구성
     const modifiedComment = {
       commentId: comment.commentId,
-      userId: comment.userId, // 댓글 작성자의 아이디
+      userId: comment.userId,           // 댓글 작성자의 아이디
+      communityId: comment.communityId, // GET 요청으로 받아온 communityId 포함
       content: editedContent,
-      // 필요시 추가 필드를 포함할 수 있습니다.
     };
 
     try {
@@ -50,8 +50,7 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
     }
   };
 
-  // 댓글 삭제: GET /comment/delete/{commentId} 호출  
-  // (백엔드 코드에서는 경로 변수명이 communityId로 되어 있으나, 댓글 삭제 시에는 commentId여야 합니다)
+  // 댓글 삭제: GET /community/comment/delete/{commentId} 호출  
   const handleDelete = async () => {
     if (!window.confirm("정말 이 댓글을 삭제하시겠습니까?")) return;
     const token = localStorage.getItem("authToken");

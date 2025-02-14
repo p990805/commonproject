@@ -18,15 +18,15 @@ export default defineConfig({
         secure: false,
       },
       "/donation": {
-        target: "https://localhost:8090",
+        target: "http://localhost:8090",
         changeOrigin: true,
         secure: false,
       },
-      "/campaign": {
-        target: "https://localhost:8090",
-        changeOrigin: true,
-        secure: false,
-      },
+      // "/shelter": {
+      //   target: "http://localhost:8090",
+      //   changeOrigin: true,
+      //   secure: false,
+      // },
     },
   },
 });

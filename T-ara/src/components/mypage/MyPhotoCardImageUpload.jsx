@@ -22,6 +22,7 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
+        setProgress({ status: '', percent: 0 }); // 진행률 초기화
       }
     };
   }, []);
@@ -61,9 +62,15 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
         const data = JSON.parse(event.data);
         console.log('Progress:', data);
         setProgress({
-          status: data.status,
-          percent: data.percent
+          status: data.status || '처리중...',  // status 기본값 설정
+          percent: data.percent || 0     // percent 기본값 설정
         });
+
+        // 완료되면 EventSource 연결 종료
+        if (data.percent === 100 || data.status.includes('완료')) {
+          eventSourceRef.current.close();
+        }
+
       } catch (error) {
         console.error('Progress parsing error:', error);
       }
@@ -71,6 +78,7 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
 
     eventSourceRef.current.onerror = (error) => {
       console.error('EventSource error:', error);
+      setError('서버와의 연결이 끊어졌습니다.');
       eventSourceRef.current.close();
     };
 
@@ -136,7 +144,7 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
           </div>
 
           {/* 진행률 표시 */}
-          {loading && progress.status && (
+          {(loading || progress.status) && (
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">{progress.status}</span>

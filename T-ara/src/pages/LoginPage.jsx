@@ -23,10 +23,14 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     console.log("💡 [프론트] 로그인 요청 데이터:", { loginId, password });
 
+    // memberType에 따라 엔드포인트 선택
+    const endpoint =
+      memberType === "shelter" ? "/member/login/shelter" : "/member/login/user";
+
     try {
       // 로그인 요청
       const response = await api.post(
-        "/member/login/user",
+        endpoint,
         { loginId, password },
         {
           headers: { "Content-Type": "application/json" },

@@ -48,7 +48,7 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
   }, [isLoggedIn, handleLogout]);
 
   return (
-    <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md relative">
+    <header className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-white shadow-md">
       <div className="flex items-center">
         <Link to="/">
           <img className="w-45 h-10" src="/assets/logo.png" alt="로고" />
@@ -62,7 +62,7 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
         >
           보호소 찾기
         </Link>
-        <Link to="/live" className="text-gray-700 hover:text-black transition">
+        <Link to="/live/daily" className="text-gray-700 hover:text-black transition">
           라이브
         </Link>
         <Link
@@ -70,6 +70,12 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
           className="text-gray-700 hover:text-black transition"
         >
           후원하기
+        </Link>
+        <Link
+          to="/campaign"
+          className="text-gray-700 hover:text-black transition"
+        >
+          캠페인
         </Link>
         <Link
           to="/community/notice"
