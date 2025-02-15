@@ -1,7 +1,7 @@
 // src/pages/LoginPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api"; // api.js에서 설정한 axios 인스턴스
+import api from "../api"; // axios 인스턴스
 
 const LoginPage = ({ onLoginSuccess }) => {
   const [memberType, setMemberType] = useState("personal");
@@ -28,7 +28,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       memberType === "shelter" ? "/member/login/shelter" : "/member/login/user";
 
     try {
-      // 로그인 요청
+      // 1. 로그인 요청
       const response = await api.post(
         endpoint,
         { loginId, password },
@@ -38,34 +38,42 @@ const LoginPage = ({ onLoginSuccess }) => {
         }
       );
       console.log("응답 헤더:", response.headers);
-      console.log("✅ [프론트] 서버 응답 데이터:", response.data);
+      console.log("✅ [프론트] 로그인 응답 데이터:", response.data);
 
-      const { name, userProfile } = response.data; // 응답 데이터에서 필요한 값 추출
+      // 토큰 추출
       const token =
         response.headers.authorization ||
-        response.headers["Authorization"]; // 응답 헤더에서 토큰 추출
-
+        response.headers["Authorization"];
       if (!token) {
         console.error("Authorization 헤더가 없습니다.");
       } else {
         console.log("토큰", token);
       }
 
-      // 로컬 스토리지에 토큰 및 사용자 정보 저장
+      // 로컬스토리지에 토큰 저장
       localStorage.setItem("authToken", token);
+
+      // 2. 로그인 후 member/myinfo API 호출하여 사용자 정보 업데이트
+      const userInfoResponse = await api.get("/member/myinfo", {
+        headers: { Authorization: token },
+      });
+      console.log("✅ [프론트] 사용자 정보 응답:", userInfoResponse.data);
+      const { user } = userInfoResponse.data;
+      const { name, profileImg } = user;
+      // profileImg가 없으면 기본값 사용
+      const profileImage = profileImg ? profileImg : "/assets/placeholder.png";
+
+      // 로컬스토리지에 사용자 정보 저장
       localStorage.setItem("userName", name);
-      localStorage.setItem("userProfile", userProfile);
+      localStorage.setItem("userProfile", profileImage);
 
-      const profileImage = userProfile || "/assets/cats.png";
-
-      // onLoginSuccess 함수 호출
+      // onLoginSuccess 호출 (Redux 등 상태 업데이트용)
       onLoginSuccess(token, name, profileImage);
 
       // 홈 화면으로 이동
       navigate("/");
     } catch (error) {
-      console.error("❌ [프론트] 요청 실패:", error);
-
+      console.error("❌ [프론트] 로그인 요청 실패:", error);
       if (error.response) {
         console.error("🛑 [프론트] 서버 응답 에러 데이터:", error.response.data);
         alert(error.response.data.message || "로그인 실패. 다시 시도하세요.");

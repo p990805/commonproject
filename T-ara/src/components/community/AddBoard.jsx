@@ -9,7 +9,7 @@ const AddBoard = ({ onCancel, onSuccess }) => {
   const [content, setContent] = useState({ ops: [{ insert: "\n" }] });
 
   const handleSubmit = async () => {
-    // 제목은 trim() 사용, 내용은 Delta 형식이므로 빈 Delta(ops 배열에 단순 newline만 있는지) 체크
+    // 제목과 내용이 모두 입력되었는지 확인
     if (
       !title.trim() ||
       (content.ops &&
@@ -28,14 +28,15 @@ const AddBoard = ({ onCancel, onSuccess }) => {
       return;
     }
 
-    // PostCommunity 객체 구성  
-    // 백엔드에서는 로그인한 사용자의 userId를 토큰에서 추출하므로,
-    // 프론트엔드에서는 title, content (Delta 객체), 그리고 categoryId (기본값 1)를 전송합니다.
+    // 백엔드에 전송할 PostCommunity 객체 구성
     const postData = {
       title: title,
-      content: content, // Delta 객체 전송 (백엔드에서 JSON 문자열로 변환)
+      content: content, // Delta 객체가 JSON 형태로 전송됨 (백엔드에서 문자열로 변환 가능)
       categoryId: 1, // 필요에 따라 수정 가능
     };
+
+    // 디버깅: 전송 전 payload 내용을 콘솔에 출력
+    console.log("백엔드로 전송될 payload:", JSON.stringify(postData, null, 2));
 
     try {
       const response = await api.post("/community/post", postData, {
@@ -43,7 +44,7 @@ const AddBoard = ({ onCancel, onSuccess }) => {
       });
       console.log("게시글 등록 응답:", response.data);
       alert("글 등록이 완료되었습니다.");
-      // 등록 성공 시 onSuccess가 있으면 호출하여 Board 컴포넌트에서 목록을 새로 불러오게 합니다.
+      // 등록 성공 시 onSuccess 혹은 onCancel 호출
       if (onSuccess) {
         onSuccess();
       } else if (onCancel) {
@@ -67,7 +68,7 @@ const AddBoard = ({ onCancel, onSuccess }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        {/* QuillEditor는 Delta 객체를 반환하도록 함 */}
+        {/* QuillEditor는 Delta 객체를 반환 */}
         <QuillEditor value={content} onChange={setContent} />
       </div>
       <div className="flex gap-4 items-center justify-center">
