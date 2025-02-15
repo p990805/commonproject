@@ -1,7 +1,7 @@
 // src/components/live/DailyLive.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api'; // axios 인스턴스 (환경에 맞게 설정되어 있다고 가정)
+import api from '../../api'; // axios 인스턴스
 import { toast } from 'react-toastify';
 import ThumbnailCapture from './ThumbnailCapture';
 
@@ -9,6 +9,8 @@ const DailyLive = () => {
   const [liveList, setLiveList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("인기순");
   const navigate = useNavigate();
 
   // 백엔드에서 라이브 스트림 목록 불러오기
@@ -25,6 +27,31 @@ const DailyLive = () => {
         setLoading(false);
       });
   }, []);
+
+  // 검색어와 정렬 옵션에 따라 라이브 목록 필터링 및 정렬
+  const filteredAndSortedList = liveList
+    // 검색 필터: title이나 description에 검색어가 포함되어 있으면 남김
+    .filter(live => {
+      if (!searchTerm) return true;
+      const lowerTerm = searchTerm.toLowerCase();
+      return (
+        (live.title && live.title.toLowerCase().includes(lowerTerm)) ||
+        (live.description && live.description.toLowerCase().includes(lowerTerm))
+      );
+    })
+    // 정렬 처리
+    .sort((a, b) => {
+      if (sortOption === "최신순") {
+        // 내림차순: 최신 startTime이 먼저
+        return new Date(b.startTime) - new Date(a.startTime);
+      } else if (sortOption === "오래된순") {
+        // 오름차순: 오래된 startTime이 먼저
+        return new Date(a.startTime) - new Date(b.startTime);
+      } else {
+        // 인기순 또는 기본 순서는 API에서 받은 순서 유지
+        return 0;
+      }
+    });
 
   // 라이브 아이템 클릭 시 라이브 플레이어 페이지로 이동
   const handleLiveClick = (streamId) => {
@@ -50,6 +77,8 @@ const DailyLive = () => {
             type="text"
             className="border p-1 absolute right-3 border-gray-400 rounded"
             placeholder="검색"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <img
             src="/assets/search-icon.png"
@@ -61,20 +90,13 @@ const DailyLive = () => {
 
       {/* 필터 */}
       <div className="flex space-x-2 mb-4">
-        <select className="w-50 border border-gray-300 p-1">
-          <option value="전체">전체</option>
-          <option value="서울">서울</option>
-          <option value="광주">광주</option>
-        </select>
-        <select className="w-50 border border-gray-300 p-1">
-          <option value="전체">전체</option>
-          <option value="광산구보호소">광산구보호소</option>
-          <option value="서구보호소">서구보호소</option>
-        </select>
-        <select className="w-50 border border-gray-300 p-1">
-          <option value="전체">전체</option>
-          <option value="강아지">강아지</option>
-          <option value="고양이">고양이</option>
+        <select
+          className="w-50 border border-gray-300 p-1"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="최신순">최신순</option>
+          <option value="오래된순">오래된순</option>
         </select>
       </div>
 
@@ -83,9 +105,9 @@ const DailyLive = () => {
         <p>로딩중...</p>
       ) : error ? (
         <p className="text-center text-red-500">진행 중인 방송이 없습니다.</p>
-      ) : liveList.length > 0 ? (
+      ) : filteredAndSortedList.length > 0 ? (
         <div className="grid grid-cols-3 gap-4">
-          {liveList.map((live) => (
+          {filteredAndSortedList.map((live) => (
             <div
               key={live.streamId}
               className="border p-2 cursor-pointer hover:bg-gray-100 transition"

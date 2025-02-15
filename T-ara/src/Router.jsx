@@ -8,8 +8,8 @@ import ShelterProtectedRoute from "./components/ShelterProtectedRoute";
 const MainPage = lazy(() => import("./pages/MainPage"));
 const LoginPageWrapper = lazy(() => import("./pages/LoginPageWrapper"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
-const IndividualSignup = lazy(() => import("./components/signup/IndividualSignup"));
-const InstitutionSignup = lazy(() => import("./components/signup/InstitutionSignup"));
+const Individual = lazy(() => import("./components/signup/Individual/Individual"));
+const Institution = lazy(() => import("./components/signup/Institution/Institution"));
 const SuccessfulSignup = lazy(() => import("./components/signup/SuccessfulSignup"));
 const ShelterPage = lazy(() => import("./pages/ShelterPage"));
 //const LocationsPage = lazy(() => import("./pages/LocationsPage"));
@@ -73,8 +73,8 @@ const AppRouter = () => {
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPageWrapper />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/signup/individual" element={<IndividualSignup />} />
-        <Route path="/signup/institution" element={<InstitutionSignup />} />
+        <Route path="/signup/individual" element={<Individual />} />
+        <Route path="/signup/institution" element={<Institution />} />
         <Route path="/signup/successfulsignup" element={<SuccessfulSignup />} />
         <Route path="/shelters" element={<ShelterPage />} />
         <Route path="/community/notice" element={<NoticePage />} />

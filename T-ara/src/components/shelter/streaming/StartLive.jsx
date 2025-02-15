@@ -1,5 +1,4 @@
-// src/components/streaming/StartLive.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { OpenVidu } from "openvidu-browser";
 import { toast } from "react-toastify";
 import api from "../../../api";
@@ -8,14 +7,14 @@ import LiveSessionForm from "./LiveSessionForm";
 import { jwtDecode } from "jwt-decode";
 
 const StartLive = () => {
-  // JWT에서 사용자 이름 가져오기 (토큰이 localStorage에 있다고 가정)
+  
   const token = localStorage.getItem("authToken");
   const hostNameFromToken = token ? jwtDecode(token).name : "anonymous";
 
-  // 초기 form 상태에서 participantName에 hostNameFromToken을 설정
+ 
   const [form, setForm] = useState({
     shelterId: "",
-    dataSource: "shelter", // "shelter" 또는 "animal"
+    dataSource: "shelter", 
     title: "",
     description: "",
     participantName: hostNameFromToken,
@@ -37,7 +36,6 @@ const StartLive = () => {
     e.preventDefault();
 
     try {
-      // 백엔드에 방송 정보 생성 요청
       const response = await api.post("/stream/new", {
         shelterId: Number(form.shelterId),
         dataSource: form.dataSource,
@@ -67,7 +65,6 @@ const StartLive = () => {
 
       newSession.on("exception", (exception) => console.warn(exception));
 
-      // 방송자(방장) 연결 시 clientData에 JSON 문자열로 이름과 role을 포함하여 보냅니다.
       await newSession.connect(streamData.sessionKey, {
         clientData: JSON.stringify({
           clientData: form.participantName,
@@ -108,10 +105,10 @@ const StartLive = () => {
         <SessionView
           session={session}
           mySessionId={streamingInfo.sessionId}
-          streamId={streamingInfo.streamId} // streamId 전달
+          streamId={streamingInfo.streamId} 
           myUserName={form.participantName}
-          hostName={form.participantName} // 방송자의 이름을 hostName으로 전달
-          title={form.title} // 방송 제목 전달
+          hostName={form.participantName} 
+          title={form.title} 
           description={form.description}
           mainStreamManager={publisher}
           publisher={publisher}
