@@ -1,7 +1,9 @@
+// src/components/live/DailyLive.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api'; // axios 인스턴스. 환경에 맞게 설정되어 있다고 가정합니다.
+import api from '../../api'; // axios 인스턴스 (환경에 맞게 설정되어 있다고 가정)
 import { toast } from 'react-toastify';
+import ThumbnailCapture from './ThumbnailCapture';
 
 const DailyLive = () => {
   const [liveList, setLiveList] = useState([]);
@@ -9,7 +11,7 @@ const DailyLive = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // 컴포넌트가 마운트될 때, 진행 중인 CCTV 라이브 목록을 백엔드에서 받아옴
+  // 백엔드에서 라이브 스트림 목록 불러오기
   useEffect(() => {
     api.get('/stream')
       .then((response) => {
@@ -24,11 +26,11 @@ const DailyLive = () => {
       });
   }, []);
 
-  // 라이브 스트림 아이템 클릭 시 해당 스트림 접속 정보를 받아오고 라이브 플레이어 페이지로 이동
+  // 라이브 아이템 클릭 시 라이브 플레이어 페이지로 이동
   const handleLiveClick = (streamId) => {
     api.get(`/stream/lives/${streamId}`)
       .then((response) => {
-        // response.data에는 JoinStreamDTO 정보가 들어있다고 가정
+        // response.data에는 JoinStreamDTO 정보가 있다고 가정
         navigate(`/live/${streamId}`, { state: response.data });
         console.log(response.data);
       })
@@ -76,7 +78,7 @@ const DailyLive = () => {
         </select>
       </div>
 
-      {/* 라이브 목록 또는 메시지 */}
+      {/* 라이브 목록 */}
       {loading ? (
         <p>로딩중...</p>
       ) : error ? (
@@ -90,7 +92,14 @@ const DailyLive = () => {
               onClick={() => handleLiveClick(live.streamId)}
             >
               <h2 className="font-semibold">{live.title}</h2>
-              {/* 필요에 따라 썸네일이나 다른 정보를 추가 */}
+              {/* 백엔드에서 각 라이브 객체에 previewUrl(스트림 미리보기 URL)을 제공한다고 가정 */}
+              {live.previewUrl ? (
+                <ThumbnailCapture imageUrl={live.previewUrl} width={320} height={260} />
+              ) : (
+                <div className="w-full h-40 bg-gray-300 flex items-center justify-center">
+                  <p>썸네일 없음</p>
+                </div>
+              )}
             </div>
           ))}
         </div>

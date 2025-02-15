@@ -6,6 +6,14 @@ const MainVideo = () => {
   const handleClick = () => {
     navigate(`/campaign`);
   };
+
+  const handleClickDonate =()=>{
+    navigate('/animal')
+  }
+
+  const handleClickLive=()=>{
+    navigate('/live/daily')
+  }
   return (
     <div className="relative w-full max-w-[1550px] h-[700px] mx-auto">
       <video
@@ -49,8 +57,10 @@ const MainVideo = () => {
                   꾸준히 이어갈 수 있는 나눔입니다.
                 </p>
               </div>
-              <button className="cursor-pointer mt-4 text-xs sm:text-sm text-white px-4 py-2 rounded border border-2 hover:bg-white hover:opacity-80 hover:text-black hover:border-0">
-                정기후원 바로가기
+              <button 
+              onClick={handleClickDonate}
+              className="cursor-pointer mt-4 text-xs sm:text-sm text-white px-4 py-2 rounded border border-2 hover:bg-white hover:opacity-80 hover:text-black hover:border-0">
+                후원하기 바로가기
               </button>
             </div>
           </div>
@@ -67,15 +77,17 @@ const MainVideo = () => {
                   transition-opacity duration-300
                 "
                 >
-                  유기동물을 위해 금액을 자유롭게 후원하여
+                  내가 후원하는 동물들이 어떻게
                   <br />
-                  긴급 치료, 구조, 돌봄 등에
+                  생활하는 지 직접 보고 소통하며
                   <br />
-                  직접적인 도움을 주는 나눔입니다.
+                  직접적인 확인을 할 수가 있습니다.
                 </p>
               </div>
-              <button className="cursor-pointer mt-4 text-xs sm:text-sm text-white px-4 py-2 rounded border border-2 hover:bg-white hover:opacity-80 hover:text-black hover:border-0">
-                일시후원 바로가기
+              <button 
+              onClick={handleClickLive}
+              className="cursor-pointer mt-4 text-xs sm:text-sm text-white px-4 py-2 rounded border border-2 hover:bg-white hover:opacity-80 hover:text-black hover:border-0">
+                라이브 방송 바로가기
               </button>
             </div>
           </div>

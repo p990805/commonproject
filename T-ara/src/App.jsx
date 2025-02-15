@@ -9,7 +9,7 @@ import api from "./api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginSuccess, logout } from "./features/auth/authSlice";
-import { jwtDecode} from "jwt-decode"; // npm install jwt-decode
+import { jwtDecode } from "jwt-decode"; // npm install jwt-decode
 
 function App() {
   const dispatch = useDispatch();
@@ -43,7 +43,6 @@ function App() {
       }
     }
   }, [dispatch, navigate, location.pathname]);
-  
 
   const handleLogout = () => {
     api

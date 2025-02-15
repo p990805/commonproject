@@ -12,7 +12,7 @@ const Nanum = () => {
         <p className="text-gray-500">유기동물과 함께한 추억과 후원자님들의 이야기를 전합니다.</p>
       </div>
       <Link
-        to="/community"
+        to="/community/board"
         className="text-gray-400 font-bold hover:underline flex items-center space-x-1"
       >
         <span className="flex gap-1 items-center">

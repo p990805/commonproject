@@ -11,13 +11,14 @@ const LivePlayer = () => {
   const navigate = useNavigate();
   const { streamId } = useParams();
 
-  // const token =localStorage.getItem("authToken");
-  // const myName = jwtDecode(token)
+  const token =localStorage.getItem("authToken");
+  const myName = jwtDecode(token).name;
+  console.log( "내이름은 뭘까? "+myName);
 
   // location.state에서 JoinStreamDTO를 그대로 사용
   const state = location.state || {};
   const sessionId = state.sessionId;
-  const myUserName = state.myUserName || 'Viewer';
+  const myUserName = myName || 'Viewer';
   const hostName = state.hostName ? state.hostName : '';
 
   console.log('[LivePlayer] location.state:', state);

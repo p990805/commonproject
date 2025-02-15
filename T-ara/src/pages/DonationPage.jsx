@@ -173,6 +173,7 @@ const DonationPage = () => {
         try {
           const serverData = {
             ...response,
+            paidAmount: 0,
             donationType: "monthly",
             donatedDate: paymentDay,
             dataSource: donationType === "shelter" ? "shelter" : "animal",

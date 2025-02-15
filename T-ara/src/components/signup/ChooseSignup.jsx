@@ -21,7 +21,7 @@ const ChooseSignup=()=>{
             </div>
             <div className="choosebox-container">
                 <div className="choosebox-option">
-                    <p>14세 이상</p>
+                    <p>개별 회원만 가입</p>
                     <h3>개인회원</h3>
                     <button onClick={navIndividual}>
                         <img src="./assets/signup-icon.png" className="icon"/>                     

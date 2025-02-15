@@ -1,22 +1,31 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const AnimalDetailHeader = ({ animal }) => {
-  const [isLiked, setIsLiked] = useState(false);
-
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-  };
-
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate(`/donation`);
   };
 
+  // 데이터가 없을 경우 로딩 또는 에러 상태 표시
   if (!animal) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        동물 정보를 불러올 수 없습니다.
+      </div>
+    );
   }
+
+  // 성별 변환 함수
+  const getGenderText = (gender) => {
+    return gender === "M" ? "수컷" : "암컷";
+  };
+
+  // 중성화 상태 변환 함수
+  const getNeuteringStatusText = (status) => {
+    return status === "0" ? "중성화 X" : "중성화 O";
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -25,8 +34,8 @@ const AnimalDetailHeader = ({ animal }) => {
         <div className="lg:w-1/2">
           <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
             <img
-              src={animal.imageUrl}
-              alt={animal.name}
+              src="https://images.unsplash.com/photo-1450778869180-41d0601e046e"
+              alt={animal.animalName}
               className="w-full h-full object-cover"
             />
           </div>
@@ -34,32 +43,26 @@ const AnimalDetailHeader = ({ animal }) => {
 
         {/* 오른쪽: 동물 정보 */}
         <div className="lg:w-1/2">
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-2xl font-bold">{animal.name}</h1>
-              <span className="text-gray-500">{animal.code}</span>
-            </div>
-            <button onClick={toggleLike} className="text-red-500 text-2xl">
-              {isLiked ? "♥" : "♡"}
-            </button>
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold">{animal.animalName}</h1>
           </div>
 
           <div className="space-y-4 border-b pb-6 mb-6">
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">종</div>
-              <div className="col-span-4">{animal.species}</div>
+              <div className="col-span-4">{animal.speciesName}</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">성별</div>
-              <div className="col-span-4">{animal.gender}</div>
+              <div className="col-span-4">{getGenderText(animal.gender)}</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">추정나이</div>
-              <div className="col-span-4">{animal.age}</div>
+              <div className="col-span-4">{animal.birth.split("-")[0]}년생</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">몸무게</div>
-              <div className="col-span-4">{animal.weight}</div>
+              <div className="col-span-4">{animal.weight}kg</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">털색</div>
@@ -67,19 +70,21 @@ const AnimalDetailHeader = ({ animal }) => {
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">중성화</div>
-              <div className="col-span-4">{animal.neutered}</div>
+              <div className="col-span-4">
+                {getNeuteringStatusText(animal.neuteringStatus)}
+              </div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">보호소</div>
-              <div className="col-span-4">{animal.shelter}</div>
+              <div className="col-span-4">{animal.shelterName}</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">등록일시</div>
-              <div className="col-span-4">{animal.registeredDate}</div>
+              <div className="col-span-4">{animal.createdAt.split(" ")[0]}</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">품종</div>
-              <div className="col-span-4">{animal.breed}</div>
+              <div className="col-span-4">{animal.breedName}</div>
             </div>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-gray-500">설명</div>
@@ -88,33 +93,15 @@ const AnimalDetailHeader = ({ animal }) => {
           </div>
 
           <div className="space-y-4">
-            <div className="text-center py-4 border rounded-lg">
-              <p className="text-gray-500">후원자 분들 (3명)</p>
-              <div className="flex justify-center gap-4 mt-2">
-                <div className="text-red-500">
-                  ♥<br />
-                  박주현
-                </div>
-                <div className="text-red-500">
-                  ♥<br />
-                  박주현
-                </div>
-                <div className="text-red-500">
-                  ♥<br />
-                  박주현
-                </div>
-              </div>
-            </div>
-
             <div className="text-center border rounded-lg p-4">
               <div className="flex items-center justify-center gap-2">
                 <span className="text-lg">✉</span>
-                <span>입양 문의 : {animal.contactNumber}</span>
+                <span>입양 문의 : 준비중</span>
               </div>
             </div>
 
             <div className="bg-gray-100 rounded-lg p-4 text-center">
-              <span>👥 {animal.donors} 명이 함께 후원중</span>
+              <span>👥 {animal.donationNumber} 명이 함께 후원중</span>
             </div>
 
             <button

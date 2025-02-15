@@ -1,4 +1,3 @@
-import React from "react";
 import CommunityLayout from "../../components/common/CommunityLayout";
 import Board from "../../components/community/Board";
 

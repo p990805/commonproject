@@ -28,7 +28,7 @@ const MySponLive = () => {
     api.get(`/stream/lives/${streamId}`)
       .then((response) => {
         // response.data에는 JoinStreamDTO 정보가 들어있음.
-        navigate(`/lives/${streamId}`, { state: response.data });
+        navigate(`/live/${streamId}`, { state: response.data });
       })
       .catch((err) => {
         console.error('라이브 접속 오류:', err);

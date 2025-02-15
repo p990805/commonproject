@@ -1,4 +1,3 @@
-import React from "react";
 import SidebarMenu from "./SidebarMenu";
 
 const CommunityLayout = ({ title, children, sidebarMenu }) => {
