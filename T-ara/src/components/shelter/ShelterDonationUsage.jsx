@@ -1,8 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SidebarNavigation from "./SidebarNavigation";
 import QuillEditor from "../QuillEditor";
 
 const ShelterDonationUsage = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/shelter/usage-register`);
+  };
+
   // 체크된 항목들을 관리하는 상태
   const [selectedItems, setSelectedItems] = useState([]);
   // 임시 데이터 (나중에 DB에서 가져올 데이터)
@@ -63,7 +70,7 @@ const ShelterDonationUsage = () => {
               후원금 사용 대시보드
             </h1>
             <button
-              onClick={() => (window.location.href = "/shelter/usage-register")}
+              onClick={handleClick}
               className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
             >
               후원금 사용 등록하기

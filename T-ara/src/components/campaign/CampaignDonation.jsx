@@ -101,7 +101,6 @@ const CampaignDonation = () => {
         try {
           const serverData = {
             ...response,
-            paidAmount: 0,
             donationType: "campaign",
             relationalId: 1, // 캠페인 ID
             amount: selectedAmount, // 선택된 후원 금액 명시적 추가

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarNavigation from "./SidebarNavigation";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
@@ -7,19 +7,60 @@ const ShelterAnimalRegister = () => {
   const navigate = useNavigate();
   const [mainImage, setMainImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [speciesList, setSpeciesList] = useState([]);
+  const [breedList, setBreedList] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
-    birthDate: "",
-    species: "",
-    isNeutered: "",
-    shelter: "광주 동물보호센터",
+    birth: "",
     gender: "",
-    registrationDate: "",
-    breed: "",
-    weight: "",
+    neuteringStatus: "",
     color: "",
+    weight: "",
     description: "",
+    speciesId: "",
+    breedId: "",
   });
+
+  // 종 목록 가져오기
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const response = await api.get("/animal/species");
+        if (response.data.speciesList) {
+          setSpeciesList(response.data.speciesList);
+        }
+      } catch (error) {
+        console.error("종 목록을 가져오는 중 오류가 발생했습니다:", error);
+        setSpeciesList([]);
+      }
+    };
+    fetchSpecies();
+  }, []);
+
+  // 종 선택에 따른 품종 목록 가져오기
+  useEffect(() => {
+    const fetchBreeds = async () => {
+      if (formData.speciesId) {
+        try {
+          const response = await api.get(`/animal/breed/${formData.speciesId}`);
+
+          if (response.data?.breedList) {
+            // 매핑 없이 직접 사용
+            setBreedList(response.data.breedList);
+          } else {
+            setBreedList([]);
+          }
+        } catch (error) {
+          console.error("Breed fetch error:", error);
+          setBreedList([]);
+        }
+      } else {
+        setBreedList([]);
+      }
+    };
+
+    fetchBreeds();
+  }, [formData.speciesId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,15 +114,44 @@ const ShelterAnimalRegister = () => {
     e.preventDefault();
 
     try {
-      const requestData = {
-        ...formData,
-        mainImage,
-        ...(additionalImages.length > 0 && { additionalImages }),
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("birth", formData.birth);
+      formDataToSend.append("gender", formData.gender === "male" ? "M" : "F");
+      formDataToSend.append(
+        "neuteringStatus",
+        formData.neuteringStatus === "yes" ? "1" : "0"
+      );
+      formDataToSend.append("color", formData.color);
+      formDataToSend.append("weight", formData.weight);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("speciesId", formData.speciesId);
+      formDataToSend.append("breedId", formData.breedId);
 
-      const response = await api.post("/diary/register", requestData);
+      // base64 이미지를 File 객체로 변환
+      if (mainImage) {
+        const mainImageFile = await base64ToFile(mainImage, "thumbnail.png");
+        formDataToSend.append("thumbnail", mainImageFile);
+      }
 
-      if (response.status === 200) {
+      // 추가 이미지들도 File 객체로 변환
+      if (additionalImages.length > 0) {
+        for (let i = 0; i < additionalImages.length; i++) {
+          const additionalImageFile = await base64ToFile(
+            additionalImages[i],
+            `additional${i}.png`
+          );
+          formDataToSend.append("animalImages", additionalImageFile);
+        }
+      }
+
+      const response = await api.post("/animal/post", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
         alert("등록이 완료되었습니다.");
         navigate("/shelter/animal");
       }
@@ -89,6 +159,13 @@ const ShelterAnimalRegister = () => {
       console.error("동물 등록 중 오류가 발생했습니다:", error);
       alert("등록 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
+  };
+
+  // base64를 File 객체로 변환하는 함수
+  const base64ToFile = async (base64String, filename) => {
+    const res = await fetch(base64String);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: blob.type });
   };
 
   return (
@@ -211,14 +288,13 @@ const ShelterAnimalRegister = () => {
                   </div>
                   <div>
                     <label className="text-sm block mb-1">
-                      생년월일(추정) <span className="text-red-500">*</span>
+                      생년월일 <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      name="birthDate"
-                      value={formData.birthDate}
+                      type="date"
+                      name="birth"
+                      value={formData.birth}
                       onChange={handleInputChange}
-                      placeholder="생년월일 8자리"
                       className="w-full h-10 px-3 border border-[#dee1e8] rounded"
                       required
                     />
@@ -227,23 +303,31 @@ const ShelterAnimalRegister = () => {
                     <label className="text-sm block mb-1">
                       종 <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="species"
-                      value={formData.species}
+                    <select
+                      name="speciesId"
+                      value={formData.speciesId || ""}
                       onChange={handleInputChange}
-                      placeholder="종"
                       className="w-full h-10 px-3 border border-[#dee1e8] rounded"
                       required
-                    />
+                    >
+                      <option value="">종을 선택하세요</option>
+                      {speciesList.map((species) => (
+                        <option
+                          key={`species-${species.speciesId}`}
+                          value={species.speciesId}
+                        >
+                          {species.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="text-sm block mb-1">
                       중성화 여부 <span className="text-red-500">*</span>
                     </label>
                     <select
-                      name="isNeutered"
-                      value={formData.isNeutered}
+                      name="neuteringStatus"
+                      value={formData.neuteringStatus}
                       onChange={handleInputChange}
                       className="w-full h-10 px-3 border border-[#dee1e8] rounded"
                       required
@@ -252,18 +336,6 @@ const ShelterAnimalRegister = () => {
                       <option value="yes">예</option>
                       <option value="no">아니오</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="text-sm block mb-1">
-                      보호소 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="shelter"
-                      value={formData.shelter}
-                      disabled
-                      className="w-full h-10 px-3 border border-[#dee1e8] rounded bg-gray-50"
-                    />
                   </div>
                 </div>
 
@@ -284,33 +356,7 @@ const ShelterAnimalRegister = () => {
                       <option value="female">암컷</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="text-sm block mb-1">
-                      등록일시 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name="registrationDate"
-                      value={formData.registrationDate}
-                      onChange={handleInputChange}
-                      className="w-full h-10 px-3 border border-[#dee1e8] rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm block mb-1">
-                      품종 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="breed"
-                      value={formData.breed}
-                      onChange={handleInputChange}
-                      placeholder="품종"
-                      className="w-full h-10 px-3 border border-[#dee1e8] rounded"
-                      required
-                    />
-                  </div>
+
                   <div>
                     <label className="text-sm block mb-1">
                       몸무게 <span className="text-red-500">*</span>
@@ -329,6 +375,31 @@ const ShelterAnimalRegister = () => {
                         kg
                       </span>
                     </div>
+                  </div>
+                  <div>
+                    <label className="text-sm block mb-1">
+                      품종 <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="breedId"
+                      value={formData.breedId}
+                      onChange={handleInputChange}
+                      className="w-full h-10 px-3 border border-[#dee1e8] rounded"
+                      required
+                      disabled={!formData.speciesId}
+                    >
+                      <option value="">품종을 선택하세요</option>
+                      {breedList &&
+                        breedList.length > 0 &&
+                        breedList.map((breed) => (
+                          <option
+                            key={`breed-${breed.breedId}`}
+                            value={breed.breedId}
+                          >
+                            {breed.name}
+                          </option>
+                        ))}
+                    </select>
                   </div>
                   <div>
                     <label className="text-sm block mb-1">

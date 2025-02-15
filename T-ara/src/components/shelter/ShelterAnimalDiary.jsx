@@ -1,6 +1,12 @@
 import SidebarNavigation from "./SidebarNavigation";
+import { useNavigate } from "react-router-dom";
 
 const ShelterAnimalDiary = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/shelter/diary-register`);
+  };
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
       {/* Sidebar */}
@@ -14,7 +20,7 @@ const ShelterAnimalDiary = () => {
               동물 일지 관리
             </h1>
             <button
-              onClick={() => (window.location.href = "/shelter/diary-register")}
+              onClick={handleClick}
               className="flex items-center justify-center px-5 h-10 bg-[#2f69dd] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
             >
               동물일지 작성하기

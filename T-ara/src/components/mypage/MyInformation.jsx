@@ -1,5 +1,5 @@
 // MyInformation.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../api';
 import PasswordChangeSection from '../mypage/mypage2/PasswordChangeSection';
 import PhoneChangeSection from '../mypage/mypage2/PhoneChangeSection';

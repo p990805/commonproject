@@ -7,7 +7,6 @@ const Individual = () => {
 
   // 폼 데이터 상태들
   const [name, setName] = useState("");
-  const [birth, setBirth] = useState(""); // DB에 반영하지 않는다면 나중에 제거 가능
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
   const [emailLocal, setEmailLocal] = useState("");

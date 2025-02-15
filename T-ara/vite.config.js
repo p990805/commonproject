@@ -22,11 +22,16 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      // "/shelter": {
-      //   target: "http://localhost:8090",
-      //   changeOrigin: true,
-      //   secure: false,
-      // },
+      "/animal": {
+        target: "http://localhost:8090",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/shelter": {
+        target: "http://localhost:8090",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

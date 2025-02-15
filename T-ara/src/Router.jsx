@@ -8,62 +8,44 @@ import ShelterProtectedRoute from "./components/ShelterProtectedRoute";
 const MainPage = lazy(() => import("./pages/MainPage"));
 const LoginPageWrapper = lazy(() => import("./pages/LoginPageWrapper"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
-const IndividualSignup = lazy(() =>
-  import("./components/signup/IndividualSignup")
-);
-const InstitutionSignup = lazy(() =>
-  import("./components/signup/InstitutionSignup")
-);
-const SuccessfulSignup = lazy(() =>
-  import("./components/signup/SuccessfulSignup")
-);
+const IndividualSignup = lazy(() => import("./components/signup/IndividualSignup"));
+const InstitutionSignup = lazy(() => import("./components/signup/InstitutionSignup"));
+const SuccessfulSignup = lazy(() => import("./components/signup/SuccessfulSignup"));
 const ShelterPage = lazy(() => import("./pages/ShelterPage"));
 //const LocationsPage = lazy(() => import("./pages/LocationsPage"));
 const NoticePage = lazy(() => import("./pages/community/NoticePage"));
 const BoardPage = lazy(() => import("./pages/community/BoardPage"));
 const FAQPage = lazy(() => import("./pages/community/FAQPage"));
 const InquiryPage = lazy(() => import("./pages/community/InquiryPage"));
-const ModifyInquiryPage = lazy(() =>
-  import("./pages/community/ModifyInquiryPage")
-);
+const ModifyInquiryPage = lazy(() => import("./pages/community/ModifyInquiryPage"));
 const BoardDetailPage = lazy(() => import("./pages/community/BoardDetailPage"));
 const BoardEditPage = lazy(() => import("./pages/community/BoardEditPage"));
+
+{/* 마이 페이지 영역 */}
 const MyPage = lazy(() => import("./pages/MyPage"));
-const ShelterDonation = lazy(() =>
-  import("./components/shelter/ShelterDonation")
-);
-const ShelterDonationUsage = lazy(() =>
-  import("./components/shelter/ShelterDonationUsage")
-);
-const ShelterUsageRegister = lazy(() =>
-  import("./components/shelter/ShelterUsageRegister")
-);
-const ShelterCampaign = lazy(() =>
-  import("./components/shelter/ShelterCampaign")
-);
-const ShelterCampaignRegister = lazy(() =>
-  import("./components/shelter/ShelterCampaignRegister")
-);
+const MyInformationPage = lazy(() => import("./pages/mypage/MyInformationPage"));
+const WithdrawPage = lazy(() => import("./pages/mypage/WithdrawPage"));
+const RegularSponPage = lazy(() => import("./pages/mypage/RegularSponPage"));
+const TemporarySponPage = lazy(() => import("./pages/mypage/TemporarySponPage"));
+const CampaignSponPage = lazy(() => import("./pages/mypage/CampaignSponPage"));
+const WorkJournalPage = lazy(() => import("./pages/mypage/WorkJournalPage"));
+const PhotocardPage = lazy(() => import("./pages/mypage/PhotocardPage"));
+
+
+
+const ShelterDonation = lazy(() => import("./components/shelter/ShelterDonation"));
+const ShelterDonationUsage = lazy(() => import("./components/shelter/ShelterDonationUsage"));
+const ShelterUsageRegister = lazy(() => import("./components/shelter/ShelterUsageRegister"));
+const ShelterCampaign = lazy(() => import("./components/shelter/ShelterCampaign"));
+const ShelterCampaignRegister = lazy(() => import("./components/shelter/ShelterCampaignRegister"));
 const ShelterAnimal = lazy(() => import("./components/shelter/ShelterAnimal"));
-const ShelterAnimalRegister = lazy(() =>
-  import("./components/shelter/ShelterAnimalRegister")
-);
-const ShelterAnimalDiary = lazy(() =>
-  import("./components/shelter/ShelterAnimalDiary")
-);
-const ShelterAnimalDiaryRegister = lazy(() =>
-  import("./components/shelter/ShelterAnimalDiaryRegister")
-);
-const ShelterWalkReservation = lazy(() =>
-  import("./components/shelter/ShelterWalkReservation")
-);
-const ShelterPhotoUpload = lazy(() =>
-  import("./components/shelter/ShelterPhotoUpload")
-);
+const ShelterAnimalRegister = lazy(() => import("./components/shelter/ShelterAnimalRegister"));
+const ShelterAnimalDiary = lazy(() => import("./components/shelter/ShelterAnimalDiary"));
+const ShelterAnimalDiaryRegister = lazy(() => import("./components/shelter/ShelterAnimalDiaryRegister"));
+const ShelterWalkReservation = lazy(() => import("./components/shelter/ShelterWalkReservation"));
+const ShelterPhotoUpload = lazy(() => import("./components/shelter/ShelterPhotoUpload"));
 const ShelterNotice = lazy(() => import("./components/shelter/ShelterNotice"));
-const ShelterNoticeRegister = lazy(() =>
-  import("./components/shelter/ShelterNoticeRegister")
-);
+const ShelterNoticeRegister = lazy(() => import("./components/shelter/ShelterNoticeRegister"));
 const ShelterInfo = lazy(() => import("./components/shelter/ShelterInfo"));
 const ShelterFinder = lazy(() => import("./components/map/ShelterFinder"));
 const ShelterDetailPage = lazy(() => import("./pages/ShelterDetailPage"));
@@ -71,20 +53,12 @@ const WalkReservationPage = lazy(() => import("./pages/WalkReservationPage"));
 const LivePage = lazy(() => import("./pages/LivePage"));
 const DonationPage = lazy(() => import("./pages/DonationPage"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
-const CampaignDetail = lazy(() =>
-  import("./components/campaign/CampaignDetail")
-);
-const CampaignDonation = lazy(() =>
-  import("./components/campaign/CampaignDonation")
-);
-const CampaignDonationSuccess = lazy(() =>
-  import("./components/campaign/CampaignDonationSuccess")
-);
+const CampaignDetail = lazy(() => import("./components/campaign/CampaignDetail"));
+const CampaignDonation = lazy(() => import("./components/campaign/CampaignDonation"));
+const CampaignDonationSuccess = lazy(() => import("./components/campaign/CampaignDonationSuccess"));
 const AnimalPage = lazy(() => import("./pages/AnimalPage"));
 const AnimalDetail = lazy(() => import("./components/animal/AnimalDetail"));
-const CommunityDetail = lazy(() =>
-  import("./components/community/CommunityDetail")
-);
+const CommunityDetail = lazy(() => import("./components/community/CommunityDetail"));
 const AlertPage = lazy(() => import("./pages/AlertPage"));
 const StartLive = lazy(() => import("./components/shelter/streaming/StartLive"))
 const DailyLivePage = lazy(() => import("./pages/live/DailyLivePage"));
@@ -121,14 +95,14 @@ const AppRouter = () => {
         />
 
         {/* 로그인한 사용자만 접근 가능한 페이지 */}
-        <Route
-          path="/mypage"
-          element={
-            <ProtectedRoute>
-              <MyPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>}/>
+        <Route path="/mypage/information" element={<ProtectedRoute><MyInformationPage /></ProtectedRoute>}/>
+        <Route path="/mypage/withdraw" element={<ProtectedRoute><WithdrawPage /></ProtectedRoute>}/>
+        <Route path="/mypage/regularspon" element={<ProtectedRoute><RegularSponPage /></ProtectedRoute>}/>
+        <Route path="/mypage/temporaryspon" element={<ProtectedRoute><TemporarySponPage /></ProtectedRoute>}/>
+        <Route path="/mypage/campaignspon" element={<ProtectedRoute><CampaignSponPage /></ProtectedRoute>}/>
+        <Route path="/mypage/workjournal" element={<ProtectedRoute><WorkJournalPage /></ProtectedRoute>}/>
+        <Route path="/mypage/photocard" element={<ProtectedRoute><PhotocardPage /></ProtectedRoute>}/>
 
         {/* 보호소 관련 페이지는 ShelterProtectedRoute로 보호 */}
         <Route

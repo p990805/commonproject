@@ -1,8 +1,8 @@
 // src/components/streaming/UserVideoComponent.jsx
-import React from "react";
+import React, { forwardRef } from "react";
 import OpenViduVideoComponent from "./OpenViduVideoComponent";
 
-const UserVideoComponent = ({ streamManager, className, fallbackName }) => {
+const UserVideoComponent = forwardRef(({ streamManager, className, fallbackName }, ref) => {
   const getNicknameTag = () => {
     const data = streamManager?.stream?.connection?.data;
     console.log("connection.data:", data, typeof data);
@@ -41,12 +41,12 @@ const UserVideoComponent = ({ streamManager, className, fallbackName }) => {
     <div className={`relative bg-black ${className}`}>
       {streamManager ? (
         <div className="relative w-full h-full">
-          <OpenViduVideoComponent streamManager={streamManager} />
-         
+          {/* ref 전달 */}
+          <OpenViduVideoComponent ref={ref} streamManager={streamManager} />
         </div>
       ) : null}
     </div>
   );
-};
+});
 
 export default UserVideoComponent;
