@@ -9,11 +9,11 @@ import "swiper/css/scrollbar";
 
 const CampaignSwiper = () => {
   const slides = [
-    { id: 1, img: "./assets/corgi.png", title: "친환경 봉사팀 방문", description: "우리 개들과 이야기" },
-    { id: 2, img: "./assets/nanum1.png", title: "사랑으로 가득한 행사", description: "유기견 보호 센터에서 하루 ♥" },
-    { id: 3, img: "./assets/nanum2.png", title: "2024년 특별한 날 이야기", description: "봉사자들과 함께한 추억" },
-    { id: 4, img: "./assets/nanum3.png", title: "행복한 유기묘 보호 활동", description: "새 가족을 찾은 친구들의 사연" },
-    { id: 5, img: "./assets/nanum4.png", title: "코기", description: "코깅1" },
+    { id: 1, img: "./assets/campaign1.jpg", title: "시골에 홀로 남은 강아지", description: "따뜻한 손길이 필요합니다" },
+    { id: 2, img: "./assets/campaign2.jpg", title: "위험한 도로에서 구조된 강아지", description: "건강한 삶을 선물해주세요" },
+    { id: 3, img: "./assets/campaign3.jpg", title: "철창 속 고양이", description: "철창에서 벗어나도록 도와주세요" },
+    { id: 4, img: "./assets/campaign4.jpg", title: "엄마를 잃고 홀로 남은 고양이", description: "따뜻한 보금자리를 찾아주세요" },
+    { id: 5, img: "./assets/campaign5.jpg", title: "길고양이를 위한 구조의 손길", description: "작은 도움, 큰 변화" },
   ];
 
   return (

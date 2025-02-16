@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // jwt-decode의 default export 사용
+import ProfileImage from "./ProfileImage"; // 새로 만든 ProfileImage 컴포넌트를 임포트
 
 const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -98,8 +99,11 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
               className="flex items-center space-x-2 cursor-pointer"
               onClick={toggleDropdown}
             >
-              <img
-                src={userProfile}
+              {/* 기존 <img> 대신 ProfileImage 컴포넌트를 사용합니다.
+                  userProfile에는 S3에 저장된 전체 URL 또는 파일 키가 들어올 수 있으므로,
+                  ProfileImage 컴포넌트가 적절한 presigned URL을 받아와 표시합니다. */}
+              <ProfileImage 
+                imageIdentifier={userProfile}
                 alt="프로필"
                 className="w-8 h-8 rounded-full"
               />

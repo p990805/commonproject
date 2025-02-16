@@ -17,9 +17,7 @@ const SidebarNavigation = () => {
     "유기 동물 관리": ["전체 유기 동물", "동물 일지", "산책 예약", "동물 사진 업로드"],
     "공지사항 관리": ["전체 공지사항"],
     "스트리밍 관리": [
-      "전체 라이브 스트리밍",
-      "라이브 스트리밍 연결",
-      "CCTV 라이브",
+      "라이브 시작하기",
     ],
     "보호소 정보 관리": ["보호소 정보"],
   };
@@ -38,9 +36,7 @@ const SidebarNavigation = () => {
     "/shelter/photo": "동물 사진 업로드",
     "/shelter/notice": "전체 공지사항",
     "/shelter/notice-register": "전체 공지사항",
-    "/shelter/live-streams": "전체 라이브 스트리밍",
-    "/shelter/live-stream-connect": "라이브 스트리밍 연결",
-    "/shelter/cctv-live": "CCTV 라이브",
+    "/shelter/live-streams": "라이브 시작하기",
     "/shelter/info": "보호소 정보",
   };
 
@@ -63,9 +59,7 @@ const SidebarNavigation = () => {
       "산책 예약": "/shelter/walk",
       "동물 사진 업로드": "/shelter/photo",
       "전체 공지사항": "/shelter/notice",
-      "전체 라이브 스트리밍": "/shelter/live",
-      "라이브 스트리밍 연결": "/shelter",
-      "CCTV 라이브": "/shelter",
+      "라이브 시작하기": "/shelter/live",
       "보호소 정보": "/shelter/info",
     };
     return pathMap[item] || "/";
@@ -74,11 +68,16 @@ const SidebarNavigation = () => {
   const handleLogout = () => {
     api
       .get("/member/logout")
-      .then((response) => {
+      .then(() => {
         toast.success("로그아웃이 완료되었습니다.");
         localStorage.removeItem("authToken");
         localStorage.removeItem("userName");
         localStorage.removeItem("userProfile");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("shelterId");
+        localStorage.removeItem("shelterName");
+        localStorage.removeItem("cityCategoryId");
+
         dispatch(logout());
         navigate("/");
       })

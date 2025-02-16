@@ -5,6 +5,8 @@ import api from "../../api";
 const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
   const [editing, setEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
+  // 현재 로그인한 사용자의 ID를 localStorage에서 가져옵니다.
+  const currentUserId = localStorage.getItem("userId");
 
   // 수정 시작: 인라인 편집 모드 전환
   const handleEditClick = () => {
@@ -32,7 +34,7 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
     const modifiedComment = {
       commentId: comment.commentId,
       userId: comment.userId,           // 댓글 작성자의 아이디
-      communityId: comment.communityId, // GET 요청으로 받아온 communityId 포함
+      communityId: comment.communityId,  // GET 요청으로 받아온 communityId 포함
       content: editedContent,
     };
 
@@ -100,20 +102,23 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
       ) : (
         <>
           <p className="text-sm">{comment.content}</p>
-          <div className="mt-2">
-            <button
-              onClick={handleEditClick}
-              className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
-            >
-              수정
-            </button>
-            <button
-              onClick={handleDelete}
-              className="bg-red-500 text-white px-3 py-1 rounded"
-            >
-              삭제
-            </button>
-          </div>
+          {/* 댓글 작성자와 현재 로그인한 사용자의 ID가 일치할 때만 수정/삭제 버튼 렌더링 */}
+          {String(currentUserId) === String(comment.userId) && (
+            <div className="mt-2">
+              <button
+                onClick={handleEditClick}
+                className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-3 py-1 rounded"
+              >
+                삭제
+              </button>
+            </div>
+          )}
         </>
       )}
     </li>

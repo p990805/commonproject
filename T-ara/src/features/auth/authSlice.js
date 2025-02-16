@@ -4,9 +4,10 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   isLoggedIn: false,
   token: null,
+  userId: null,         // 추가: userId
   userName: '',
   userProfile: '',
-  role: '', // role 필드를 추가합니다.
+  role: '',
 };
 
 const authSlice = createSlice({
@@ -16,16 +17,18 @@ const authSlice = createSlice({
     loginSuccess: (state, action) => {
       state.isLoggedIn = true;
       state.token = action.payload.token;
+      state.userId = action.payload.userId; // userId 저장
       state.userName = action.payload.userName;
       state.userProfile = action.payload.userProfile;
-      state.role = action.payload.role; // role을 저장합니다.
+      state.role = action.payload.role;
     },
     logout: (state) => {
       state.isLoggedIn = false;
       state.token = null;
+      state.userId = null;
       state.userName = '';
       state.userProfile = '';
-      state.role = ''; // 로그아웃 시 role도 초기화합니다.
+      state.role = '';
     },
   },
 });

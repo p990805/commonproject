@@ -35,23 +35,6 @@ const LiveSessionForm = ({ form, handleChange, handleSubmit }) => {
       
       <h2 className="text-2xl font-bold mb-4">라이브 방송 시작</h2>
       <form onSubmit={handleSubmit}>
-        {/* 보호소 ID 입력 */}
-        <div className="mb-4">
-          <label htmlFor="shelterId" className="block text-gray-700 mb-2">
-            보호소 ID
-          </label>
-          <input
-            type="number"
-            id="shelterId"
-            name="shelterId"
-            value={form.shelterId}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded"
-            placeholder="보호소 ID를 입력하세요"
-            required
-          />
-        </div>
-
         {/* 데이터 소스 선택 */}
         <div className="mb-4">
           <label htmlFor="dataSource" className="block text-gray-700 mb-2">

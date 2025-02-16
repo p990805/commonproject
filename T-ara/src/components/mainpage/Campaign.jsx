@@ -7,7 +7,7 @@ const Campaign =()=>{
             <div className="flex w-full h-full">
 
                 <div className="h-full w-600">
-                    <img src="/assets/nanum1.png" alt=""  className="h-full w-full"/>
+                    <img src="/assets/campaign.jpg" alt=""  className="h-full w-full rounded-lg"/>
                 </div>
 
                 <div className="w-full h-full">
