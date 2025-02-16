@@ -3,6 +3,8 @@ import React, { useState } from "react";
 
 function CalendarModule({ onSelectDate }) {
   const now = new Date();
+  // 오늘은 현재 날짜의 자정 기준 (오늘 포함 이전이면 지난 날짜로 처리)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1); // JS는 0~11이므로 +1
   const [selectedDay, setSelectedDay] = useState(null);
@@ -52,7 +54,7 @@ function CalendarModule({ onSelectDate }) {
     setSelectedDay(null);
   };
 
-  // 예시로 24, 25일은 예약 불가능한 날짜로 가정
+  // 예시로 예약 불가능한 날짜 (기본적으로 빨간색 처리할 날짜)
   const unavailableDays = [24, 25];
 
   return (
@@ -99,24 +101,32 @@ function CalendarModule({ onSelectDate }) {
                 );
               }
 
+              const currentDay = new Date(year, month - 1, day);
+              // 오늘 포함 이전 날짜는 지난 날짜로 처리
+              const isPast = currentDay <= today;
               const isUnavailable = unavailableDays.includes(day);
               const isSelected = selectedDay === day;
+
+              // 스타일 결정: 지난 날짜 -> 회색, 예약 불가능 -> 빨간색, 나머지 -> 파란색
+              const dayClass = isPast
+                ? "bg-gray-300 text-gray-500"
+                : isUnavailable
+                ? "bg-red-100 text-red-500"
+                : "bg-blue-100 text-blue-600";
 
               return (
                 <div key={di} className="h-10 flex items-center justify-center">
                   <div
                     onClick={() => {
-                      // 예약 불가능한 날짜는 클릭 불가 처리
-                      if (!isUnavailable) {
-                        setSelectedDay(day);
-                        // 선택된 날짜 정보를 Date 객체로 부모에 전달
-                        onSelectDate && onSelectDate(new Date(year, month - 1, day));
-                      }
+                      // 지난 날짜 또는 예약 불가능한 날짜는 클릭 불가
+                      if (isPast || isUnavailable) return;
+                      setSelectedDay(day);
+                      onSelectDate && onSelectDate(currentDay);
                     }}
                     className={`
                       w-8 h-8 flex items-center justify-center rounded-full cursor-pointer
                       ${isSelected ? "ring ring-offset-2 ring-blue-500" : ""}
-                      ${isUnavailable ? "bg-red-100 text-red-500" : "bg-blue-100 text-blue-600"}
+                      ${dayClass}
                     `}
                   >
                     {day}

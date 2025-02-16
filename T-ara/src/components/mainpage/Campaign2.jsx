@@ -11,7 +11,7 @@ const Campaign2 =()=>{
         <div className="flex justify-between items-center mb-3 w-full p-7">
           <div className="mb-10 flex flex-col gap-4">
             <h2 className="text-4xl font-bold text-gray-800">캠페인</h2>
-            <p className="text-gray-500">동물을 지키는 캠페인에 참여해주세요.</p>
+            <p className="text-gray-500">유기동물을 지키는 캠페인에 참여해주세요.</p>
           </div>
           <Link
             to="/campaign"

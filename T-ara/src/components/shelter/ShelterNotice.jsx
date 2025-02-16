@@ -1,255 +1,207 @@
-import React, { useState } from "react";
+// src/components/ShelterNotice.jsx
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SidebarNavigation from "./SidebarNavigation";
-import QuillEditor from "../QuillEditor";
+import api from "../../api";
+import NoticeSearch from "../shelter/notice/NoticeSearch";
+import NoticeList from "../shelter/notice/NoticeList";
 
 const ShelterNotice = () => {
-  // 체크된 항목들을 관리하는 상태
+  const navigate = useNavigate();
+
+  // 검색 필터 상태
+  const [searchCategory, setSearchCategory] = useState("title");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // 공지사항 리스트, 로딩, 에러, 선택된 항목 상태
+  const [noticeList, setNoticeList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
-  // 임시 데이터 (나중에 DB에서 가져올 데이터)
-  const [donations] = useState([
-    {
-      id: 1,
-      category: "병원비",
-      amount: 150000,
-      useDate: "2024-02-11",
-      registerDate: "2024-02-11 14:30",
-      place: "동물병원",
-      receipt: "있음",
-      shelter: "싸피보호소",
-    },
-    {
-      id: 2,
-      category: "사료비",
-      amount: 200000,
-      useDate: "2024-02-10",
-      registerDate: "2024-02-10 15:20",
-      place: "펫샵",
-      receipt: "있음",
-      shelter: "싸피보호소",
-    },
-  ]);
+
+  // 로컬스토리지에서 보호소 ID 가져오기
+  const shelterId = localStorage.getItem("shelterId");
+
+  // 공지사항 목록 불러오기 함수
+  const fetchNotices = (params) => {
+    if (!shelterId) {
+      setError(new Error("보호소 정보가 없습니다."));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    api
+      .get("/notice/list", {
+        params: params || {
+          shelterCategory: shelterId,
+          searchCategory,
+          keyword: searchKeyword,
+          startDate,
+          endDate,
+        },
+      })
+      .then((response) => {
+        const list = response.data.noticeList || [];
+        setNoticeList(list);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("공지사항 리스트 로드 오류:", err);
+        setError(err);
+        setLoading(false);
+      });
+  };
+
+  // 초기 조회 (컴포넌트 마운트 시)
+  useEffect(() => {
+    fetchNotices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shelterId]);
+
+  // 검색 버튼 클릭 시 목록 갱신
+  const handleSearch = () => {
+    fetchNotices();
+    setSelectedItems([]);
+  };
+
+  // 초기화 버튼 클릭 시 검색 조건 리셋 후 목록 갱신
+  const handleReset = () => {
+    const initialParams = {
+      shelterCategory: shelterId,
+      searchCategory: "title",
+      keyword: "",
+      startDate: "",
+      endDate: "",
+    };
+    setSearchCategory(initialParams.searchCategory);
+    setSearchKeyword(initialParams.keyword);
+    setStartDate(initialParams.startDate);
+    setEndDate(initialParams.endDate);
+    setSelectedItems([]);
+    fetchNotices(initialParams);
+  };
 
   // 전체 선택/해제 핸들러
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedItems(donations.map((item) => item.id));
+      setSelectedItems(noticeList.map((notice) => notice.noticeId));
     } else {
       setSelectedItems([]);
     }
   };
 
   // 개별 항목 선택/해제 핸들러
-  const handleSelectItem = (id) => {
-    setSelectedItems((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
-      } else {
-        return [...prev, id];
-      }
+  const handleSelectItem = (noticeId) => {
+    setSelectedItems((prev) =>
+      prev.includes(noticeId)
+        ? prev.filter((id) => id !== noticeId)
+        : [...prev, noticeId]
+    );
+  };
+
+  // 수정 버튼: 단일 항목 선택 시 수정 페이지로 이동
+  const handleEdit = () => {
+    if (selectedItems.length !== 1) {
+      alert("수정할 공지사항을 하나만 선택하세요.");
+      return;
+    }
+    const noticeId = selectedItems[0];
+    navigate(`/shelter/notice/edit/${noticeId}`);
+  };
+
+  // 삭제 버튼: 선택한 공지사항 모두 삭제
+  const handleDelete = () => {
+    if (selectedItems.length === 0) {
+      alert("삭제할 공지사항을 선택하세요.");
+      return;
+    }
+    if (!window.confirm("선택한 공지사항을 삭제하시겠습니까?")) return;
+    Promise.all(
+      selectedItems.map((noticeId) => api.get(`/notice/delete/${noticeId}`))
+    )
+      .then(() => {
+        alert("삭제가 완료되었습니다.");
+        setSelectedItems([]);
+        fetchNotices();
+      })
+      .catch((err) => {
+        console.error("공지사항 삭제 오류:", err);
+        alert("공지사항 삭제에 실패하였습니다.");
+      });
+  };
+
+  // 날짜 포맷 함수 (예: "2025-02-16 07:38:28" → "2025.02.16")
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
-      {/* Sidebar */}
       <SidebarNavigation />
-
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
-          {/* Dashboard Title */}
+          {/* 검색 필터 영역 */}
+          <NoticeSearch
+            searchCategory={searchCategory}
+            setSearchCategory={setSearchCategory}
+            searchKeyword={searchKeyword}
+            setSearchKeyword={setSearchKeyword}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            onSearch={handleSearch}
+            onReset={handleReset}
+          />
+
+          {/* 헤더 영역: 제목 및 액션 버튼 */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
               전체 공지사항
             </h1>
-            <button
-              onClick={() =>
-                (window.location.href = "/shelter/notice-register")
-              }
-              className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
-            >
-              공지사항 등록하기
-            </button>
-          </div>
-
-          {/* Search Filters */}
-          <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
-            <div className="border border-[#dee1e8]">
-              {/* Period Filter */}
-              <div className="flex">
-                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
-                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    기간
-                  </span>
-                </div>
-                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
-                  <div className="flex items-center ml-5">
-                    <input
-                      type="date"
-                      className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2024-10-23"
-                    />
-                    <span className="mx-4 !text-[#575757]">-</span>
-                    <input
-                      type="date"
-                      className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2025-01-23"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Search Keyword */}
-              <div className="flex">
-                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
-                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    검색 키워드
-                  </span>
-                </div>
-                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
-                  <div className="flex gap-4 ml-5">
-                    <input
-                      type="text"
-                      className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Search Button */}
-            <div className="flex justify-center mt-5">
-              <button className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]">
-                검색
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate("/shelter/notice-register")}
+                className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+              >
+                공지사항 등록하기
+              </button>
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600"
+                disabled={selectedItems.length !== 1}
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600"
+                disabled={selectedItems.length === 0}
+              >
+                삭제
               </button>
             </div>
           </div>
-          {/* Donation List Title */}
-          <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
-            공지사항 전체 목록
-          </div>
 
-          {/* Donation List Table */}
-          <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
-            {/* List Header */}
-            <div className="px-3 py-3 border-b border-[#dee1e8]">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <span className="!text-[#191919] text-[15px] font-semibold">
-                    [
-                  </span>
-                  <div className="mx-1">
-                    <span className="!text-[#191919] text-sm font-semibold">
-                      {selectedItems.length > 0
-                        ? `${selectedItems.length}개의 항목 선택됨`
-                        : `전체 항목 총 ${donations.length}건`}
-                    </span>
-                  </div>
-                  <span className="!text-[#191919] text-[15px] font-semibold">
-                    ]
-                  </span>
-                </div>
-                <div className="flex gap-3 items-center">
-                  {selectedItems.length > 0 && (
-                    <div className="flex gap-2">
-                      {selectedItems.length === 1 && (
-                        <button className="px-4 py-1.5 bg-blue-500 text-white rounded text-xs">
-                          수정
-                        </button>
-                      )}
-                      <button className="px-4 py-1.5 bg-red-500 text-white rounded text-xs">
-                        삭제
-                      </button>
-                    </div>
-                  )}
-                  <select className="w-[131px] h-7 px-3 border border-[#cccccc] !text-[#191919] text-xs">
-                    <option>최신순</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Table Container with margin */}
-            <div className="mx-4 my-4">
-              {/* Table Header */}
-              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-                <div className="flex">
-                  <div className="w-[4%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.length === donations.length}
-                      onChange={handleSelectAll}
-                    />
-                  </div>
-                  <div className="w-[8%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 번호
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 카테고리
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 금액
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 일자
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    등록 일시
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용처
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    영수증 사진
-                  </div>
-                  <div className="w-[16%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    담당 보호소
-                  </div>
-                </div>
-              </div>
-              {/* 테이블 본문 */}
-              {donations.map((donation) => (
-                <div
-                  key={donation.id}
-                  className="flex border-b border-[#dee1e8]"
-                >
-                  <div className="w-[4%] p-4 border-r border-[#dee1e8] flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.includes(donation.id)}
-                      onChange={() => handleSelectItem(donation.id)}
-                    />
-                  </div>
-                  <div className="w-[8%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.id}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.category}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.amount.toLocaleString()}원
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.useDate}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.registerDate}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.place}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.receipt}
-                  </div>
-                  <div className="w-[16%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.shelter}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* 공지사항 목록 영역 */}
+          <NoticeList
+            noticeList={noticeList}
+            loading={loading}
+            error={error}
+            selectedItems={selectedItems}
+            handleSelectAll={handleSelectAll}
+            handleSelectItem={handleSelectItem}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            formatDate={formatDate}
+          />
         </div>
       </div>
     </div>

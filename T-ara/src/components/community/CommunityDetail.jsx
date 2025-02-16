@@ -111,6 +111,12 @@ const CommunityDetail = ({ communityId, onBack }) => {
       : `${process.env.REACT_APP_BASE_URL}/${url}`;
   };
 
+  // 현재 로그인한 사용자의 ID (localStorage에 저장된 값)
+  const currentUserId = localStorage.getItem("userId");
+  // 게시글 응답에는 작성자 ID가 userId 필드로 날라옵니다.
+  const isAuthor =
+    article.userId && String(article.userId) === String(currentUserId);
+
   return (
     <div className="w-full p-6 bg-white rounded-md shadow-md">
       <button className="mb-4 text-blue-500 underline" onClick={onBack}>
@@ -125,7 +131,7 @@ const CommunityDetail = ({ communityId, onBack }) => {
         />
         <div className="ml-2">
           <p className="text-sm font-bold">
-            {article.writerName || "작성자"}
+            {article.userNickname || "작성자"}
           </p>
           <p className="text-xs text-gray-500">
             {article.createdAt || "시간정보"}
@@ -152,18 +158,23 @@ const CommunityDetail = ({ communityId, onBack }) => {
         >
           {likeStatus ? "좋아요 취소" : "좋아요"}
         </button>
-        <button
-          onClick={handleModify}
-          className="px-4 py-2 bg-green-500 text-white rounded"
-        >
-          수정
-        </button>
-        <button
-          onClick={handleDelete}
-          className="px-4 py-2 bg-red-500 text-white rounded"
-        >
-          삭제
-        </button>
+        {/* 작성자일 때만 수정/삭제 버튼 노출 */}
+        {isAuthor && (
+          <>
+            <button
+              onClick={handleModify}
+              className="px-4 py-2 bg-green-500 text-white rounded"
+            >
+              수정
+            </button>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-500 text-white rounded"
+            >
+              삭제
+            </button>
+          </>
+        )}
       </div>
       <div className="mt-6">
         <CommentForm

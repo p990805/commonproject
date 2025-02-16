@@ -29,13 +29,13 @@ const Introduce = () => {
         <div className="relative z-10 text-center py-20 flex flex-col gap-5">
           <h1 className="text-3xl font-bold mb-4">티아라 소개</h1>
           <p className="text-lg text-gray-700 max-w-md mx-auto leading-relaxed">
-            100% 시민의 후원으로 운영되는 비영리단체로서
+            100% 여러분의 후원으로 운영되는 비영리단체로서
             <br />
             투명하고 정직하게 활동합니다.
           </p>
 
           <div className="w-[80%] mx-auto">
-            <img src="/assets/corgi.png" alt="" 
+            <img src="/assets/introduce.jpg" alt="" 
             className="w-full h-80"
             />
           </div>

@@ -1,7 +1,25 @@
-// src/pages/LoginPage.jsx
+// src/LoginPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api"; // axios 인스턴스
+
+// S3 URL에서 파일 키 추출 함수 (필요시 사용)
+// 예: "profile_img/gigwan3.png" → "gigwan3.png"
+const extractFileKey = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    let key = parsedUrl.pathname.startsWith('/')
+      ? parsedUrl.pathname.substring(1)
+      : parsedUrl.pathname;
+    if (key.startsWith("profile_img/")) {
+      key = key.replace("profile_img/", "");
+    }
+    return key;
+  } catch (error) {
+    console.error("파일 키 추출 오류:", error);
+    return url;
+  }
+};
 
 const LoginPage = ({ onLoginSuccess }) => {
   const [memberType, setMemberType] = useState("personal");
@@ -53,25 +71,68 @@ const LoginPage = ({ onLoginSuccess }) => {
       // 로컬스토리지에 토큰 저장
       localStorage.setItem("authToken", token);
 
-      // 2. 로그인 후 member/myinfo API 호출하여 사용자 정보 업데이트
+      // 보호소든 개인회원이든, /member/myinfo API 호출하여 사용자 정보를 가져옵니다.
       const userInfoResponse = await api.get("/member/myinfo", {
         headers: { Authorization: token },
       });
       console.log("✅ [프론트] 사용자 정보 응답:", userInfoResponse.data);
-      const { user } = userInfoResponse.data;
-      const { name, profileImg } = user;
-      // profileImg가 없으면 기본값 사용
-      const profileImage = profileImg ? profileImg : "/assets/placeholder.png";
+      // 응답 구조가 { user: { ... } } 또는 { shelter: { ... } }로 내려온다고 가정합니다.
+      const userData =
+        userInfoResponse.data.user || userInfoResponse.data.shelter || {};
 
-      // 로컬스토리지에 사용자 정보 저장
-      localStorage.setItem("userName", name);
-      localStorage.setItem("userProfile", profileImage);
+      let presignedProfileUrl = "";
+      if (memberType === "personal") {
+        // 개인회원 로그인 시
+        const { userId, name, profileImg } = userData;
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userName", name);
+        const originalProfileImg = profileImg ? profileImg : "";
+        if (originalProfileImg) {
+          if (originalProfileImg.includes("placeholder")) {
+            presignedProfileUrl = originalProfileImg;
+          } else {
+            const fileKey = extractFileKey(originalProfileImg);
+            console.log("추출된 파일 키:", fileKey);
+            try {
+              const presignedResponse = await api.get("/upload/presigned-get-url", {
+                params: { fileName: fileKey },
+              });
+              console.log("presigned URL 응답:", presignedResponse.data);
+              presignedProfileUrl = presignedResponse.data.url;
+            } catch (error) {
+              console.error("presigned URL 가져오기 실패:", error);
+              presignedProfileUrl = originalProfileImg;
+            }
+          }
+          localStorage.setItem("userProfile", presignedProfileUrl);
+        }
+      } else {
+        // 보호소 로그인 시
+        // shelter 객체에서 필요한 정보를 저장
+        const { shelterId, cityCategoryId, name } = userData;
+        localStorage.setItem("shelterId", shelterId);
+        localStorage.setItem("shelterName", name);
+        localStorage.setItem("cityCategoryId", cityCategoryId);
+        // 보호소 로그인 시, userName은 shelterName으로 사용
+        localStorage.setItem("userName", name);
+        localStorage.setItem("userProfile", ""); // 보호소는 별도 프로필 이미지 없다고 가정
+      }
 
-      // onLoginSuccess 호출 (Redux 등 상태 업데이트용)
-      onLoginSuccess(token, name, profileImage);
+      // onLoginSuccess 호출 (객체 형태로 전달하여 키-값 매핑 오류를 방지)
+      onLoginSuccess({
+        token,
+        userId: memberType === "personal" ? userData.userId : "",
+        userName: userData.name,
+        userProfile: memberType === "personal" ? presignedProfileUrl : "",
+        role: memberType === "personal" ? "ROLE_USER" : "ROLE_SHELTER",
+      });
 
-      // 홈 화면으로 이동
-      navigate("/");
+      // 보호소 로그인인 경우 "/shelter"로, 그렇지 않으면 홈 화면("/")으로 이동
+      if (memberType === "shelter") {
+        navigate("/shelter");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("❌ [프론트] 로그인 요청 실패:", error);
       if (error.response) {
@@ -158,7 +219,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         <div className="mt-4 text-center text-sm">
           <a
             onClick={navSignup}
-            className="text-black-500 hover:underline font-bold"
+            className="text-black-500 hover:underline font-bold cursor-pointer"
           >
             회원가입
           </a>

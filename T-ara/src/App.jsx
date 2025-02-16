@@ -9,7 +9,7 @@ import api from "./api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginSuccess, logout } from "./features/auth/authSlice";
-import { jwtDecode } from "jwt-decode"; // default export
+import { jwtDecode } from "jwt-decode";
 
 function App() {
   const dispatch = useDispatch();
@@ -21,39 +21,57 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      // "Bearer " 접두어 제거
-      const actualToken = token.startsWith("Bearer ")
-        ? token.slice(7)
-        : token;
+      // "Bearer " 접두어가 있다면 제거
+      const actualToken = token.startsWith("Bearer ") ? token.slice(7) : token;
       try {
         const decoded = jwtDecode(actualToken);
         const userRole = decoded.role; // 예: "ROLE_SHELTER" 또는 "ROLE_USER"
-        const loginId = decoded.sub; // 토큰에 loginId가 포함되어 있다고 가정 (예: sub 필드)
-        // 사용자 정보를 백엔드에서 가져옵니다.
-        api.get(`/member/myinfo`)
-          .then((response) => {
-            console.log(response.data);
-            // 응답이 { user: { name, profileImg, ... } } 형태인 경우
-            const { name, profileImg } = response.data.user;
-            // 프로필 이미지가 없으면 기본값 사용
-            const finalProfileImg = profileImg ? profileImg : "/assets/placeholder.png";
-            // Redux 상태 업데이트
-            dispatch(
-              loginSuccess({
-                token,
-                userName: name,
-                userProfile: finalProfileImg,
-                role: userRole,
-              })
-            );
-            // 보호소 계정이면 보호소 페이지로 리다이렉트
-            if (userRole === "ROLE_SHELTER" && !window.location.pathname.startsWith("/shelter")) {
-              navigate("/shelter");
-            }
+        
+        if (userRole === "ROLE_USER") {
+          // 개인회원 로그인일 경우에만 /member/myinfo 호출
+          api.get("/member/myinfo", {
+            headers: { Authorization: token },
           })
-          .catch((error) => {
-            console.error("사용자 정보 로드 실패:", error);
-          });
+            .then((response) => {
+              console.log(response.data);
+              // 응답이 { user: { name, profileImg, ... } } 형태라고 가정합니다.
+              const { name, profileImg } = response.data.user;
+              // 프로필 이미지가 없으면 기본값 처리
+              const finalProfileImg = profileImg ? profileImg : "/assets/placeholder.png";
+              // Redux 상태 업데이트
+              dispatch(
+                loginSuccess({
+                  token,
+                  userName: name,
+                  userProfile: finalProfileImg,
+                  role: userRole,
+                  userId: response.data.user.userId,
+                })
+              );
+            })
+            .catch((error) => {
+              console.error("사용자 정보 로드 실패:", error);
+            });
+        } else if (userRole === "ROLE_SHELTER") {
+          // 보호소 로그인인 경우, 별도의 API 호출 없이 decoded 토큰(또는 기본값)으로 처리
+          // decoded 토큰에 name, profileImg 등이 있다면 사용하고, 없다면 기본값을 설정합니다.
+          const name = decoded.name || "보호소 사용자";
+          const profileImg = decoded.profileImg || "/assets/placeholder.png";
+          const userId = decoded.userId || ""; // 토큰에 userId가 없다면, 백엔드 로그인 응답에 shelter 데이터에 포함되어 있어야 함.
+          dispatch(
+            loginSuccess({
+              token,
+              userName: name,
+              userProfile: profileImg,
+              role: userRole,
+              userId,
+            })
+          );
+          // 보호소 계정이면 보호소 페이지로 리다이렉트
+          if (!window.location.pathname.startsWith("/shelter")) {
+            navigate("/shelter");
+          }
+        }
       } catch (error) {
         console.error("토큰 디코딩 실패:", error);
       }
@@ -63,11 +81,16 @@ function App() {
   const handleLogout = () => {
     api
       .get("/member/logout")
-      .then((response) => {
+      .then(() => {
         toast.success("로그아웃이 완료되었습니다.");
         localStorage.removeItem("authToken");
         localStorage.removeItem("userName");
         localStorage.removeItem("userProfile");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("shelterId");
+        localStorage.removeItem("shelterName");
+        localStorage.removeItem("cityCategoryId");
+
         dispatch(logout());
         navigate("/");
       })
@@ -77,7 +100,7 @@ function App() {
       });
   };
 
-  // 보호소 계정이면 Header, Footer를 렌더링하지 않음
+  // 보호소 계정이면 Header, Footer 렌더링하지 않음
   const showLayout = !(isLoggedIn && role === "ROLE_SHELTER");
 
   return (
@@ -96,7 +119,7 @@ function App() {
         <Header
           isLoggedIn={isLoggedIn}
           userName={userName}
-          userProfile={userProfile}
+          userProfile={userProfile}  // 이 값은 전체 URL 또는 파일 키일 수 있음
           handleLogout={handleLogout}
         />
       )}

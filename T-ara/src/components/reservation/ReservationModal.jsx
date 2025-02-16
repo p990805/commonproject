@@ -1,4 +1,4 @@
-import React,{ useState } from "react";
+import { useState } from "react";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { MdAlternateEmail } from "react-icons/md";
 import { IoCallOutline } from "react-icons/io5";
