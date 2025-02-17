@@ -16,11 +16,6 @@ const DonationFieldSelect = ({ amount, donationMode, donationType }) => {
                 ? "보호소 후원"
                 : "개별 유기동물 후원"}
             </span>
-            <div className="text-sm text-gray-500">
-              {donationType === "shelter"
-                ? "(보호소를 선택해주세요)"
-                : "(유기동물을 선택해주세요)"}
-            </div>
           </div>
         </div>
         <div className="flex justify-between">

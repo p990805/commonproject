@@ -5,7 +5,16 @@ const AnimalDetailHeader = ({ animal }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/donation`);
+    navigate(`/donation`, {
+      state: {
+        animalInfo: {
+          id: animal.animalId,
+          animalName: animal.animalName,
+          shelterName: animal.shelterName,
+          shelterId: animal.shelterId,
+        },
+      },
+    });
   };
 
   // 데이터가 없을 경우 로딩 또는 에러 상태 표시
@@ -16,7 +25,6 @@ const AnimalDetailHeader = ({ animal }) => {
       </div>
     );
   }
-
   // 성별 변환 함수
   const getGenderText = (gender) => {
     return gender === "M" ? "수컷" : "암컷";
@@ -29,6 +37,8 @@ const AnimalDetailHeader = ({ animal }) => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">보호동물 정보</h2>
+
       <div className="flex flex-col lg:flex-row gap-8">
         {/* 왼쪽: 이미지 */}
         <div className="lg:w-1/2">

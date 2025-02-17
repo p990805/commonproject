@@ -10,9 +10,7 @@ const MyPhotoCardEditor = ({ composedImage }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentTool, setCurrentTool] = useState('draw');
   const [brushColor, setBrushColor] = useState('#000000');
-  const [tempColor, setTempColor] = useState('#000000');
   const [brushSize, setBrushSize] = useState(5);
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [editHistory, setEditHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
@@ -188,15 +186,16 @@ const MyPhotoCardEditor = ({ composedImage }) => {
           </button>
           <button 
             onClick={handleSave}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-white text-red-500 border-2 border-red-500 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2"
           >
             <FaSave />
-            저장하기
+            저장
           </button>
+          
           <button 
             onClick={handleComplete}
             disabled={isSubmitting}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FaCheck />
             {isSubmitting ? '처리중...' : '완료'}

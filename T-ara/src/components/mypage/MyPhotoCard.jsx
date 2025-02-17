@@ -1,82 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTrash, FaDownload, FaMagic, FaImage } from "react-icons/fa";
-import MyPhotoCardImageUpload from './MyPhotoCardImageUpload';  // 이미지 업로드 컴포넌트 import
+import MyPhotoCardImageUpload from './MyPhotoCardImageUpload';
+import api from "../../api";
 
 const MyPhotoCard = () => {
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const [cards, setCards] = useState([
+    { id: 0, date: '2025-01-25', title: '샘플 포토카드', photocardPath: '/assets/corgi.png' }
+  ]);
 
-  // 샘플 카드 데이터
-  const cards = [
-    { id: 1, date: '2025-01-25', title: '별이와 박주찬의 포토카드' },
-    { id: 2, date: '2025-01-25', title: '별이와 박주찬의 포토카드' },
-    { id: 3, date: '2025-01-25', title: '별이와 박주찬의 포토카드' },
-    { id: 4, date: '2025-01-25', title: '별이와 박주찬의 포토카드' },
-    { id: 5, date: '2025-01-25', title: '별이와 박주찬의 포토카드' }
-  ];
+  // useEffect(() => {
+  //   const fetchPhotoCards = async () => {
+  //     try {
+  //       const response = await api.get(`/photocard/list?animalId=${animalId}&pageNum=1&size=10`);
+  //       const photoCards = response.data?.data || [];
+  //       if (photoCards.length > 0) {
+  //         setCards(photoCards);
+  //       }
+  //     } catch (error) {
+  //       console.error("포토카드 조회 오류:", error);
+  //     }
+  //   };
 
-  // 공통으로 사용되는 버튼 스타일
-  const buttonBaseStyle = "flex items-center gap-2 border border-red-500 rounded-md hover:bg-red-50";
+  //   fetchPhotoCards();
+  // }, [animalId]);
 
-  // 액션 버튼 컴포넌트
-  const ActionButton = ({ icon: Icon, text }) => (
-    <button className={`${buttonBaseStyle} px-3 py-1.5 text-sm`}>
-      <Icon size={12} className="text-red-500" />
-      <span className="text-gray-700">{text}</span>
-    </button>
-  );
+  const updatePhotoCard = async (photocardId) => {
+    // 수정부분 수정 필요
+    const newPath = prompt("새로운 포토카드 이미지 URL을 입력하세요:");
+    if (!newPath) return;
+    
+    try {
+      // await api.put(`/photocard/update/${photocardId}`, { photocardPath: newPath });
+      setCards(cards.map(card => card.id === photocardId ? { ...card, photocardPath: newPath } : card));
+    } catch (error) {
+      console.error("포토카드 수정 오류:", error);
+    }
+  };
 
-  // 이미지 업로드 컴포넌트가 표시되면 메인 화면 대신 보여줌
+  const deletePhotoCard = async (photocardId) => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    
+    try {
+      // await api.delete(`/photocard/delete/${photocardId}`);
+      setCards(cards.filter(card => card.id !== photocardId));
+    } catch (error) {
+      console.error("포토카드 삭제 오류:", error);
+    }
+  };
+
   if (showImageUpload) {
     return <MyPhotoCardImageUpload onClose={() => setShowImageUpload(false)} />;
   }
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
-      {/* 헤더 섹션 */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">포토카드</h1>
-        <button 
-          className={`${buttonBaseStyle} px-4 py-2`}
-          onClick={() => setShowImageUpload(true)}  // 클릭 핸들러 수정
-        >
+        <button className="flex items-center gap-2 border border-red-500 rounded-md px-4 py-2 hover:bg-red-50" onClick={() => setShowImageUpload(true)}>
           <FaImage className="text-red-500" size={16} />
           <span className="text-sm text-gray-700">포토카드 만들기</span>
         </button>
       </div>
 
-      {/* 카드 그리드 섹션 */}
       <div className="border-t border-black pt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {cards.map(card => (
             <div key={card.id} className="relative">
-              {/* 카드 이미지 컨테이너 */}
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-gray-100">
-                <img 
-                  src="/assets/corgi.png"
-                  alt="포토카드 이미지" 
-                  className="w-full h-full rounded-[18px] object-cover"
-                />
-                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                <img src={card.photocardPath} alt="포토카드 이미지" className="w-full h-full object-cover" />
+                <button onClick={() => deletePhotoCard(card.id)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
                   <FaTrash size={14} />
                 </button>
               </div>
-              
-              {/* 카드 정보 및 액션 버튼 */}
               <div className="mt-2 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{card.date}</span>
-                </div>
+                <span className="text-sm text-gray-500">{card.date}</span>
                 <h3 className="font-bold text-sm">{card.title}</h3>
                 <div className="flex gap-2">
-                  <ActionButton icon={FaDownload} text="다운로드" />
-                  <ActionButton icon={FaMagic} text="수정" />
+                  <button onClick={() => updatePhotoCard(card.id)} className="flex items-center gap-2 border border-red-500 rounded-md px-3 py-1.5 text-sm hover:bg-red-50">
+                    <FaMagic size={12} className="text-red-500" />
+                    <span className="text-gray-700">수정</span>
+                  </button>
+                  <button className="flex items-center gap-2 border border-red-500 rounded-md px-3 py-1.5 text-sm hover:bg-red-50">
+                    <FaDownload size={12} className="text-red-500" />
+                    <span className="text-gray-700">다운로드</span>
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    
+
       {/* 페이지네이션 */}
       <div className="flex justify-center items-center gap-1 mt-8">
         <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50">«</button>
@@ -85,6 +100,7 @@ const MyPhotoCard = () => {
         <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50">›</button>
         <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50">»</button>
       </div>
+
     </div>
   );
 };

@@ -1,11 +1,10 @@
 // src/api.js
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-// import { isTokenExpired } from './utils/token';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
+  withCredentials: true,          
 });
 
 console.log("VITE_API_BASE_URL", import.meta.env.VITE_API_BASE_URL);
@@ -13,6 +12,9 @@ console.log("VITE_API_BASE_URL", import.meta.env.VITE_API_BASE_URL);
 // 요청 인터셉터: 토큰 만료 시간이 60초 미만이면 /reissue 호출 후 Authorization 헤더 업데이트
 api.interceptors.request.use(
   async (config) => {
+    // 디버깅: 현재 document.cookie를 출력 (쿠키에 refresh_token 포함 여부 확인)
+    console.log("현재 쿠키:", document.cookie);
+
     const token = localStorage.getItem("authToken"); // "Bearer ..." 형식으로 저장되어 있다고 가정
     if (token) {
       // 토큰에서 Bearer 접두어 제거
@@ -22,12 +24,14 @@ api.interceptors.request.use(
         const currentTime = Date.now() / 1000; // 초 단위
         // 토큰 만료 시간까지 남은 시간이 60초 미만이면 reissue 호출
         if (decoded.exp - currentTime < 60) {
+          console.log("토큰 만료 임박, 재발급 요청 시작");
           try {
             // 재발급 요청: 재발급 엔드포인트는 인터셉터의 영향을 피하기 위해 기본 axios 인스턴스를 사용
             const reissueResponse = await axios.get("/member/reissue", {
               baseURL: import.meta.env.VITE_API_BASE_URL,
               withCredentials: true,
             });
+            console.log("재발급 응답:", reissueResponse);
             const newToken =
               reissueResponse.headers.authorization ||
               reissueResponse.headers["Authorization"];
@@ -53,6 +57,8 @@ api.interceptors.request.use(
         config.headers.Authorization = token;
       }
     }
+    // 디버깅: 최종 요청 헤더 출력
+    console.log("최종 요청 config.headers:", config.headers);
     return config;
   },
   (error) => Promise.reject(error)

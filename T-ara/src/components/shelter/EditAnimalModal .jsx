@@ -9,7 +9,6 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
   const [speciesList, setSpeciesList] = useState([]);
   const [breedList, setBreedList] = useState([]);
   const [formData, setFormData] = useState({
-    // formData state 추가
     name: "",
     birth: "",
     gender: "",
@@ -22,6 +21,7 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
     animalStatus: "",
   });
 
+  // 이미지 파일 처리 함수
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -82,81 +82,64 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
 
   // 초기 데이터 설정
   useEffect(() => {
-    if (animal) {
-      // 종 목록과 품종 목록 가져오기
-      const fetchSpeciesAndBreed = async () => {
-        try {
-          // 종 목록 가져오기
-          const speciesResponse = await api.get("/animal/species");
-          if (speciesResponse.data.speciesList) {
-            setSpeciesList(speciesResponse.data.speciesList);
+    const fetchAnimalDetails = async () => {
+      try {
+        // 동물 상세 정보 가져오기
+        const response = await api.get(`/animal/modifyInfo/${animal.animalId}`);
+        const animalInfo = response.data.animalInfo;
 
-            // 현재 동물의 종에 맞는 종 ID 찾기
-            const matchedSpecies = speciesResponse.data.speciesList.find(
-              (species) => species.name === animal.speciesName
+        // 종 목록 가져오기
+        const speciesResponse = await api.get("/animal/species");
+        if (speciesResponse.data.speciesList) {
+          setSpeciesList(speciesResponse.data.speciesList);
+
+          // 현재 동물의 종에 맞는 종 ID 찾기
+          const matchedSpecies = speciesResponse.data.speciesList.find(
+            (species) => species.speciesId === animalInfo.speciesId
+          );
+
+          if (matchedSpecies) {
+            // 해당 종의 품종 목록 가져오기
+            const breedResponse = await api.get(
+              `/animal/breed/${matchedSpecies.speciesId}`
             );
+            if (breedResponse.data?.breedList) {
+              setBreedList(breedResponse.data.breedList);
+            }
 
-            if (matchedSpecies) {
-              // 초기 폼 데이터 설정
-              setFormData({
-                name: animal.animalName || "",
-                birth: animal.birth || "",
-                gender: animal.gender === "M" ? "male" : "female",
-                neuteringStatus: animal.neuteringStatus === "1" ? "yes" : "no",
-                color: animal.color || "",
-                weight: animal.weight || "",
-                description: animal.description || "",
-                speciesId: matchedSpecies.speciesId,
-                breedId: "", // 품종 ID는 아래에서 처리
-                animalStatus: animal.animalStatus || "protecting",
-              });
+            // 초기 폼 데이터 설정
+            setFormData({
+              name: animalInfo.animalName || "",
+              birth: animalInfo.birth || "",
+              gender: animalInfo.gender === "M" ? "male" : "female",
+              neuteringStatus:
+                animalInfo.neuteringStatus === "1" ? "yes" : "no",
+              color: animalInfo.color || "",
+              weight: animalInfo.weight || "",
+              description: animalInfo.description || "",
+              speciesId: animalInfo.speciesId,
+              breedId: animalInfo.breedId,
+              animalStatus: animalInfo.animalStatus || "protecting",
+            });
 
-              // 썸네일 이미지 설정
-              if (animal.thumbnail) {
-                setThumbnailPreview(animal.thumbnail);
-              }
+            // 썸네일 및 추가 이미지 설정
+            if (animalInfo.animalImages && animalInfo.animalImages.length > 0) {
+              // 첫 번째 이미지를 썸네일로 설정
+              setThumbnailPreview(animalInfo.animalImages[0]);
 
-              // 해당 종의 품종 목록 가져오기
-              const breedResponse = await api.get(
-                `/animal/breed/${matchedSpecies.speciesId}`
-              );
-              if (breedResponse.data?.breedList) {
-                setBreedList(breedResponse.data.breedList);
-
-                // 현재 동물의 품종에 맞는 품종 ID 찾기
-                const matchedBreed = breedResponse.data.breedList.find(
-                  (breed) => breed.name === animal.breedName
-                );
-
-                if (matchedBreed) {
-                  // 품종 ID 설정
-                  setFormData((prev) => ({
-                    ...prev,
-                    breedId: matchedBreed.breedId,
-                  }));
-                }
-              }
-
-              // 추가 이미지 설정 (서버에서 추가 이미지 URL 리스트를 제공한다고 가정)
-              if (
-                animal.additionalImages &&
-                animal.additionalImages.length > 0
-              ) {
-                setAdditionalImagePreviews(animal.additionalImages);
-              }
+              // 나머지 이미지를 추가 이미지로 설정
+              setAdditionalImagePreviews(animalInfo.animalImages.slice(1));
             }
           }
-        } catch (error) {
-          console.error("Error fetching species and breeds:", error);
-          // 오류 발생 시 기본값 설정
-          setFormData((prev) => ({
-            ...prev,
-            description: "동물에 대한 정보를 불러오는 중 오류가 발생했습니다.",
-          }));
         }
-      };
+      } catch (error) {
+        console.error("Error fetching animal details:", error);
+        alert("동물 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
 
-      fetchSpeciesAndBreed();
+    if (animal) {
+      fetchAnimalDetails();
     }
   }, [animal]);
 
@@ -200,44 +183,47 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
     e.preventDefault();
 
     try {
+      // 이미지 제외한 기본 데이터
+      const basicData = {
+        animalId: animal.animalId,
+        animalName: formData.name,
+        birth: formData.birth,
+        gender: formData.gender === "male" ? "M" : "F",
+        neuteringStatus: formData.neuteringStatus === "yes" ? "1" : "0",
+        color: formData.color,
+        weight: formData.weight,
+        description: formData.description,
+        speciesId: formData.speciesId,
+        breedId: formData.breedId,
+        animalStatus: formData.animalStatus,
+      };
+
+      // 이미지가 있는 경우 별도 처리
       const formDataToSend = new FormData();
 
-      // 기본 정보 매핑
-      formDataToSend.append("animalName", formData.name);
-      formDataToSend.append("birth", formData.birth);
-      formDataToSend.append("gender", formData.gender === "male" ? "M" : "F");
-      formDataToSend.append(
-        "neuteringStatus",
-        formData.neuteringStatus === "yes" ? "1" : "0"
-      );
-      formDataToSend.append("color", formData.color);
-      formDataToSend.append("weight", formData.weight);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("speciesId", formData.speciesId);
-      formDataToSend.append("breedId", formData.breedId);
-      formDataToSend.append("animalStatus", formData.animalStatus);
+      // 기본 정보 추가
+      Object.keys(basicData).forEach((key) => {
+        formDataToSend.append(key, basicData[key]);
+      });
 
-      // 이미지 처리 (기존 로직 유지)
+      // 썸네일 이미지 추가
       if (mainImage instanceof File) {
         formDataToSend.append("thumbnail", mainImage);
       }
 
+      // 추가 이미지 추가
       additionalImages.forEach((image) => {
         if (image instanceof File) {
           formDataToSend.append("animalImages", image);
         }
       });
 
-      // 동물 정보 수정 API 호출
-      const response = await api.put(
-        `/animal/modifyInfo/${animal.animalId}`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      // API 호출
+      const response = await api.put(`/animal/modify`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (response.status === 200) {
         alert("수정이 완료되었습니다.");
@@ -245,8 +231,12 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
         onClose();
       }
     } catch (error) {
-      console.error("Error updating animal:", error);
-      alert("수정 중 오류가 발생했습니다.");
+      console.error("Error updating animal:", error.response);
+      alert(
+        `수정 중 오류가 발생했습니다: ${
+          error.response?.data?.message || "알 수 없는 오류"
+        }`
+      );
     }
   };
 

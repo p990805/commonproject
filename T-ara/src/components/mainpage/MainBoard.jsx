@@ -71,7 +71,7 @@ const MainBoard = () => {
           ) : (
             displayList.map((notice) => (
               <div
-                key={notice.id}
+                key={notice.noticeId}
                 className="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-none cursor-pointer hover:bg-gray-100 rounded-md transition"
                 onClick={() => navigate(`/community/notice/${notice.noticeId}`)}
               >

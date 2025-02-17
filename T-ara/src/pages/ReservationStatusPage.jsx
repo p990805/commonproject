@@ -1,22 +1,23 @@
-// WalkReservationPage.jsx
+// ReservationStatusPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ReservationModal from "../components/reservation/ReservationModal";
-import ReservationList from "../components/reservation/ReservationList"
+import ReservationState from "../components/reservation/ReservationState";
 
-const WalkReservationPage = () => {
+const ReservationStatusPage = () => {
+  // 별도의 키를 사용: "reservationStatusActiveTab"
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("activeTab") || "산책 예약";
+    return localStorage.getItem("reservationStatusActiveTab") || "예약 현황";
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("activeTab", activeTab);
+    localStorage.setItem("reservationStatusActiveTab", activeTab);
   }, [activeTab]);
 
   useEffect(() => {
     return () => {
-      localStorage.removeItem("activeTab");
+      localStorage.removeItem("reservationStatusActiveTab");
     };
   }, []);
 
@@ -32,7 +33,7 @@ const WalkReservationPage = () => {
 
   return (
     <div className="w-full bg-white relative">
-      {/* 배너 영역: activeTab과 관계없이 항상 표시 */}
+      {/* 배너 영역 */}
       <div className="relative w-full flex items-center justify-end">
         <img
           src="/assets/walkbanner.png"
@@ -56,29 +57,29 @@ const WalkReservationPage = () => {
           <aside className="hidden md:block w-1/4 mr-6">
             <nav className="bg-white rounded border border-gray-300 p-4">
               <ul>
-                  <li className="mb-2">
-                    <button
-                      onClick={() => navigate("/reservation")}
-                      className="w-full text-left px-3 py-2 rounded bg-red-500 text-white"
-                    >
-                      산책 예약
-                    </button>
-                  </li>
-                  <li className="mb-2">
-                    <button
-                      onClick={() => navigate("/reservation-status")}
-                      className="w-full text-left px-3 py-2 rounded bg-white text-gray-700 hover:bg-gray-100"
-                    >
-                      예약현황
-                    </button>
-                  </li>
-                </ul>
-             </nav>
+                <li className="mb-2">
+                  <button
+                    onClick={() => navigate("/reservation")}
+                    className="w-full text-left px-3 py-2 rounded bg-white text-gray-700 hover:bg-gray-100"
+                  >
+                    산책 예약
+                  </button>
+                </li>
+                <li className="mb-2">
+                  <button
+                    onClick={() => navigate("/reservation-status")}
+                    className="w-full text-left px-3 py-2 rounded  bg-red-500 text-white"
+                  >
+                    예약현황
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </aside>
 
           {/* 메인 콘텐츠 영역 */}
           <section className="flex-1 border-y border-gray-300 p-4">
-            <ReservationList handleOpenModal={handleOpenModal} />
+            <ReservationState />
           </section>
         </div>
       </div>
@@ -92,4 +93,4 @@ const WalkReservationPage = () => {
   );
 };
 
-export default WalkReservationPage;
+export default ReservationStatusPage;
