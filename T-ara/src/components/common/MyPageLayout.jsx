@@ -8,12 +8,12 @@ const MyPageLayout = ({ title, children, sidebarMenu }) => {
         <div className="flex">
           {/* 좌측 사이드바 */}
           <aside className="w-1/4 mr-6">
-            <nav className="bg-white rounded border border-gray-300 p-4">
+            <nav className="bg-white rounded border border-gray-300 p-4 shadow-md">
               {sidebarMenu || <MyPageSidebar />}
             </nav>
           </aside>
           {/* 우측 메인 콘텐츠 */}
-          <section className="flex-1 bg-white p-4 rounded border">
+          <section className="flex-1 bg-white p-4 rounded border border-gray-300 shadow-md">
             {children}
           </section>
         </div>

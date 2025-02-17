@@ -8,7 +8,7 @@ const MainVideo = () => {
   };
 
   const handleClickDonate =()=>{
-    navigate('/animal')
+    navigate('/animal');
   }
 
   const handleClickLive=()=>{
@@ -41,7 +41,7 @@ const MainVideo = () => {
           <div className="flex flex-1 border border-white w-full">
             <div className="text-white text-center sm:text-right mt-4 sm:mt-0 p-5 flex flex-col  group w-full">
               <div className="flex flex-col w-full">
-                <h1 className="text-xl sm:text-2xl">정기후원</h1>
+                <h1 className="text-xl sm:text-2xl">후원하기</h1>
                 {/* 변경: hidden -> opacity-0 + transition */}
                 <p
                   className="
@@ -69,7 +69,7 @@ const MainVideo = () => {
           <div className="flex flex-1 border border-white w-full">
             <div className="text-white text-center sm:text-right mt-4 sm:mt-0 p-5 flex flex-col group w-full">
               <div className="flex flex-col">
-                <h1 className="text-xl sm:text-2xl">일시후원</h1>
+                <h1 className="text-xl sm:text-2xl">라이브</h1>
                 <p
                   className="
                   mt-2 text-xs sm:text-sm 

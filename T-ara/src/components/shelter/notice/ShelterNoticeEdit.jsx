@@ -12,28 +12,26 @@ const ShelterNoticeEdit = () => {
     noticeId: "",
     title: "",
     shelterId: "",
-    content: "", // Quill Delta 객체
+    content: { ops: [{ insert: "\n" }] }, // 초기 Quill Delta 객체
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 공지사항 수정 데이터 로드
+  // 수정할 공지사항 데이터를 백엔드에서 로드
   useEffect(() => {
     const fetchNoticeData = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        // /notice/modifyinfo/{noticeId} API 호출
         const modifyInfoResponse = await api.get(
           `/notice/modifyinfo/${noticeId}`,
           { headers: { Authorization: token } }
         );
         const noticeInfo = modifyInfoResponse.data.noticeInfo;
-        // 만약 noticeInfo에 content가 없으면 별도 호출(여기선 이미 포함되었다고 가정)
         setFormData({
           noticeId: noticeInfo.noticeId,
           title: noticeInfo.title,
           shelterId: noticeInfo.shelterId,
-          content: noticeInfo.content, // Delta 객체 형태
+          content: noticeInfo.content || { ops: [{ insert: "\n" }] },
         });
         setLoading(false);
       } catch (err) {
@@ -48,14 +46,14 @@ const ShelterNoticeEdit = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const handleQuillChange = (content) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       content,
     }));
@@ -69,6 +67,7 @@ const ShelterNoticeEdit = () => {
       alert("제목을 입력해주세요.");
       return;
     }
+
     // 내용 유효성 검사 (Quill Delta 객체의 ops 배열 확인)
     let isContentEmpty = false;
     if (typeof formData.content === "string") {
@@ -92,12 +91,12 @@ const ShelterNoticeEdit = () => {
       return;
     }
 
-    // 수정 제출 시, 백엔드에서는 'saveContent' 필드명을 사용합니다.
+    // 백엔드에서는 수정 시 "content" 키로 JSON 객체를 받기를 기대합니다.
     const payload = {
       noticeId: formData.noticeId,
       shelterId: formData.shelterId,
       title: formData.title,
-      saveContent: JSON.stringify(formData.content),
+      content: formData.content, // 객체 그대로 전송 (stringify하지 않음)
     };
 
     console.log("수정 제출 payload:", payload);
@@ -130,7 +129,9 @@ const ShelterNoticeEdit = () => {
           <form onSubmit={handleSubmit} className="w-full bg-white rounded-lg shadow-lg p-6">
             {/* 제목 입력 */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">제목</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                제목
+              </label>
               <input
                 type="text"
                 name="title"
@@ -140,9 +141,11 @@ const ShelterNoticeEdit = () => {
                 required
               />
             </div>
-            {/* 내용 에디터 */}
+            {/* Quill 에디터 */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                내용
+              </label>
               <div className="border border-gray-300 rounded-md">
                 <QuillEditor value={formData.content} onChange={handleQuillChange} />
               </div>

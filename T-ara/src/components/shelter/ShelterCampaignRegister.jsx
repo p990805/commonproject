@@ -1,18 +1,39 @@
 import React, { useState } from "react";
 import SidebarNavigation from "./SidebarNavigation";
 import QuillEditor from "../QuillEditor";
+import api from "../../api";
 
 const ShelterCampaignRegister = () => {
+  const shelterName = localStorage.getItem("shelterName");
   const [formData, setFormData] = useState({
     title: "",
-    description: "", // 간단 설명을 위한 필드 추가
+    description: "",
     content: "",
-    target_amount: "",
-    achieved_amount: "0",
-    started_at: "",
-    ended_at: "",
-    shelter_name: "행복보호소",
+    targetAmount: "",
+    achievedAmount: "0",
+    startedAt: "",
+    endedAt: "",
+    shelterName: shelterName,
   });
+
+  const base64ToFile = async (base64String, filename) => {
+    try {
+      const res = await fetch(base64String);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error("Error converting base64 to file:", error);
+      return null;
+    }
+  };
+
+  const extractImagesFromQuill = (quillContent) => {
+    if (!quillContent || !quillContent.ops) return [];
+
+    return quillContent.ops
+      .filter((op) => op.insert && op.insert.image)
+      .map((op) => op.insert.image);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,9 +50,31 @@ const ShelterCampaignRegister = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+
+    try {
+      const campaignData = {
+        title: formData.title,
+        targetAmount: parseInt(formData.targetAmount),
+        achievedAmount: 0,
+        startedAt: formData.startedAt,
+        endedAt: formData.endedAt,
+        simpleDescription: formData.description,
+        content: formData.content,
+      };
+
+      // API 호출
+      const response = await api.post("/campaigns", campaignData);
+
+      if (response.status === 201 || response.status === 200) {
+        alert("캠페인이 성공적으로 등록되었습니다.");
+        window.history.back();
+      }
+    } catch (error) {
+      console.error("Failed to create campaign:", error);
+      alert("캠페인 등록에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   return (
@@ -65,7 +108,7 @@ const ShelterCampaignRegister = () => {
               />
             </div>
 
-            {/* Description Input - 새로 추가된 부분 */}
+            {/* Description Input */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 간단 설명
@@ -103,8 +146,8 @@ const ShelterCampaignRegister = () => {
                 <div className="relative">
                   <input
                     type="number"
-                    name="target_amount"
-                    value={formData.target_amount}
+                    name="targetAmount"
+                    value={formData.targetAmount}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
@@ -121,8 +164,8 @@ const ShelterCampaignRegister = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    name="shelter_name"
-                    value={formData.shelter_name}
+                    name="shelterName"
+                    value={formData.shelterName}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                     disabled
@@ -139,8 +182,8 @@ const ShelterCampaignRegister = () => {
                 </label>
                 <input
                   type="datetime-local"
-                  name="started_at"
-                  value={formData.started_at}
+                  name="startedAt"
+                  value={formData.startedAt}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
@@ -152,8 +195,8 @@ const ShelterCampaignRegister = () => {
                 </label>
                 <input
                   type="datetime-local"
-                  name="ended_at"
-                  value={formData.ended_at}
+                  name="endedAt"
+                  value={formData.endedAt}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required

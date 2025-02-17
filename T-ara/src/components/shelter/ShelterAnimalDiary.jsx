@@ -1,18 +1,123 @@
-import SidebarNavigation from "./SidebarNavigation";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import SidebarNavigation from "./SidebarNavigation";
+import EditDiaryModal from "./EditDiaryModal";
+import api from "../../api";
 
 const ShelterAnimalDiary = () => {
   const navigate = useNavigate();
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [diaries, setDiaries] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedDiary, setSelectedDiary] = useState(null);
+  const [animals, setAnimals] = useState([]);
+
+  // Search filter states
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [animalId, setAnimalId] = useState("all");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const itemsPerPage = 10;
 
   const handleClick = () => {
-    navigate(`/shelter/diary-register`);
+    navigate("/shelter/diary-register");
   };
+
+  const handleDiaryClick = (diary) => {
+    setSelectedDiary(diary);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSave = () => {
+    fetchDiaries();
+  };
+
+  const fetchAnimals = async () => {
+    try {
+      const response = await api.get("/diary/shelter/list");
+      if (response.data && response.data.animalList) {
+        setAnimals(response.data.animalList);
+      }
+    } catch (error) {
+      console.error("Failed to fetch animals:", error);
+    }
+  };
+
+  const fetchDiaries = useCallback(async () => {
+    try {
+      const params = {
+        animalId: animalId === "all" ? null : animalId,
+        startDate: startDate || "1900-01-01",
+        endDate: endDate || "2999-12-31",
+        page: currentPage,
+        size: itemsPerPage,
+        deleteStatus: 1, // Only fetch non-deleted diaries
+      };
+
+      const response = await api.get("/diary/shelter/list", { params });
+
+      if (response.data) {
+        setDiaries(response.data.diaryList || []);
+        setTotalPages(response.data.totalPages || 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch diaries:", error);
+      setDiaries([]);
+    }
+  }, [animalId, startDate, endDate, currentPage]);
+
+  useEffect(() => {
+    fetchDiaries();
+    fetchAnimals();
+  }, [fetchDiaries]);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchDiaries();
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allDiaryIds = diaries.map((diary) => diary.diaryId);
+      setSelectedItems(allDiaryIds);
+    } else {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleSelectItem = (id) => {
+    setSelectedItems((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(
+        selectedItems.map((diaryId) => api.get(`/diary/delete/${diaryId}`))
+      );
+      fetchDiaries();
+      setSelectedItems([]);
+      alert("선택된 일지가 삭제되었습니다.");
+    } catch (error) {
+      console.error("Failed to delete diaries:", error);
+      alert("일지 삭제에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
-      {/* Sidebar */}
       <SidebarNavigation />
-
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mx-4">
           <div className="flex justify-between items-center mb-6">
@@ -21,11 +126,12 @@ const ShelterAnimalDiary = () => {
             </h1>
             <button
               onClick={handleClick}
-              className="flex items-center justify-center px-5 h-10 bg-[#2f69dd] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
+              className="flex items-center justify-center px-5 h-10 bg-[#235fd9] text-white text-sm font-medium rounded hover:bg-[#1e51b8] transition-colors"
             >
               동물일지 작성하기
             </button>
           </div>
+
           {/* Search Filters */}
           <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
             <div className="border border-[#dee1e8]">
@@ -33,7 +139,7 @@ const ShelterAnimalDiary = () => {
               <div className="flex">
                 <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
                   <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    등록 기간
+                    작성 기간
                   </span>
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
@@ -41,50 +147,41 @@ const ShelterAnimalDiary = () => {
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2024-10-23"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span className="mx-4 !text-[#575757]">-</span>
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2025-01-23"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Category Filter */}
+              {/* Animal Filter */}
               <div className="flex">
                 <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
                   <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    동물 카테고리
+                    동물 선택
                   </span>
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
+                    <select
+                      value={animalId}
+                      onChange={(e) => setAnimalId(e.target.value)}
+                      className="w-64 h-7 px-3 bg-white border border-[#cccccc] text-[#191919] text-xs"
+                    >
+                      <option value="all">전체</option>
+                      {animals.map((animal) => (
+                        <option key={animal.animalId} value={animal.animalId}>
+                          {animal.name}
+                        </option>
+                      ))}
                     </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Search Keyword */}
-              <div className="flex">
-                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
-                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    검색 키워드
-                  </span>
-                </div>
-                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
-                  <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
-                    </select>
-                    <input
-                      type="text"
-                      className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
-                    />
                   </div>
                 </div>
               </div>
@@ -92,17 +189,16 @@ const ShelterAnimalDiary = () => {
 
             {/* Search Button */}
             <div className="flex justify-center mt-5">
-              <button className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]">
+              <button
+                onClick={handleSearch}
+                className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]"
+              >
                 검색
               </button>
             </div>
           </div>
-          {/* Donation List Title */}
-          <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
-            동물 일지 전체 목록
-          </div>
 
-          {/* Donation List Table */}
+          {/* Diary List */}
           <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
             {/* List Header */}
             <div className="px-3 py-3 border-b border-[#dee1e8]">
@@ -110,77 +206,114 @@ const ShelterAnimalDiary = () => {
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     [
-                  </span>
-                  <div className="mx-1">
-                    <span className="!text-[#191919] text-sm font-semibold">
-                      전체 항목 총{" "}
-                    </span>
-                    <span className="!text-[#235fd9] text-sm font-bold">0</span>
-                    <span className="!text-[#191919] text-sm font-semibold">
-                      건
-                    </span>
-                  </div>
-                  <span className="!text-[#191919] text-[15px] font-semibold">
+                    {selectedItems.length > 0
+                      ? `${selectedItems.length}개의 항목 선택됨`
+                      : `전체 항목 총 ${diaries.length}건`}
                     ]
                   </span>
                 </div>
-                <div className="flex gap-3">
-                  <select className="w-[131px] h-7 px-3 border border-[#cccccc] !text-[#191919] text-xs">
-                    <option>최신순</option>
-                  </select>
+                <div className="flex gap-3 items-center">
+                  {selectedItems.length > 0 && (
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="px-4 py-1.5 bg-red-500 text-white rounded text-xs"
+                    >
+                      삭제
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Table Container with margin */}
-            <div className="mx-4 my-4">
-              {/* Table Header */}
-              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-                <div className="flex">
-                  <div className="w-16 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    지출 코드
-                  </div>
-                  <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원자명
-                  </div>
-                  <div className="w-28 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원자 아이디
-                  </div>
-                  <div className="w-24 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원 분류
-                  </div>
-                  <div className="flex-1 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원 프로젝트 명
-                  </div>
-                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원 대상
-                  </div>
-                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원 금액
-                  </div>
-                  <div className="w-32 p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    후원일시
-                  </div>
-                </div>
-              </div>
+            {/* Table */}
+            <div className="relative overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#f0f3fc]">
+                  <tr>
+                    <th className="w-[4%] p-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedItems.length === diaries.length &&
+                          diaries.length > 0
+                        }
+                        onChange={handleSelectAll}
+                        className="w-4 h-4"
+                      />
+                    </th>
+                    <th className="w-[10%] p-4 text-left">일지 번호</th>
+                    <th className="w-[10%] p-4 text-left">동물 번호</th>
+                    <th className="w-[10%] p-4 text-left">동물 이름</th>
+                    <th className="w-[10%] p-4 text-left">제목</th>
+                    <th className="w-[10%] p-4 text-left">작성일자</th>
+                    <th className="w-[10%] p-4 text-left">등록일시</th>
+                    <th className="w-[10%] p-4 text-left">삭제 상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {diaries.map((diary) => (
+                    <tr key={diary.diaryId} className="border-b">
+                      <td className="p-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(diary.diaryId)}
+                          onChange={() => handleSelectItem(diary.diaryId)}
+                          className="w-4 h-4"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => handleDiaryClick(diary)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {diary.diaryId}
+                        </button>
+                      </td>
+                      <td className="p-4">{diary.animalId}</td>
+                      <td className="p-4">{diary.animalName}</td>
+                      <td className="p-4">{diary.title}</td>
+                      <td className="p-4">{diary.writtenDate}</td>
+                      <td className="p-4">{diary.createdAt}</td>
+                      <td className="p-4">
+                        {diary.deleteStatus === 1 ? "활성" : "삭제됨"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center py-5 gap-4">
-              <button className="w-3.5 h-3.5 rotate-180">◀</button>
-              <div className="flex gap-5">
-                <span className="!text-[#235fd9] text-[13px] font-bold">1</span>
-                <span className="!text-[#5a738e] text-[13px]">2</span>
-                <span className="!text-[#5a738e] text-[13px]">3</span>
-                <span className="!text-[#5a738e] text-[13px]">4</span>
-                <span className="!text-[#5a738e] text-[13px]">5</span>
-                <span className="!text-[#5a738e] text-[13px]">6</span>
+            <div className="flex justify-center mt-4">
+              <div className="flex items-center space-x-2">
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === index + 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
               </div>
-              <button className="w-3.5 h-3.5">▶</button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <EditDiaryModal
+          diary={selectedDiary}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 };

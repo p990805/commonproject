@@ -71,6 +71,8 @@ const TermsOfUse = lazy(() => import("./pages/footer/TermsOfUse"));
 const PasswordCheckPage = lazy(() => import("./pages/mypage/PasswordCheckPage"));
 const PageNotFound = lazy(() => import("./components/PageNotFound"));
 const ShelterNoticeEdit = lazy(() => import("./components/shelter/notice/ShelterNoticeEdit"));
+const NoticeDetail = lazy(() => import("./components/shelter/notice/NoticeDetail"));
+const ReservationStatusPage = lazy(() => import("./pages/ReservationStatusPage"));
 
 
 const AppRouter = () => {
@@ -115,21 +117,12 @@ const AppRouter = () => {
         <Route path="/shelter/animal-register" element={<ShelterProtectedRoute><ShelterAnimalRegister /></ShelterProtectedRoute>}/>
         <Route path="/shelter/animal-diary" element={<ShelterProtectedRoute><ShelterAnimalDiary /></ShelterProtectedRoute>}/>
         <Route path="/shelter/diary-register" element={<ShelterProtectedRoute><ShelterAnimalDiaryRegister /></ShelterProtectedRoute>}/>
-        <Route path="/shelter/walk" element={
-            // <ShelterProtectedRoute>
-              <ShelterWalkReservation />
-            // </ShelterProtectedRoute>
-          }
-        />
-        <Route path="/shelter/photo" element={
-            // <ShelterProtectedRoute>
-              <ShelterPhotoUpload />
-            // </ShelterProtectedRoute>
-          }
-        />
+        <Route path="/shelter/walk" element={<ShelterProtectedRoute><ShelterWalkReservation /></ShelterProtectedRoute>}/>
+        <Route path="/shelter/photo" element={<ShelterProtectedRoute><ShelterPhotoUpload /></ShelterProtectedRoute>}/>
         <Route path="/shelter/notice" element={<ShelterProtectedRoute><ShelterNotice /></ShelterProtectedRoute>}/>
         <Route path="/shelter/notice-register" element={<ShelterProtectedRoute><ShelterNoticeRegister /></ShelterProtectedRoute>}/>
         <Route path="/shelter/notice/edit/:noticeId" element={<ShelterProtectedRoute><ShelterNoticeEdit /></ShelterProtectedRoute>}/>
+        <Route path="/shelter/notice/:noticeId" element={<ShelterProtectedRoute><NoticeDetail /></ShelterProtectedRoute>}/>
         <Route path="/shelter/live" element={<ShelterProtectedRoute><StartLive /></ShelterProtectedRoute>}/>
         <Route path="/shelter/info" element={<ShelterProtectedRoute><ShelterInfo /></ShelterProtectedRoute>}/>
 
@@ -137,6 +130,7 @@ const AppRouter = () => {
         <Route path="/shelter/:id" element={<ShelterDetailPage />} />
         <Route path="/donation" element={<DonationPage />} />
         <Route path="/reservation" element={<WalkReservationPage />} />
+        <Route path="/reservation-status" element={<ReservationStatusPage />} />
         <Route path="/live" element={<LivePage />} />
         <Route path="/campaign" element={<CampaignPage />} />
         <Route path="/campaign/:id" element={<CampaignDetail />} />

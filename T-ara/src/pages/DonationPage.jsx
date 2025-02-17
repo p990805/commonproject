@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import DonationFieldSelect from "../components/payment/DonationFieldSelect";
 import PatronInformation from "../components/payment/PatronInformation";
 import api from "../api"; // api.js import 추가
 
 const DonationPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedAmount, setSelectedAmount] = useState(30000);
   const [customAmount, setCustomAmount] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentDay, setPaymentDay] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
+  const [fixedDonationTarget, setFixedDonationTarget] = useState(null);
   const [donationType, setDonationType] = useState("shelter");
   const [donationMode, setDonationMode] = useState("monthly");
   const [agreements, setAgreements] = useState({
@@ -31,6 +33,30 @@ const DonationPage = () => {
 
   // 사용자 정보 가져오기
   useEffect(() => {
+    const state = location.state;
+
+    console.log("전체 location.state:", state);
+
+    if (state && state.animalInfo) {
+      // 개별 유기동물 후원으로 고정
+      setDonationType("individual");
+      setFixedDonationTarget({
+        type: "animal",
+        id: state.animalInfo.id,
+        name: state.animalInfo.animalName,
+        shelterName: state.animalInfo.shelterName,
+        shelterId: state.animalInfo.shelterId,
+      });
+
+      console.log("fixedDonationTarget 설정:", {
+        type: state.animalInfo.id,
+        id: state.animalInfo.id,
+        name: state.animalInfo.animalName,
+        shelterName: state.animalInfo.shelterName,
+        shelterId: state.animalInfo.shelterId,
+      });
+    }
+
     const fetchDonorInfo = async () => {
       setIsLoading(true);
       try {
@@ -59,7 +85,7 @@ const DonationPage = () => {
     };
 
     fetchDonorInfo();
-  }, []);
+  }, [location.state]);
 
   // setDonationMode 함수를 수정하여 초기화 로직 추가
   const resetDonationFields = (mode) => {
@@ -152,7 +178,10 @@ const DonationPage = () => {
     if (!validateDonation()) return;
 
     const { IMP } = window;
-    IMP.init("imp18166354");
+    //시원이꺼
+    //IMP.init("imp18166354");
+    //희주
+    IMP.init("imp72516258");
 
     const paymentData = {
       pg: selectedMethod === "card" ? "tosspayments" : "kakaopay.TCSUBSCRIP",
@@ -177,7 +206,10 @@ const DonationPage = () => {
             donationType: "monthly",
             donatedDate: paymentDay,
             dataSource: donationType === "shelter" ? "shelter" : "animal",
-            relationalId: donationType === "shelter" ? 10 : 41,
+            relationalId:
+              donationType === "shelter"
+                ? fixedDonationTarget.shelterId
+                : fixedDonationTarget.id,
             amount: selectedAmount,
           };
 
@@ -226,7 +258,10 @@ const DonationPage = () => {
             ...response,
             donationType: "general",
             dataSource: donationType === "shelter" ? "shelter" : "animal",
-            relationalId: donationType === "shelter" ? 10 : 41,
+            relationalId:
+              donationType === "shelter"
+                ? fixedDonationTarget.shelterId
+                : fixedDonationTarget.id,
           };
 
           console.log("서버로 전송할 데이터:", serverData);
@@ -294,7 +329,7 @@ const DonationPage = () => {
               <div className="space-y-4">
                 {/* 보호소 후원 */}
                 <div
-                  className={`p-4 border rounded-md cursor-pointer ${
+                  className={`p-4 border rounded-md ${
                     donationType === "shelter"
                       ? "border-red-500"
                       : "border-gray-300"
@@ -310,27 +345,25 @@ const DonationPage = () => {
                     />
                     <h3 className="text-base font-medium">보호소 후원</h3>
                   </div>
-                  {donationType === "shelter" && (
-                    <div className="mt-4">
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          className="flex-1 border rounded-md py-2 px-3"
-                          placeholder="보호소 검색"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="px-4 py-2 border rounded-md text-gray-600">
-                          검색
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-4">
+                    <input
+                      type="text"
+                      className="w-full border rounded-md py-2 px-3"
+                      placeholder="보호소 검색"
+                      value={
+                        fixedDonationTarget?.type === "animal"
+                          ? fixedDonationTarget.shelterName
+                          : searchTerm
+                      }
+                      readOnly={fixedDonationTarget?.type === "animal"}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 {/* 개별 유기동물 후원 */}
                 <div
-                  className={`p-4 border rounded-md cursor-pointer ${
+                  className={`p-4 border rounded-md ${
                     donationType === "individual"
                       ? "border-red-500"
                       : "border-gray-300"
@@ -348,22 +381,20 @@ const DonationPage = () => {
                       개별 유기동물 후원
                     </h3>
                   </div>
-                  {donationType === "individual" && (
-                    <div className="mt-4">
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          className="flex-1 border rounded-md py-2 px-3"
-                          placeholder="[광주 동물보호소] 맥스"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="px-4 py-2 border rounded-md text-gray-600">
-                          검색
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-4">
+                    <input
+                      type="text"
+                      className="w-full border rounded-md py-2 px-3"
+                      placeholder="동물 이름"
+                      value={
+                        fixedDonationTarget?.type === "animal"
+                          ? fixedDonationTarget.name
+                          : searchTerm
+                      }
+                      readOnly={fixedDonationTarget?.type === "animal"}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -586,6 +617,7 @@ const DonationPage = () => {
               amount={selectedAmount}
               donationMode={donationMode}
               donationType={donationType}
+              searchTerm={searchTerm}
             />
             <PatronInformation donor={donor} />
           </div>
