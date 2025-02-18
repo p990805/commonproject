@@ -198,6 +198,7 @@ const ShelterDonationUsage = () => {
               </button>
             </div>
           </div>
+
           {/* Donation List Title */}
           <div className="!text-[#191919] text-lg font-bold font-['Roboto'] leading-tight mb-6">
             후원금 사용 전체 목록

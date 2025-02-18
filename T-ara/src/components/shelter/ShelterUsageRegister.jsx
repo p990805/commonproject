@@ -2,12 +2,15 @@ import SidebarNavigation from "./SidebarNavigation";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { FaTimes } from "react-icons/fa";
+import api from "../../api";
 
 const ShelterUsageRegister = () => {
   const navigate = useNavigate();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [ocrResult, setOcrResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     storeName: "",
     businessNumber: "",
@@ -27,6 +30,28 @@ const ShelterUsageRegister = () => {
     "설비/기자재",
     "기타"
   ];
+
+  // 사용분야 옵션
+  const usageFieldOptions = [
+    "동물",
+    "보호소"
+  ];
+
+  const formatDateString = (dateStr) => {
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      const year = parts[0].length === 2 ? '20' + parts[0] : parts[0];
+      const month = parts[1].padStart(2, '0');
+      const day = parts[2].padStart(2, '0');
+      return `${year}${month}${day}`;
+    }
+    return dateStr;
+  };
+  
+  const convertDateToServerFormat = (dateStr) => {
+    if (!dateStr) return '';
+    return dateStr.replace(/-/g, '');
+  };
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -68,26 +93,33 @@ const ShelterUsageRegister = () => {
       
       // OCR 결과를 폼 데이터로 변환
       const receipt = response.data?.images?.[0]?.receipt?.result;
+      // OCR 결과를 폼 데이터로 변환하는 부분
       if (receipt) {
+        // OCR에서 받은 날짜를 YYYYMMDD 형식으로 변환
+        const ocrDate = receipt.paymentInfo?.date?.text || 
+                      receipt.paymentInfo?.date?.formatted?.value || "";
+        let formattedDate = ocrDate.replace(/[^0-9]/g, ''); // 숫자만 추출
+        
+        // 2자리 연도를 4자리로 변환 (예: 24 -> 2024)
+        if (formattedDate.length === 6) { // YYMMDD 형식인 경우
+          formattedDate = `20${formattedDate}`;
+        }
+
         const items = receipt.subResults?.[0]?.items?.map(item => ({
           name: item.name?.text || item.name?.formatted?.value || "",
-          count: item.count?.text || item.count?.formatted?.value || "",
-          price: (item.price?.price?.text || item.price?.price?.formatted?.value || "").replace(/원$/, ""),
+          count: (item.count?.text || item.count?.formatted?.value || "").replace(/[^0-9]/g, ''), // 숫자만 추출
+          price: (item.price?.price?.text || item.price?.price?.formatted?.value || "").replace(/[^0-9]/g, ''), // 숫자만 추출
           category: "",
-          isOCR: true // OCR로 인식된 항목 표시
+          isOCR: true
         })) || [];
 
-        let totalAmount = receipt.totalPrice?.price?.text || 
-                         receipt.totalPrice?.price?.formatted?.value || "";
-        // '원'이 없는 경우 추가
-        if (!totalAmount.endsWith('원')) {
-          totalAmount += '원';
-        }
+        let totalAmount = (receipt.totalPrice?.price?.text || 
+                        receipt.totalPrice?.price?.formatted?.value || "").replace(/[^0-9]/g, ''); // 숫자만 추출
 
         setFormData({
           storeName: receipt.storeInfo?.name?.text || receipt.storeInfo?.name?.formatted?.value || "",
           businessNumber: receipt.storeInfo?.bizNum?.text || receipt.storeInfo?.bizNum?.formatted?.value || "",
-          date: receipt.paymentInfo?.date?.text || receipt.paymentInfo?.date?.formatted?.value || "",
+          date: formattedDate,
           time: receipt.paymentInfo?.time?.text || receipt.paymentInfo?.time?.formatted?.value || "",
           totalAmount: totalAmount,
           paymentMethod: receipt.paymentInfo?.cardInfo?.company?.text || 
@@ -111,9 +143,10 @@ const ShelterUsageRegister = () => {
 
   // 폼 데이터 업데이트 핸들러
   const handleInputChange = (e, field) => {
+    const { value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [field]: e.target.value
+      [field]: value
     }));
   };
 
@@ -131,7 +164,7 @@ const ShelterUsageRegister = () => {
   const handleAddItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { name: "", count: "", price: "", category: "", isOCR: false }]
+      items: [...prev.items, { name: "", count: "", price: "", category: "", usageField: "", isOCR: false }]
     }));
   };
 
@@ -141,6 +174,61 @@ const ShelterUsageRegister = () => {
       ...prev,
       items: prev.items.filter((_, i) => i !== index)
     }));
+  };
+
+  const handleSubmit = async () => {
+    // 데이터 검증 로직
+    const isValid = formData.items.every(item => 
+      item.name && item.count && item.price && item.category && item.usageField
+    );
+  
+    if (!isValid) {
+      alert("모든 항목의 정보를 완전히 입력해주세요.");
+      return;
+    }
+ 
+    if (!formData.date) {
+      alert("날짜를 선택해주세요.");
+      return;
+    }
+  
+    try {
+      setIsSubmitting(true);
+  
+      // 제출용 데이터 포맷팅
+      const submitData = {
+        expenseDate: convertDateToServerFormat(formData.date),
+        amount: parseInt(formData.totalAmount.replace(/[^0-9]/g, '')),
+        content: formData.items.map(item => 
+          `구매 품목: ${item.name} (${item.count}개)`
+        ).join(', '),
+        expenseItems: formData.items.map(item => ({
+          name: item.name,
+          quantity: parseInt(item.count.replace(/[^0-9]/g, '')),
+          price: parseInt(item.price.replace(/[^0-9]/g, '')),
+          category: item.category,
+          usageField: item.usageField
+        }))
+      };
+
+      return api.post("/shelter/receipt", submitData)
+        .then(response => {
+          console.log("전송 성공:", response);
+          alert('영수증이 성공적으로 등록되었습니다.');
+          navigate('/shelter/usage-list');
+        })
+        .catch(error => {
+          console.error('영수증 제출 중 오류 발생:', error);
+          alert(error.response?.data?.message || '영수증 제출 중 오류가 발생했습니다.');
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    } catch (error) {
+      console.error('데이터 준비 중 오류 발생:', error);
+      alert('데이터 준비 중 오류가 발생했습니다.');
+      setIsSubmitting(false);
+    }
   };
 
   const renderForm = () => {
@@ -155,7 +243,7 @@ const ShelterUsageRegister = () => {
               value={formData.storeName}
               onChange={(e) => handleInputChange(e, 'storeName')}
               className="w-full p-2 border rounded bg-gray-50"
-              readOnly
+              readOnly={ocrResult ? false : !!formData.storeName}
             />
           </div>
           <div>
@@ -165,17 +253,16 @@ const ShelterUsageRegister = () => {
               value={formData.businessNumber}
               onChange={(e) => handleInputChange(e, 'businessNumber')}
               className="w-full p-2 border rounded bg-gray-50"
-              readOnly
+              readOnly={ocrResult ? false : !!formData.storeName}
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">날짜</label>
             <input
-              type="text"
+              type="date"
               value={formData.date}
               onChange={(e) => handleInputChange(e, 'date')}
-              className="w-full p-2 border rounded bg-gray-50"
-              readOnly
+              className="w-full p-2 border rounded"
             />
           </div>
           <div>
@@ -185,7 +272,7 @@ const ShelterUsageRegister = () => {
               value={formData.time}
               onChange={(e) => handleInputChange(e, 'time')}
               className="w-full p-2 border rounded bg-gray-50"
-              readOnly
+              readOnly={ocrResult ? false : !!formData.storeName}
             />
           </div>
         </div>
@@ -201,7 +288,7 @@ const ShelterUsageRegister = () => {
                 value={formData.totalAmount}
                 onChange={(e) => handleInputChange(e, 'totalAmount')}
                 className="w-full p-2 border rounded bg-gray-50"
-                readOnly
+                readOnly={ocrResult ? false : !!formData.storeName}
               />
             </div>
             <div>
@@ -211,7 +298,7 @@ const ShelterUsageRegister = () => {
                 value={formData.paymentMethod}
                 onChange={(e) => handleInputChange(e, 'paymentMethod')}
                 className="w-full p-2 border rounded bg-gray-50"
-                readOnly
+                readOnly={ocrResult ? false : !!formData.storeName}
               />
             </div>
           </div>
@@ -228,10 +315,17 @@ const ShelterUsageRegister = () => {
               항목 추가
             </button>
           </div>
+          <div className="grid grid-cols-19 gap-3 mb-2 text-sm font-medium text-gray-600">
+            <div className="col-span-7">구매 물품</div>
+            <div className="col-span-2">구매 개수</div>
+            <div className="col-span-3">구매 금액</div>
+            <div className="col-span-4">카테고리</div>
+            <div className="col-span-3">사용분야</div>
+          </div>
           <div className="space-y-3">
             {formData.items.map((item, index) => (
-              <div key={index} className="flex gap-3 items-start">
-                <div className="flex-1">
+              <div key={index} className="grid grid-cols-19 gap-3 items-start">
+                <div className="col-span-7 relative">
                   <input
                     type="text"
                     value={item.name}
@@ -240,8 +334,16 @@ const ShelterUsageRegister = () => {
                     className={`w-full p-2 border rounded ${item.isOCR ? 'bg-gray-50' : ''}`}
                     readOnly={item.isOCR}
                   />
+                  {!item.isOCR && (
+                    <button
+                      onClick={() => handleRemoveItem(index)}
+                      className="absolute right-2 top-2.5 text-gray-400 hover:text-red-500"
+                    >
+                      <FaTimes size={16} />
+                    </button>
+                  )}
                 </div>
-                <div className="w-24">
+                <div className="col-span-2">
                   <input
                     type="text"
                     value={item.count}
@@ -251,17 +353,18 @@ const ShelterUsageRegister = () => {
                     readOnly={item.isOCR}
                   />
                 </div>
-                <div className="w-32">
+                <div className="col-span-3 relative">
                   <input
                     type="text"
                     value={item.price}
                     onChange={(e) => handleItemChange(index, 'price', e.target.value)}
                     placeholder="가격"
-                    className={`w-full p-2 border rounded ${item.isOCR ? 'bg-gray-50' : ''}`}
+                    className={`w-full p-2 border rounded ${item.isOCR ? 'bg-gray-50' : ''} pr-8`}
                     readOnly={item.isOCR}
                   />
+                  <span className="absolute right-3 top-2.5 text-gray-500">원</span>
                 </div>
-                <div className="w-40">
+                <div className="col-span-4">
                   <select
                     value={item.category}
                     onChange={(e) => handleItemChange(index, 'category', e.target.value)}
@@ -273,14 +376,18 @@ const ShelterUsageRegister = () => {
                     ))}
                   </select>
                 </div>
-                {!item.isOCR && (
-                  <button
-                    onClick={() => handleRemoveItem(index)}
-                    className="px-2 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                <div className="col-span-3">
+                  <select
+                    value={item.usageField}
+                    onChange={(e) => handleItemChange(index, 'usageField', e.target.value)}
+                    className="w-full p-2 border rounded"
                   >
-                    삭제
-                  </button>
-                )}
+                    <option value="">사용분야 선택</option>
+                    {usageFieldOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ))}
           </div>
@@ -356,14 +463,19 @@ const ShelterUsageRegister = () => {
                 {/* 폼 렌더링 */}
                 {!isLoading && ocrResult && renderForm()}
 
-                <div className="flex justify-center gap-4 mt-8">
-                  <button
-                    className="w-40 h-12 bg-[#4763E4] text-white rounded hover:bg-[#3951d3]"
-                    disabled={isLoading}
-                  >
-                    등록 완료
-                  </button>
-                </div>
+                {/* 등록 완료 버튼 */}
+                {!isLoading && ocrResult && (
+                  <div className="flex justify-center gap-4 mt-8">
+                    <button
+                      onClick={handleSubmit}
+                      className="w-40 h-12 bg-[#4763E4] text-white rounded hover:bg-[#3951d3]"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? '등록 중...' : '등록 완료'}
+                    </button>
+                  </div>
+                )}
+
               </div>
             </div>
           </div>

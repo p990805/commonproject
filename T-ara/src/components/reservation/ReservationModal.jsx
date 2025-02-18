@@ -6,72 +6,28 @@ import { FaCircle } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
 import CalendarModule from "./Calender";
 import SmallModal from "./SmallModal";
-import api from "../../api"; // API 호출을 위해 추가
+import api from "../../api";
 
-function ReservationModal({ isOpen, onClose }) {
+function ReservationModal({ isOpen, onClose, animalId }) {
   if (!isOpen) return null;
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [answerModalOpen, setAnswerModalOpen] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(null); // 선택한 시간 (예: "15:00")
+  const [selectedTime, setSelectedTime] = useState(null);
 
   const handleAnswer = () => {
     setAnswerModalOpen(true);
   };
 
-  const handleReservation = async () => {
+  const handleReservation = () => {
     if (selectedDate && selectedTime) {
-      // 선택한 날짜와 시간을 "YYYY-MM-DD HH:mm:ss" 형식으로 합칩니다.
-      const year = selectedDate.getFullYear();
-      const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
-      const day = selectedDate.getDate().toString().padStart(2, "0");
-      const walk_at = `${year}-${month}-${day} ${selectedTime}:00`;
-
-      // 여기서는 animal_id를 1로 하였으나, 필요에 따라 다른 값으로 설정하세요.
-      const payload = {
-        animal_id: 1,
-        walk_at: walk_at,
-      };
-
-      console.log("예약 요청 payload:", payload);
-
-      try {
-        // 백엔드에 예약 요청을 보내는 API 호출 (엔드포인트와 로직은 실제 상황에 맞게 수정)
-        const token = localStorage.getItem("authToken");
-        const response = await api.post("/animal/walk", payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-        });
-        alert(response.data.message || "예약 요청이 완료되었습니다.");
-        setCompleteModalOpen(true);
-      } catch (error) {
-        console.error("예약 오류:", error);
-        alert("예약 요청에 실패하였습니다.");
-      }
+      setAlertOpen(true);
     } else {
       alert("예약할 날짜와 시간을 선택해주세요.");
     }
   };
-
-  const answerMessage = (
-    <div className="flex flex-col">
-      <p>자세한 사항은 아래 연락처로 문의해주시기 바랍니다.</p>
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-1 items-center">
-          <IoCallOutline />
-          <p>보호소 연락처 : 062-xxx-xxxx</p>
-        </div>
-        <div className="flex gap-1 items-center">
-          <MdAlternateEmail />
-          <p>보호소 이메일 : p9090@nave.co</p>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -79,16 +35,14 @@ function ReservationModal({ isOpen, onClose }) {
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
       {/* 모달 컨테이너 */}
       <div className="relative z-10 bg-white w-[73%] max-h-[90vh] overflow-y-auto rounded shadow-md p-4">
-        {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 font-bold"
         >
           ✕
         </button>
-
         <div className="flex">
-          {/* 왼쪽 섹션 (40%) */}
+          {/* 왼쪽 섹션 */}
           <div className="flex flex-col w-1/2 border-r border-gray-300 gap-2 p-5">
             <img src="/assets/corgi.png" alt="예약 이미지" className="w-70 h-40" />
             <h1 className="text-xl text-gray-500 font-bold">시원</h1>
@@ -120,8 +74,7 @@ function ReservationModal({ isOpen, onClose }) {
               </p>
             </div>
           </div>
-
-          {/* 오른쪽 섹션 (60%) */}
+          {/* 오른쪽 섹션 */}
           <div className="p-5 w-1/2">
             <div className="flex justify-between">
               <h1 className="text-xl font-bold">날짜를 선택하세요</h1>
@@ -136,10 +89,7 @@ function ReservationModal({ isOpen, onClose }) {
                 </div>
               </div>
             </div>
-
             <CalendarModule onSelectDate={setSelectedDate} />
-
-            {/* 시간 선택 버튼 영역 */}
             <div className="w-full flex gap-7 mt-4">
               <button
                 onClick={() => setSelectedTime("15:00")}
@@ -162,7 +112,6 @@ function ReservationModal({ isOpen, onClose }) {
                 16:00
               </button>
             </div>
-
             <div className="font-bold flex flex-col gap-1 mt-4">
               <p>유의사항</p>
               <div className="flex items-center gap-1">
@@ -170,7 +119,6 @@ function ReservationModal({ isOpen, onClose }) {
                 <p>보호소 상황에 따라 예약이 취소될 수 있습니다.</p>
               </div>
             </div>
-
             <div className="mt-4 flex justify-between">
               <button
                 onClick={handleAnswer}
@@ -188,8 +136,7 @@ function ReservationModal({ isOpen, onClose }) {
           </div>
         </div>
       </div>
-
-      {/* 첫번째 SmallModal: 날짜 확인 모달 */}
+      {/* 예약 날짜 확인 모달 */}
       <SmallModal
         isOpen={alertOpen}
         onClose={() => setAlertOpen(false)}
@@ -199,28 +146,47 @@ function ReservationModal({ isOpen, onClose }) {
             ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
             : ""
         } 입니다.\n맞습니까?`}
-        onConfirm={() => {
-          console.log("날짜 확인 완료");
+        onConfirm={async () => {
           setAlertOpen(false);
-          setCompleteModalOpen(true);
+          const year = selectedDate.getFullYear();
+          const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
+          const day = selectedDate.getDate().toString().padStart(2, "0");
+          const walk_at = `${year}-${month}-${day} ${selectedTime}:00`;
+
+          const payload = {
+            animalId, // 부모에서 전달받은 animalId 사용
+            walkAt: walk_at,
+          };
+
+          console.log("예약 요청 payload:", payload);
+
+          try {
+            const token = localStorage.getItem("authToken");
+            await api.post("/walk/register", payload, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: token,
+              },
+            });
+            setCompleteModalOpen(true);
+          } catch (error) {
+            console.error("예약 오류:", error);
+            alert("예약 요청에 실패하였습니다.");
+          }
         }}
       />
-
-      {/* 두번째 SmallModal: 예약 완료 모달 */}
+      {/* 예약 완료 모달 */}
       <SmallModal
         isOpen={completeModalOpen}
         onClose={() => setCompleteModalOpen(false)}
         title="🐕"
         message="예약 신청이 완료되었습니다."
         onConfirm={() => {
-          console.log("예약 완료 확인");
-          alert("예약 완료");
           setCompleteModalOpen(false);
-          setAlertOpen(false);
-          // 여기서 추가 로직 구현 가능 (예: 페이지 이동 등)
+          onClose();
         }}
       />
-
+      {/* 보호소 문의 모달 */}
       <SmallModal
         isOpen={answerModalOpen}
         onClose={() => setAnswerModalOpen(false)}
@@ -240,9 +206,7 @@ function ReservationModal({ isOpen, onClose }) {
             </div>
           </div>
         }
-        onConfirm={() => {
-          setAnswerModalOpen(false);
-        }}
+        onConfirm={() => setAnswerModalOpen(false)}
       />
     </div>
   );

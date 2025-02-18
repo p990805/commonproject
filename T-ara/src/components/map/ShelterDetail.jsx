@@ -17,12 +17,46 @@ const CloseIcon = () => (
   </svg>
 );
 
-const ShelterDetail = ({ shelter, onClose }) => {
+// cityCategoryId에 따른 지역명을 매핑하는 객체
+const cityCategoryMapping = {
+  "1": "서울",
+  "2": "경기",
+  "3": "인천",
+  "4": "강원",
+  "5": "충북",
+  "6": "대전/충남/세종",
+  "7": "대구/경북",
+  "8": "전북",
+  "9": "광주/전남",
+  "10": "부산/울산/경남",
+  "11": "제주",
+};
+
+const ShelterDetail = ({ shelter, onClose,regionId }) => {
   const navigate = useNavigate();
 
   const handleDetailClick = () => {
-    navigate(`/shelter/${shelter.id}`);
+    // shelter.id 대신 shelter.shelterId를 사용합니다.
+    navigate(`/shelter/${shelter.shelterId}`);
   };
+
+  // 값이 null, undefined, 또는 공백이면 기본값 반환하는 함수
+  const displayValue = (value) => {
+    return value && value.toString().trim() !== "" ? value : "등록되지 않았습니다.";
+  };
+
+  const regionDetail = regionId
+    ? cityCategoryMapping[regionId] || "등록되지 않았습니다."
+    : "등록되지 않았습니다.";
+    console.log("shelter 디버깅용" ,shelter);
+    console.log("지역번호" ,regionDetail);
+    console.log(regionId);
+  const shelterName = displayValue(shelter.name);
+  const uniqueNumber = displayValue(shelter.uniqueNumber);
+  const phone = displayValue(shelter.phone);
+  const email = displayValue(shelter.email);
+  const address = displayValue(shelter.address);
+  const description = displayValue(shelter.description);
 
   return (
     <div className="flex flex-col h-full relative">
@@ -34,52 +68,50 @@ const ShelterDetail = ({ shelter, onClose }) => {
       </button>
 
       <div className="p-8">
+        {/* 헤더 영역: 지역 및 보호소 이름 */}
         <div className="mb-8">
           <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-            광주 / 전남지역 보호소
+            {regionDetail} 보호소
           </div>
           <div className="text-[#1a1a1a] text-[39.90px] font-bold leading-[59.85px]">
-            {shelter.name}
+            {shelterName}
           </div>
         </div>
 
+        {/* 상세 정보 영역 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              고유번호 62-613-6770121
+              고유번호: {uniqueNumber}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              연락처 062-613-6770
+              연락처: {phone}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              이메일 gwangjuanimals@gmail.com
+              이메일: {email}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              주소 {shelter.address}
+              주소: {address}
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3">
             <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              보호소 소개
+              보호소 소개:
             </div>
-            <div className="text-[#1a1a1a]/60 text-[22.80px] font-bold leading-[34.20px]">
-              동물보호법과 광주광역시 동물보호조례에 의하여 광주광역시에서 유기
-              <br />
-              동물의 생명과 안전을 적정하게 보호,관리하여 생명 존중과 시민의
-              생명
-              <br />
-              존중에 대한 정서함양에 이바지하기 위하여 설립되었습니다.
+            <div className="text-[#1a1a1a] text-[22.80px] font-bold leading-[34.20px]">
+              {description}
             </div>
           </div>
         </div>
       </div>
       <div className="flex-1" />
+      {/* 보호소 상세보기 버튼 */}
       <div className="p-8">
         <button
           onClick={handleDetailClick}

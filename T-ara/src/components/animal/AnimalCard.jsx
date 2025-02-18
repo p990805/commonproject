@@ -8,11 +8,6 @@ const AnimalCard = ({ animal }) => {
     navigate(`/animal/${animal.animalId}`);
   };
 
-  // 성별 표시 변환
-  const getGenderText = (gender) => {
-    return gender === "M" ? "수컷" : gender === "F" ? "암컷" : "성별 미상";
-  };
-
   return (
     <div
       onClick={handleClick}
@@ -22,7 +17,7 @@ const AnimalCard = ({ animal }) => {
       <div className="aspect-square relative">
         <img
           src={
-            animal.thumbnail ||
+            animal.thumbnailUrl ||
             "https://img.icons8.com/?size=100&id=j1UxMbqzPi7n&format=png"
           }
           alt={animal.animalName}

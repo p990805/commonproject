@@ -1,18 +1,28 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import api from "../../api";
+
+// Error message component
+const ErrorMessage = ({ message }) => {
+  if (!message) return null;
+  return <p className="text-red-500 text-sm mt-1">{message}</p>;
+};
 
 const CampaignDonation = () => {
   const [selectedMethod, setSelectedMethod] = useState("");
-  const [selectedAmount, setSelectedAmount] = useState(30000); // 기본값 설정
+  const [selectedAmount, setSelectedAmount] = useState(30000);
+  const [campaign, setCampaign] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [agreements, setAgreements] = useState({
     all: false,
     terms: false,
     privacy: false,
   });
-  const navigate = useNavigate();
 
-  // 에러 상태 추가
   const [errors, setErrors] = useState({
     amount: "",
     paymentMethod: "",
@@ -26,6 +36,22 @@ const CampaignDonation = () => {
     name: "박주찬",
     phone: "010-8508-8650",
     email: "p990805@naver.com",
+  };
+
+  // Extract first image from Quill content
+  const getFirstQuillImage = () => {
+    if (campaign?.content && campaign.content.ops) {
+      const firstImage = campaign.content.ops.find(
+        (op) => op.insert && op.insert.image
+      );
+      return firstImage ? firstImage.insert.image : null;
+    }
+    return null;
+  };
+
+  const getValidImageUrl = (url) => {
+    const quillImage = getFirstQuillImage();
+    return quillImage || url;
   };
 
   // 약관 동의 처리 함수
@@ -42,7 +68,6 @@ const CampaignDonation = () => {
         ...agreements,
         [type]: !agreements[type],
       };
-      // all 체크 상태 업데이트
       newAgreements.all = newAgreements.terms && newAgreements.privacy;
       setAgreements(newAgreements);
     }
@@ -76,6 +101,30 @@ const CampaignDonation = () => {
     return isValid;
   };
 
+  // 캠페인 정보 가져오기
+  useEffect(() => {
+    const fetchCampaignData = async () => {
+      try {
+        const campaignId = location.state?.campaignId;
+        if (!campaignId) {
+          alert("잘못된 접근입니다.");
+          navigate("/");
+          return;
+        }
+
+        const response = await api.get(`/campaigns/${campaignId}`);
+        setCampaign(response.data);
+      } catch (error) {
+        console.error("캠페인 정보 로딩 실패:", error);
+        alert("캠페인 정보를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaignData();
+  }, [location.state, navigate]);
+
   // 결제 처리 함수
   const handleGeneralPayment = () => {
     if (!validateDonation()) return;
@@ -95,25 +144,19 @@ const CampaignDonation = () => {
     };
 
     IMP.request_pay(paymentData, async (response) => {
-      console.log("포트원 응답:", response);
-
       if (response.success) {
         try {
           const serverData = {
             ...response,
             donationType: "campaign",
-            relationalId: 1, // 캠페인 ID
-            amount: selectedAmount, // 선택된 후원 금액 명시적 추가
+            relationalId: campaign.id,
+            amount: selectedAmount,
           };
-
-          console.log("서버로 전송할 데이터:", serverData);
 
           const result = await api.post(
             "/donation/campaign/register",
             serverData
           );
-          console.log("서버 성공 응답:", result.data);
-
           alert("✅ 결제가 완료되었습니다!");
           navigate("/campaign/success");
         } catch (error) {
@@ -126,11 +169,29 @@ const CampaignDonation = () => {
     });
   };
 
-  // 에러 메시지 컴포넌트
-  const ErrorMessage = ({ message }) => {
-    if (!message) return null;
-    return <p className="text-red-500 text-sm mt-1">{message}</p>;
+  const calculateDaysLeft = () => {
+    if (!campaign?.endedAt) return 0;
+    const end = new Date(campaign.endedAt);
+    const today = new Date();
+    const diffTime = end - today;
+    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    return diffDays;
   };
+
+  const calculateAchievement = () => {
+    if (!campaign) return 0;
+    const { targetAmount, achievedAmount } = campaign;
+    if (!targetAmount) return 0;
+    return (((achievedAmount || 0) / targetAmount) * 100).toFixed(1);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        로딩중...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 pt-10">
@@ -150,38 +211,43 @@ const CampaignDonation = () => {
                 <div className="flex gap-4">
                   <div className="w-72 h-48 flex-shrink-0">
                     <img
-                      src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b"
-                      alt="캠페인 이미지"
+                      src={getValidImageUrl(campaign?.imageUrl)}
+                      alt={campaign?.title || "캠페인 이미지"}
                       className="w-full h-full object-cover rounded-lg"
                     />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-base font-medium mb-2">
-                      불법 번식장에서 구조된 이름모를 강아지에게 입을 옷을
-                      선물해주세요!
+                      {campaign?.title}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm text-gray-600">목표금액</span>
-                      <span className="text-sm font-medium">1,800만 원</span>
+                      <span className="text-sm font-medium">
+                        {campaign?.targetAmount?.toLocaleString()}원
+                      </span>
                       <span className="text-sm text-gray-600 ml-4">
                         남은기간
                       </span>
-                      <span className="text-sm font-medium">11일</span>
+                      <span className="text-sm font-medium">
+                        {calculateDaysLeft()}일
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">광주 무슨무슨 보호소</span>
+                    <p className="text-sm text-gray-600">
+                      {campaign?.shelterName}
                     </p>
-                    <div className="bg-gray-100 rounded-md p-3 mt-2">
+                    <div className="bg-gray-100 rounded-md p-3 mt-4">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-gray-600">
                           현재 후원금액
                         </span>
-                        <span className="text-sm font-medium">3,601원</span>
+                        <span className="text-sm font-medium">
+                          {campaign?.achievedAmount?.toLocaleString()}원
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-red-500 h-2 rounded-full"
-                          style={{ width: `${(3601 / 18000000) * 100}%` }}
+                          style={{ width: `${calculateAchievement()}%` }}
                         ></div>
                       </div>
                     </div>

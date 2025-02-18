@@ -18,7 +18,7 @@ const ShelterCampaign = () => {
   const fetchCampaigns = async () => {
     try {
       const shelterId = localStorage.getItem("shelterId");
-      const response = await api.get("/campaigns");
+      const response = await api.get("/campaigns/shelter");
       const filteredCampaigns = response.data.filter(
         (campaign) => campaign.shelterId === parseInt(shelterId)
       );
@@ -99,7 +99,7 @@ const ShelterCampaign = () => {
         <div className="mx-4">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
-              캠페인 후원 대시보드
+              캠페인 후원 관리
             </h1>
             <button
               onClick={handleClick}
@@ -107,6 +107,61 @@ const ShelterCampaign = () => {
             >
               캠페인 후원 등록하기
             </button>
+          </div>
+
+          <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
+            <div className="border border-[#dee1e8]">
+              {/* Period Filter */}
+              <div className="flex">
+                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
+                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
+                    기간
+                  </span>
+                </div>
+                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
+                  <div className="flex items-center ml-5">
+                    <input
+                      type="date"
+                      className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
+                      defaultValue="2024-10-23"
+                    />
+                    <span className="mx-4 !text-[#575757]">-</span>
+                    <input
+                      type="date"
+                      className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
+                      defaultValue="2025-01-23"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Keyword */}
+              <div className="flex">
+                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
+                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
+                    검색 키워드
+                  </span>
+                </div>
+                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
+                  <div className="flex gap-4 ml-5">
+                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
+                      <option>전체</option>
+                    </select>
+                    <input
+                      type="text"
+                      className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Button */}
+            <div className="flex justify-center mt-5">
+              <button className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]">
+                검색
+              </button>
+            </div>
           </div>
 
           {/* Donation List Table */}

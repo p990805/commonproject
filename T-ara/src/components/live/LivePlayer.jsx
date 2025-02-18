@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { OpenVidu } from 'openvidu-browser';
@@ -11,22 +10,18 @@ const LivePlayer = () => {
   const navigate = useNavigate();
   const { streamId } = useParams();
 
-  const token =localStorage.getItem("authToken");
+  const token = localStorage.getItem("authToken");
   const myName = jwtDecode(token).name;
-  console.log( "내이름은 뭘까? "+myName);
-
   const state = location.state || {};
   const sessionId = state.sessionId;
   const myUserName = myName || 'Viewer';
-  const hostName = state.hostName ? state.hostName : '';
-
-  console.log('[LivePlayer] location.state:', state);
-  console.log('[LivePlayer] myUserName:', myUserName, 'hostName:', hostName);
+  const hostName = state.hostName || '';
 
   const [connectionStatus, setConnectionStatus] = useState('연결 안됨');
   const [ovSession, setOvSession] = useState(null);
   const [subscriber, setSubscriber] = useState(null);
   const [viewerToken, setViewerToken] = useState(null);
+  const [streamEnded, setStreamEnded] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -39,7 +34,6 @@ const LivePlayer = () => {
       try {
         const response = await api.get(`/stream/viewerToken?sessionId=${sessionId}`);
         setViewerToken(response.data.token);
-        console.log('[LivePlayer] Viewer token received:', response.data.token);
       } catch (error) {
         console.error('Viewer token fetch error:', error);
         alert('유효한 토큰을 가져오지 못했습니다.');
@@ -59,12 +53,24 @@ const LivePlayer = () => {
       console.log('[LivePlayer] Stream created event:', event);
       const sub = session.subscribe(event.stream, undefined);
       setSubscriber(sub);
+      // 스트림이 재생되면 방송 종료 상태 초기화
+      setStreamEnded(false);
     });
 
-    session.on('streamDestroyed', () => {
-      console.log('[LivePlayer] Stream destroyed');
+    session.on('streamDestroyed', (event) => {
+      console.log('[LivePlayer] Stream destroyed event:', event);
       setSubscriber(null);
+      // 스트림이 종료되면 방송 종료 메시지 표시
+      setStreamEnded(true);
     });
+
+    // 추가: connectionDestroyed 이벤트 (필요한 경우)
+    session.on('connectionDestroyed', (event) => {
+      console.log('[LivePlayer] Connection destroyed event:', event);
+      // 모든 연결이 끊겼을 경우 종료 처리
+      setStreamEnded(true);
+    });
+
     session.on('exception', (exception) => console.warn(exception));
 
     session
@@ -94,11 +100,17 @@ const LivePlayer = () => {
     <div className="flex flex-col bg-gray-100">
       <div className="max-w-[1380px] w-full mx-auto mt-4 px-4 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex-1 bg-black relative flex justify-center items-center h-[500px]">
-          <video
-            ref={videoRef}
-            autoPlay
-            className="w-full h-full object-cover"
-          />
+          {streamEnded ? (
+            <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-75">
+              <h2 className="text-white text-3xl font-bold">방송이 종료되었습니다.</h2>
+            </div>
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
 
         <div className="md:w-[400px] bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-[500px] overflow-y-auto">

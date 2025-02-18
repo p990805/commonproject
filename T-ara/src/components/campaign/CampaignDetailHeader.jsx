@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const CampaignDetailHeader = ({ campaign }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+const CampaignDetailHeader = ({ campaign = {} }) => {
   const [showDonateButton, setShowDonateButton] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // 헤더의 높이보다 더 스크롤되면 버튼 표시
-      const headerHeight = 600; // 헤더의 대략적인 높이
+      const headerHeight = 600;
       setShowDonateButton(window.scrollY > headerHeight);
     };
 
@@ -19,91 +18,124 @@ const CampaignDetailHeader = ({ campaign }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/campaign/donation`);
+    navigate("/campaign/donation", { state: { campaignId: campaign.id } });
   };
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const handleImageError = () => {
+    setImageError(true);
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  // Extract first image from Quill content
+  const getFirstQuillImage = () => {
+    if (campaign.content && campaign.content.ops) {
+      const firstImage = campaign.content.ops.find(
+        (op) => op.insert && op.insert.image
+      );
+      return firstImage ? firstImage.insert.image : null;
+    }
+    return null;
   };
 
-  // 임시 이미지 배열 (실제로는 campaign 데이터에 포함되어야 함)
-  const images = [campaign.imageUrl];
+  const getValidImageUrl = (url) => {
+    if (imageError) {
+      return "https://via.placeholder.com/800x600?text=No+Image+Available";
+    }
+
+    // Try to get the first image from Quill content
+    const quillImage = getFirstQuillImage();
+
+    // Use Quill image if available, otherwise use imageUrl
+    const finalUrl = quillImage || url;
+
+    if (!finalUrl) {
+      return "https://via.placeholder.com/800x600?text=No+Image+Available";
+    }
+
+    return finalUrl;
+  };
+
+  // 캠페인 달성률 계산
+  const calculateAchievement = () => {
+    const targetAmount = campaign.targetAmount || 0;
+    const achievedAmount = campaign.achievedAmount || 0;
+
+    if (targetAmount === 0) return 0;
+
+    const achievement = (achievedAmount / targetAmount) * 100;
+    return achievement.toFixed(1);
+  };
+
+  // 남은 날짜 계산
+  const calculateDaysLeft = () => {
+    if (!campaign.startedAt || !campaign.endedAt) return 14;
+    const end = new Date(campaign.endedAt);
+    const today = new Date();
+    const diffTime = end - today;
+    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    return diffDays;
+  };
 
   return (
     <>
       <div className="bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8 py-8">
-            {/* 이미지 캐러셀 */}
+            {/* 이미지 섹션 */}
             <div className="relative lg:w-3/5">
-              <div className="relative h-[444px] bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative h-[444px] bg-[#F2F4F6] rounded-lg overflow-hidden">
                 <img
-                  src={images[currentImageIndex]}
-                  alt={campaign.title}
+                  src={getValidImageUrl(campaign.imageUrl)}
+                  alt={campaign.title || "캠페인 이미지"}
                   className="w-full h-full object-cover"
+                  onError={handleImageError}
                 />
-                {/* 이미지 인디케이터 */}
-                <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                  {currentImageIndex + 1}/{images.length}
-                </div>
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white"
-                    >
-                      &lt;
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white"
-                    >
-                      &gt;
-                    </button>
-                  </>
-                )}
               </div>
             </div>
 
             {/* 캠페인 정보 */}
             <div className="lg:w-2/5">
-              {/* 보호소 정보 */}
-              <div className="mb-6">
-                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded">
-                  {campaign.location}
-                </span>
-              </div>
-
               {/* 캠페인 제목 */}
-              <h1 className="text-2xl font-bold mb-4">{campaign.title}</h1>
+              <h1 className="text-[20px] leading-6 text-[#212529] font-bold mb-4">
+                {campaign.title || "제목 없음"}
+              </h1>
+
+              {/* 달성률 정보 */}
+              <div className="text-[#00C4C4] font-bold text-lg mb-4">
+                {(
+                  ((campaign.achievedAmount || 0) /
+                    (campaign.targetAmount || 1)) *
+                  100
+                ).toFixed(0)}
+                % 달성
+              </div>
 
               {/* 참여 정보 */}
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-red-500 text-xl font-bold">302</span>
-                  <span className="text-gray-500">명 참여</span>
+                  <span className="text-black text-xl font-bold">
+                    {(
+                      ((campaign.achievedAmount || 0) /
+                        (campaign.targetAmount || 1)) *
+                      100
+                    ).toFixed(0)}
+                  </span>
+                  <span className="text-[#868E96] text-[11.25px]">달성</span>
                 </div>
-                <div className="text-gray-500">{campaign.daysLeft}일 남음</div>
+                <div className="text-[#868E96] text-[11.25px]">
+                  {calculateDaysLeft()}일 남음
+                </div>
               </div>
 
               {/* 모금액 정보 */}
               <div className="mb-6">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-2xl font-bold">{campaign.amount}</span>
-                  <span className="text-gray-500">
-                    {campaign.achievement}% 달성
-                  </span>
+                <div className="flex gap-1">
+                  <div className="px-2 py-1 bg-[#F2F4F6] rounded text-[10px] text-[#495057]">
+                    1명 후원
+                  </div>
+                  <div className="px-2 py-1 bg-[#F2F4F6] rounded text-[10px] text-[#495057]">
+                    {calculateDaysLeft()}일 남음
+                  </div>
                 </div>
-                {/* <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-red-500 rounded-full"
-                  style={{ width: `${Math.min(campaign.achievement, 100)}%` }}
-                ></div>
-              </div> */}
               </div>
 
               {/* 후원하기 버튼 */}
@@ -126,7 +158,10 @@ const CampaignDetailHeader = ({ campaign }) => {
       {/* 스크롤 시 나타나는 둥근 후원하기 버튼 */}
       {showDonateButton && (
         <div className="fixed bottom-8 right-8 z-50">
-          <button className="w-16 h-16 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 flex items-center justify-center transition-transform hover:scale-110">
+          <button
+            onClick={handleClick}
+            className="w-16 h-16 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 flex items-center justify-center transition-transform hover:scale-110"
+          >
             <div className="text-center text-sm leading-tight">
               <p>후원</p>
               <p>하기</p>

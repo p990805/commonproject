@@ -18,11 +18,10 @@ const SessionView = ({
   switchCamera,
   autoCapture = true, // 자동 캡처 활성화 여부
 }) => {
-  // OpenViduVideoComponent을 래핑한 UserVideoComponent에 전달할 ref
   const videoComponentRef = useRef(null);
   const [thumbnailData, setThumbnailData] = useState(null);
 
-  // 자동 캡처: autoCapture가 true이면 5초마다 캡처하여 S3 업로드 API를 호출합니다.
+  // 자동 캡처: autoCapture가 true이면 5초마다 캡처하여 S3 업로드 API 호출
   useEffect(() => {
     let intervalId;
     if (autoCapture) {
@@ -32,7 +31,6 @@ const SessionView = ({
           console.log("자동 캡쳐된 데이터 URL:", dataUrl);
           if (dataUrl) {
             setThumbnailData(dataUrl);
-            // S3 업로드: 방송 중이면 같은 streamId로 덮어쓰게 됩니다.
             console.log("API 호출 시작: /stream/thumbnail?streamId=", streamId);
             api
               .post(`/stream/thumbnail?streamId=${streamId}`, { image: dataUrl })
@@ -71,12 +69,13 @@ const SessionView = ({
               <UserVideoComponent
                 streamManager={mainStreamManager}
                 className="w-full h-full object-cover"
-                ref={videoComponentRef} // ref 전달
+                ref={videoComponentRef}
               />
             )}
           </div>
-          {/* 캡처 버튼 (수동 테스트용) 및 미리보기 */}
-          <div className="mt-4">
+
+          {/* 수동 캡처 및 썸네일 미리보기 UI를 숨김 처리 */}
+          <div className="hidden">
             <button
               onClick={() => {
                 if (videoComponentRef.current && videoComponentRef.current.captureFrame) {
@@ -85,7 +84,6 @@ const SessionView = ({
                   if (dataUrl) {
                     setThumbnailData(dataUrl);
                     console.log("수동 API 호출 시작: /stream/thumbnail?streamId=", streamId);
-                    // 수동 캡처 시에도 백엔드에 이미지 업로드 요청 수행
                     api
                       .post(`/stream/thumbnail?streamId=${streamId}`, { image: dataUrl })
                       .then((res) => {
@@ -108,6 +106,7 @@ const SessionView = ({
               </div>
             )}
           </div>
+
           {/* 방송 정보 */}
           <div className="w-full bg-gray-100 text-black p-4 mt-3 rounded-lg shadow-lg">
             <div className="flex items-center gap-4">

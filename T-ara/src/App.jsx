@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginSuccess, logout } from "./features/auth/authSlice";
 import { jwtDecode } from "jwt-decode";
+import ScrollToTop from "./ScrollToTop"; // ScrollToTop 컴포넌트 추가
 
 function App() {
   const dispatch = useDispatch();
@@ -115,6 +116,8 @@ function App() {
         draggable
         pauseOnHover
       />
+      {/* ScrollToTop을 추가하여 페이지 이동 시 최상단으로 스크롤 */}
+      <ScrollToTop />
       {showLayout && (
         <Header
           isLoggedIn={isLoggedIn}

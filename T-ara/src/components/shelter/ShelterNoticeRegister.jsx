@@ -39,10 +39,7 @@ const ShelterNoticeRegister = () => {
     let isContentEmpty = false;
     if (typeof formData.content === "string") {
       isContentEmpty = !formData.content.trim();
-    } else if (
-      typeof formData.content === "object" &&
-      formData.content.ops
-    ) {
+    } else if (typeof formData.content === "object" && formData.content.ops) {
       // 델타 객체의 ops 배열이 비어있거나 단순 newline만 있다면 내용 없음으로 판단
       if (
         formData.content.ops.length === 0 ||
@@ -79,7 +76,7 @@ const ShelterNoticeRegister = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      const response = await api.post("notice/post", updatedData, {
+      const response = await api.post("/notice/post", updatedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: token,

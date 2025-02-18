@@ -34,15 +34,17 @@ const ShelterAnimal = () => {
   const fetchAnimals = async () => {
     try {
       const params = {
-        protectStatus,
+        ...(protectStatus && { protectStatus }), // protectStatus가 있을 때만 포함
         startDate: startDate || "1900-01-01",
         endDate: endDate || "2999-12-31",
         speciesId: "all",
-        breedId,
-        animalName,
+        breedId: breedId === "all" ? "" : breedId, // "all"일 경우 빈 문자열 전송
+        ...(animalName && { animalName }), // animalName이 있을 때만 포함
       };
 
+      console.log("Request params:", params);
       const response = await api.get("/animal/list/shelter", { params });
+      console.log("API Response:", response.data);
 
       if (response.data && response.data.animalList) {
         setAnimals(response.data.animalList);
