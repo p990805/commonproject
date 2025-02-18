@@ -15,7 +15,7 @@ const TermsAgreement = ({
           onChange={(e) => handleAgreeAll(e.target.checked)}
         />
         <span className="font-bold text-sm">
-          이용약관, 개인정보 수정 및 이용, 세이브더칠드런 활동 안내 수신에 모두 동의합니다.
+          이용약관, 개인정보 수정 및 이용, 티아라 활동 안내 수신에 모두 동의합니다.
         </span>
       </label>
       <hr className="my-4" />

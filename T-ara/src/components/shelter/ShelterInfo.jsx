@@ -1,20 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarNavigation from "./SidebarNavigation";
+import api from "../../api";
 
 const ShelterInfo = () => {
+  const [cityCategoryList, setCityCategoryList] = useState([]);
   const [formData, setFormData] = useState({
-    name: "행복보호소",
-    email: "happy@shelter.com",
-    phone: "02-1234-5678",
-    profile_image: null,
-    description: "행복한 보호소입니다.",
-    registration_number: "제1234-5678호",
-    address: "서울특별시 강남구 테헤란로 123",
-    address_detail: "4층",
+    shelterId: "",
+    cityCategoryId: "",
+    name: "",
+    email: "",
+    phone: "",
+    profile: null,
+    description: "",
+    uniqueNumber: "",
+    address: "",
+    addressDetail: "",
   });
 
   const [imagePreview, setImagePreview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCityCategories = async () => {
+      try {
+        const response = await api.get("/shelter/citycategory");
+        setCityCategoryList(response.data.cityCategoryList);
+      } catch (error) {
+        console.error("Failed to fetch city categories:", error);
+      }
+    };
+
+    const fetchShelterInfo = async () => {
+      try {
+        const response = await api.get("/member/myinfo");
+        const shelterData = response.data.shelter;
+
+        // Split address if it contains multiple parts
+        const addressParts = shelterData.address.split(",");
+
+        setFormData({
+          shelterId: shelterData.shelterId || "",
+          cityCategoryId: shelterData.cityCategoryId || "",
+          loginId: shelterData.loginId || "",
+          name: shelterData.name || "",
+          email: shelterData.email || "",
+          phone: shelterData.phone || "",
+          profile: shelterData.profile || null,
+          description: shelterData.description || "",
+          uniqueNumber: shelterData.uniqueNumber || "",
+          address: addressParts[0] || "",
+          addressDetail: addressParts[1] || "",
+        });
+
+        // Set image preview if profile exists
+        if (shelterData.profile) {
+          setImagePreview(shelterData.profile);
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch shelter information:", error);
+        setIsLoading(false);
+      }
+    };
+
+    // 두 함수 동시 호출
+    Promise.all([fetchCityCategories(), fetchShelterInfo()]);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +82,7 @@ const ShelterInfo = () => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        profile_image: file,
+        profile: file,
       }));
 
       const reader = new FileReader();
@@ -40,17 +93,55 @@ const ShelterInfo = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // API 호출 로직 추가
+    try {
+      // Combine address into a single string
+      const combinedAddress = formData.addressDetail
+        ? `${formData.address},${formData.addressDetail}`
+        : formData.address;
+
+      // 수정된 API 엔드포인트와 데이터 구조에 맞게 변경
+      const submitData = {
+        name: formData.name,
+        loginId: formData.loginId, // 로그인 ID로 이메일 사용
+        email: formData.email,
+        phone: formData.phone,
+        profile: formData.profile,
+        description: formData.description,
+        uniqueNumber: formData.uniqueNumber,
+        address: combinedAddress,
+      };
+
+      const response = await api.put("/shelter/modify", submitData, {
+        headers: {
+          "Content-Type": "application/json", // JSON 형식으로 변경
+        },
+      });
+
+      alert("정보가 성공적으로 수정되었습니다.");
+    } catch (error) {
+      console.error("Failed to update shelter information:", error);
+      alert("정보 수정 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleWithdrawal = () => {
-    console.log("회원 탈퇴 처리");
+  const handleWithdrawal = async () => {
+    try {
+      await axios.delete("/member/withdrawal");
+      alert("회원 탈퇴가 완료되었습니다.");
+      // Redirect to main page or login page
+      // window.location.href = "/";
+    } catch (error) {
+      console.error("Failed to withdraw:", error);
+      alert("탈퇴 처리 중 오류가 발생했습니다.");
+    }
     setShowModal(false);
-    // API 호출 로직 추가
   };
+
+  if (isLoading) {
+    return <div>로딩 중...</div>;
+  }
 
   return (
     <div className="flex min-h-screen bg-[#FBFBFF]">
@@ -68,31 +159,6 @@ const ShelterInfo = () => {
             onSubmit={handleSubmit}
             className="w-full bg-white rounded-lg shadow-lg p-6"
           >
-            {/* 프로필 이미지 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                프로필 이미지
-              </label>
-              <div className="flex items-center space-x-6">
-                <div className="w-24 h-24 border rounded-full overflow-hidden">
-                  <img
-                    src={imagePreview || "/default-profile.png"}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <input
-                  type="file"
-                  name="profile_image"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0 file:text-sm file:font-semibold
-                  file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </div>
-            </div>
-
             {/* 보호소 이름 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -159,12 +225,36 @@ const ShelterInfo = () => {
               </label>
               <input
                 type="text"
-                name="registration_number"
-                value={formData.registration_number}
+                name="uniqueNumber"
+                value={formData.uniqueNumber}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+            </div>
+
+            {/* 지역 카테고리 */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                지역 카테고리
+              </label>
+              <select
+                name="cityCategoryId"
+                value={formData.cityCategoryId}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">지역을 선택해주세요</option>
+                {cityCategoryList.map((category) => (
+                  <option
+                    key={`category-${category.cityCategoryId}`}
+                    value={category.cityCategoryId}
+                  >
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* 주소 */}
@@ -178,16 +268,9 @@ const ShelterInfo = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  placeholder="주소"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
-                />
-                <input
-                  type="text"
-                  name="address_detail"
-                  value={formData.address_detail}
-                  onChange={handleInputChange}
-                  placeholder="상세주소"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Carousel from "../components/campaign/Carousel";
 import CampaignCard from "../components/campaign/CampaignCard";
+import api from "../api";
 
 const SearchIcon = () => (
   <svg
@@ -18,46 +19,155 @@ const SearchIcon = () => (
   </svg>
 );
 
-export const campaignData = [
-  {
-    id: 1,
-    title: "불법 번식장에서 구조된 이름모를 강아지에게 입을 옷을 선물해주세요!",
-    achievement: 3601,
-    location: "광주 무슨무슨 보호소",
-    amount: "1,800만 원",
-    daysLeft: 11,
-    imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
-  },
-  {
-    id: 2,
-    title: "이름모를 강아지가 살을 찌울 수 있도록 맛있는 것을 선물해주세요!",
-    achievement: 7649,
-    location: "서울 보호소",
-    amount: "3,824만 원",
-    daysLeft: 18,
-    imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
-  },
-  {
-    id: 3,
-    title: "이름 모를 강아지가 깨끗한 물을 마실 수 있도록 후원해주세요!",
-    achievement: 1790,
-    location: "대심 보호소",
-    amount: "895만 원",
-    daysLeft: 6,
-    imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
-  },
-  {
-    id: 4,
-    title: "웁은 ft 개발자 육성소 ssfay 생들의 모금 캠페인 진행 중",
-    achievement: 36835,
-    location: "SSAFY",
-    amount: "1.8억 원",
-    daysLeft: 10,
-    imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
-  },
-];
+const PaginationButton = ({ children, onClick, disabled, active }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`px-4 py-2 mx-1 rounded ${
+      disabled
+        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+        : active
+        ? "bg-blue-50 text-blue-600 border border-blue-300"
+        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+    }`}
+  >
+    {children}
+  </button>
+);
 
 const CampaignPage = () => {
+  const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 페이징 관련 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 9; // 3x3 그리드에 맞춰 9개로 설정
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const { data } = await api.get("/campaigns");
+
+        const transformedData = data.map((campaign, index) => ({
+          id: index + 1,
+          title: campaign.title,
+          achievement: campaign.achievementRate * 100,
+          location: campaign.shelterName,
+          imageUrl: campaign.imageUrl,
+          amount: "진행중",
+          daysLeft: 30,
+        }));
+
+        setCampaigns(transformedData);
+        setTotalPages(Math.ceil(transformedData.length / itemsPerPage));
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaigns();
+  }, []);
+
+  // 현재 페이지의 캠페인만 반환
+  const getCurrentPageCampaigns = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return campaigns.slice(startIndex, endIndex);
+  };
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 페이지네이션 렌더링
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    return (
+      <div className="flex justify-center items-center mt-8 mb-8">
+        <PaginationButton
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          이전
+        </PaginationButton>
+
+        {startPage > 1 && (
+          <>
+            <PaginationButton
+              onClick={() => handlePageChange(1)}
+              active={currentPage === 1}
+            >
+              1
+            </PaginationButton>
+            {startPage > 2 && <span className="mx-2">...</span>}
+          </>
+        )}
+
+        {Array.from(
+          { length: endPage - startPage + 1 },
+          (_, i) => startPage + i
+        ).map((page) => (
+          <PaginationButton
+            key={page}
+            onClick={() => handlePageChange(page)}
+            active={currentPage === page}
+          >
+            {page}
+          </PaginationButton>
+        ))}
+
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="mx-2">...</span>}
+            <PaginationButton
+              onClick={() => handlePageChange(totalPages)}
+              active={currentPage === totalPages}
+            >
+              {totalPages}
+            </PaginationButton>
+          </>
+        )}
+
+        <PaginationButton
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          다음
+        </PaginationButton>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        Error: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -89,31 +199,25 @@ const CampaignPage = () => {
                 전체
               </button>
               <button className="text-gray-700 font-medium px-2 py-4 border-b-2 border-transparent hover:border-gray-300">
-                강아지
+                진행중
               </button>
               <button className="text-gray-700 font-medium px-2 py-4 border-b-2 border-transparent hover:border-gray-300">
-                고양이
-              </button>
-              <button className="text-gray-700 font-medium px-2 py-4 border-b-2 border-transparent hover:border-gray-300">
-                기타
+                종료
               </button>
             </div>
-            <select className="border border-gray-300 rounded px-3 py-2 text-sm">
-              <option>지역 선택</option>
-              <option>서울</option>
-              <option>경기</option>
-              <option>인천</option>
-            </select>
           </div>
         </div>
 
         {/* Campaign Cards Grid */}
         <div className="px-4 py-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-            {campaignData.map((campaign) => (
+            {getCurrentPageCampaigns().map((campaign) => (
               <CampaignCard key={campaign.id} campaign={campaign} />
             ))}
           </div>
+
+          {/* Pagination */}
+          {renderPagination()}
         </div>
       </div>
     </div>

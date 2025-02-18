@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTrash, FaDownload, FaMagic, FaImage } from "react-icons/fa";
+import { FaTrash, FaDownload, FaImage } from "react-icons/fa";
 import MyPhotoCardImageUpload from './MyPhotoCardImageUpload';
 import api from "../../api";
 
@@ -25,25 +25,12 @@ const MyPhotoCard = () => {
   //   fetchPhotoCards();
   // }, [animalId]);
 
-  const updatePhotoCard = async (photocardId) => {
-    // 수정부분 수정 필요
-    const newPath = prompt("새로운 포토카드 이미지 URL을 입력하세요:");
-    if (!newPath) return;
-    
-    try {
-      // await api.put(`/photocard/update/${photocardId}`, { photocardPath: newPath });
-      setCards(cards.map(card => card.id === photocardId ? { ...card, photocardPath: newPath } : card));
-    } catch (error) {
-      console.error("포토카드 수정 오류:", error);
-    }
-  };
-
-  const deletePhotoCard = async (photocardId) => {
+  const deletePhotoCard = async (photoCardId) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     
     try {
-      // await api.delete(`/photocard/delete/${photocardId}`);
-      setCards(cards.filter(card => card.id !== photocardId));
+      await api.delete(`/photocard/delete/${photoCardId}`);
+      setCards(cards.filter(card => card.id !== photoCardId));
     } catch (error) {
       console.error("포토카드 삭제 오류:", error);
     }
@@ -77,10 +64,6 @@ const MyPhotoCard = () => {
                 <span className="text-sm text-gray-500">{card.date}</span>
                 <h3 className="font-bold text-sm">{card.title}</h3>
                 <div className="flex gap-2">
-                  <button onClick={() => updatePhotoCard(card.id)} className="flex items-center gap-2 border border-red-500 rounded-md px-3 py-1.5 text-sm hover:bg-red-50">
-                    <FaMagic size={12} className="text-red-500" />
-                    <span className="text-gray-700">수정</span>
-                  </button>
                   <button className="flex items-center gap-2 border border-red-500 rounded-md px-3 py-1.5 text-sm hover:bg-red-50">
                     <FaDownload size={12} className="text-red-500" />
                     <span className="text-gray-700">다운로드</span>

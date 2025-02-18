@@ -1,7 +1,28 @@
-// ReservationList.jsx
+import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
+import api from "../../api";
 
 const ReservationList = ({ handleOpenModal }) => {
+  const [animals, setAnimals] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const fetchAnimals = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/walk/reservation");
+        // response.data.walkLists 를 상태로 저장
+        setAnimals(response.data.walkLists);
+      } catch (error) {
+        console.error("동물 데이터를 불러오는 중 에러 발생:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnimals();
+  }, []);
+
   return (
     <div>
       {/* 상단 헤더: 제목 및 검색 영역 */}
@@ -12,6 +33,8 @@ const ReservationList = ({ handleOpenModal }) => {
             type="text"
             placeholder="검색어를 입력해주세요."
             className="border p-2 rounded border-gray-400"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
           <button className="flex items-center gap-1 border p-2 rounded border-gray-400 hover:bg-amber-100 cursor-pointer">
             <FaSearch className="w-4 h-4 text-gray-600" />
@@ -19,7 +42,7 @@ const ReservationList = ({ handleOpenModal }) => {
           </button>
         </div>
       </div>
-      <hr  className="border-gray-300"/>
+      <hr className="border-gray-300" />
 
       {/* 필터 영역 */}
       <div className="mb-4">
@@ -40,27 +63,32 @@ const ReservationList = ({ handleOpenModal }) => {
 
       {/* 산책 예약 동물 목록 */}
       <div className="my-5">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <div className="border p-4 rounded border-gray-300">
-            <img
-              src="/assets/corgi.png"
-              alt="동물 이미지"
-              className="aspect-square w-full rounded-lg bg-gray-200 object-cover mb-2"
-            />
-            <div className="flex flex-col mb-2">
-              <p className="font-bold">김시원 99</p>
-              <p>익산 동물보호센터</p>
-              <p>수컷</p>
-            </div>
-            <button
-              onClick={handleOpenModal}
-              className="w-full py-2 border rounded border-gray-400 hover:bg-gray-100 cursor-pointer"
-            >
-              산책 예약하기
-            </button>
+        {loading ? (
+          <p>로딩중...</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {animals.map((animal) => (
+              <div key={animal.animalId} className="border p-4 rounded border-gray-300">
+                <img
+                  src={animal.thumbnail || "/assets/corgi.png"}
+                  alt={`${animal.animalName} 이미지`}
+                  className="aspect-square w-full rounded-lg bg-gray-200 object-cover mb-2"
+                />
+                <div className="flex flex-col mb-2">
+                  <p className="font-bold">{animal.animalName}</p>
+                  <p>{animal.shelterName}</p>
+                  <p>{animal.gender === "M" ? "수컷" : "암컷"}</p>
+                </div>
+                <button
+                  onClick={() => handleOpenModal(animal.animalId)}
+                  className="w-full py-2 border rounded border-gray-400 hover:bg-gray-100 cursor-pointer"
+                >
+                  산책 예약하기
+                </button>
+              </div>
+            ))}
           </div>
-          {/* 필요한 경우 다른 동물 카드들을 추가 */}
-        </div>
+        )}
       </div>
 
       {/* 페이징 버튼 */}

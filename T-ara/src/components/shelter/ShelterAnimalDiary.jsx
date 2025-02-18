@@ -275,7 +275,7 @@ const ShelterAnimalDiary = () => {
                       <td className="p-4">{diary.writtenDate}</td>
                       <td className="p-4">{diary.createdAt}</td>
                       <td className="p-4">
-                        {diary.deleteStatus === 1 ? "활성" : "삭제됨"}
+                        {diary.deleteStatus === 1 ? "삭제됨됨" : "활성"}
                       </td>
                     </tr>
                   ))}

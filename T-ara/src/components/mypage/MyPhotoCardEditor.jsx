@@ -140,7 +140,7 @@ const MyPhotoCardEditor = ({ composedImage }) => {
 
       // API 요청 데이터 구성
       const requestData = {
-        photocardPath: imageData
+        photoCardUrl: imageData
       };
 
       // POST 요청 전송
