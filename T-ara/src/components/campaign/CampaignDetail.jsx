@@ -22,17 +22,30 @@ const CampaignDetail = () => {
     const fetchCampaignDetail = async () => {
       try {
         const { data } = await api.get(`/campaigns/${id}`);
-        // Transform API data to match the expected format
+
+        // 남은 기간 계산
+        const today = new Date();
+        const endDate = new Date(data.endedAt);
+        const remainingDays = Math.max(
+          0,
+          Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))
+        );
+
         const transformedCampaign = {
           id: id,
           title: data.title,
           imageUrl: data.imageUrl,
-          achievement: data.achievementRate * 100,
-          location: data.shelterName,
-          amount: "진행중",
-          daysLeft: 30,
-          content: data.content, // Add content field for Quill data
+          achievement: (data.achievedAmount / data.targetAmount) * 100, // 달성률 계산
+          donatePersonNum: data.donatePersonNum, // 후원자 수
+          targetAmount: data.targetAmount, // 목표 금액
+          achievedAmount: data.achievedAmount, // 달성 금액
+          startedAt: data.startedAt, // 시작일
+          endedAt: data.endedAt, // 종료일
+          daysLeft: remainingDays, // 남은 기간
+          content: data.content,
           lastModified: data.lastModified,
+          shelterId: data.shelterId,
+          simpleDescription: data.simpleDescription, // 간단 설명
         };
         setCampaign(transformedCampaign);
       } catch (error) {
@@ -118,16 +131,6 @@ const CampaignDetail = () => {
           </div>
         </div>
       </main>
-
-      {/* 하단 후원하기 버튼 (모바일에서 고정) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden">
-        <button
-          onClick={() => navigate(`/campaign/donation`)}
-          className="w-full bg-red-500 text-white py-4 rounded-md font-bold"
-        >
-          캠페인 후원하기
-        </button>
-      </div>
     </div>
   );
 };

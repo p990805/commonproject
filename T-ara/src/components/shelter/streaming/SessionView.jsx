@@ -28,14 +28,14 @@ const SessionView = ({
       intervalId = setInterval(() => {
         if (videoComponentRef.current && videoComponentRef.current.captureFrame) {
           const dataUrl = videoComponentRef.current.captureFrame();
-          console.log("자동 캡쳐된 데이터 URL:", dataUrl);
+          // console.log("자동 캡쳐된 데이터 URL:", dataUrl);
           if (dataUrl) {
             setThumbnailData(dataUrl);
-            console.log("API 호출 시작: /stream/thumbnail?streamId=", streamId);
+            // console.log("API 호출 시작: /stream/thumbnail?streamId=", streamId);
             api
               .post(`/stream/thumbnail?streamId=${streamId}`, { image: dataUrl })
               .then((res) => {
-                console.log("Thumbnail uploaded to S3:", res);
+                // console.log("Thumbnail uploaded to S3:", res);
               })
               .catch((err) => {
                 console.error("Error uploading thumbnail to S3:", err.response || err);

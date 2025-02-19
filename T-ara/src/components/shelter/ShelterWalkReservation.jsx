@@ -4,6 +4,7 @@ import DashboardStats from "./reservation/DashboardStats";
 import SearchFilters from "./reservation/SearchFilters";
 import ReservationTable from "./reservation/ReservationTable";
 import ReservationDetails from "./reservation/ReservationDetails";
+import CantReservation from "./reservation/CantReservation";
 import api from "../../api"; 
 
 const ShelterWalkReservation = () => {
@@ -101,6 +102,10 @@ const ShelterWalkReservation = () => {
           {/* DashboardStats는 전체 예약(reservations)으로 통계를 계산 */}
           <DashboardStats reservations={reservations} />
           <SearchFilters onSearch={handleSearch} />
+        </div>
+
+        <div className="flex-1 p-6">
+          <CantReservation />
         </div>
 
         <div className="flex-1 p-6">

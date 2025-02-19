@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../../../api"; // axios 인스턴스 임포트 (경로에 주의하세요)
 
 const DonationRecord = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // 실제 사용자 ID (예시로 8번 사용자)
+  // 실제 사용자 ID (예시로 localStorage에 저장된 userId 사용)
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/donation/history/${userId}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("네트워크 응답에 문제가 있습니다.");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        // data는 donation history 객체 배열임.
-        // 각 객체를 UI에서 사용할 형태로 변환합니다.
+    api.get(`/donation/history/${userId}`)
+      .then((response) => {
+        const data = response.data;
+        // donation history 객체 배열을 UI에서 사용할 형태로 변환
         const mappedDonations = data.map((item) => {
           let type, where;
           if (item.dataSource === "monthly") {
@@ -35,7 +30,7 @@ const DonationRecord = () => {
           // donationAt이 null이면 "등록되지 않았습니다."를 표시
           let dateStr = "등록되지 않았습니다.";
           if (item.donationAt) {
-            // donationAt 예시: "2025-02-17T07:06:17" → "2025.02.17"
+            // 예: "2025-02-17T07:06:17" → "2025.02.17"
             const datePart = item.donationAt.slice(0, 10);
             dateStr = datePart.replace(/-/g, ".");
           }
@@ -47,7 +42,6 @@ const DonationRecord = () => {
             date: dateStr,
           };
         });
-
         // 최신 후원 내역이 위쪽에 오도록 내림차순 정렬 (historyId 기준)
         const sortedDonations = mappedDonations.sort((a, b) => b.id - a.id);
         // 최신 5개만 선택
@@ -97,7 +91,7 @@ const DonationRecord = () => {
                 {/* 왼쪽 영역: 후원 타입, where, 후원 내용 */}
                 <div className="flex items-center space-x-2">
                   <span
-                    className={`text-sm flex items-center justify-center rounded-2xl py-1 px-3 font-semibold ${getStatusColor(
+                    className={`text-sm flex items-center justify-center align-middle rounded-2xl py-1 px-2 font-semibold ${getStatusColor(
                       item.type
                     )}`}
                   >

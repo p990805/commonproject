@@ -1,55 +1,63 @@
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../../../api"; // api.js의 경로에 맞게 수정해주세요
 
-const MiniWorkJournal =() => {
+const MiniWorkJournal = () => {
+  const [journals, setJournals] = useState([]);
 
-    const journals =[
-        {
-            id:1,
-            title:"12월의 김시원",
-            date:"2025.02.17"
-        },
-        {
-            id:2,
-            title:"11월의 김시원",
-            date:"2025.02.17"
-        },
-        {
-            id:3,
-            title:"10월의 김시원",
-            date:"2025.02.17"
-        },
-    ]
+  useEffect(() => {
+    const fetchDiaries = async () => {
+      try {
+        const response = await api.get("/diary/user/list");
+        const { diaryList } = response.data;
+        // 최신순 정렬 (createdAt 기준 내림차순)
+        const sortedList = diaryList.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        // 최대 5개만 사용
+        setJournals(sortedList.slice(0, 5));
+      } catch (error) {
+        console.error("다이어리 목록 조회 실패:", error);
+      }
+    };
 
-    return(
-        <div className="w-full bg-white p-4 rounded shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">활동일지</h2>
-                <Link
-                 to="/mypage/workjournal"
-                 className="text-gray-400 hover:underline text-sm font-medium"
-                 >
-                +더보기
-                </Link>
+    fetchDiaries();
+  }, []);
+
+  return (
+    <div className="w-full bg-white p-4 rounded shadow-sm">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-bold">활동일지</h2>
+        <Link
+          to="/mypage/workjournal"
+          className="text-gray-400 hover:underline text-sm font-medium"
+        >
+          +더보기
+        </Link>
+      </div>
+
+      <div className="space-y-2">
+        {journals.map((item) => (
+          <Link
+            key={item.diaryId}
+            to={`/mypage/workjournal/${item.diaryId}`}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center justify-between border-b p-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">{item.title}</span>
+              </div>
+              <div>
+                <span className="text-gray-700 text-sm">
+                  후원일 {item.writtenDate}
+                </span>
+              </div>
             </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-            <div className="space-y-2">
-                {journals.map((item) =>(
-                    <div
-                        key={item.id}
-                        className="flex items-center justify-between border-b p-2"
-                    >
-                        <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-700">{item.title}</span>
-                        </div>
-
-                        <div>
-                            <span className="text-gray-700 text-sm">후원일 {item.date}</span>
-                        </div>
-                    </div>
-                ))}
-
-            </div>
-        </div>
-    )
-}
 export default MiniWorkJournal;

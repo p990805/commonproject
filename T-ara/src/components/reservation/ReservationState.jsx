@@ -103,7 +103,37 @@ const ReservationState = () => {
     if (selectedRegion !== "all") {
       if (selectedRegion === "seoul" && !item.shelterName.includes("서울"))
         return false;
+      if (selectedRegion === "gyeongkido" && !item.shelterName.includes("경기"))
+        return false;
+      if (selectedRegion === "incheon" && !item.shelterName.includes("인천"))
+        return false;
+      if (selectedRegion === "gangwon" && !item.shelterName.includes("강원"))
+        return false;
+      if (selectedRegion === "choongbuk" && !item.shelterName.includes("충북"))
+        return false;
+      if (selectedRegion === "dejeon" && !item.shelterName.includes("대전"))
+        return false;
+      if (selectedRegion === "choongnam" && !item.shelterName.includes("충남"))
+        return false;
+      if (selectedRegion === "sejong" && !item.shelterName.includes("세종"))
+        return false;
+      if (selectedRegion === "deagu" && !item.shelterName.includes("대구"))
+        return false;
+      if (selectedRegion === "gyeongbuk" && !item.shelterName.includes("경북"))
+        return false;
+      if (selectedRegion === "junbuk" && !item.shelterName.includes("전북"))
+        return false;
       if (selectedRegion === "gwangju" && !item.shelterName.includes("광주"))
+        return false;
+      if (selectedRegion === "junnam" && !item.shelterName.includes("전남"))
+        return false;
+      if (selectedRegion === "busan" && !item.shelterName.includes("부산"))
+        return false;
+      if (selectedRegion === "ulsan" && !item.shelterName.includes("울산"))
+        return false;
+      if (selectedRegion === "gyeongnam" && !item.shelterName.includes("경남남"))
+        return false;
+      if (selectedRegion === "jeju" && !item.shelterName.includes("제주"))
         return false;
     }
     return true;
@@ -166,7 +196,22 @@ const ReservationState = () => {
             >
               <option value="all">전체</option>
               <option value="seoul">서울</option>
+              <option value="gyeongkido">경기</option>
+              <option value="incheon">인천</option>
+              <option value="gangwon">강원</option>
+              <option value="choongbuk">충북</option>
+              <option value="dejeon">대전</option>
+              <option value="choongnam">충남</option>
+              <option value="sejong">세종</option>
+              <option value="deagu">대구</option>
+              <option value="gyeongbuk">경북</option>
+              <option value="junbuk">전북</option>
               <option value="gwangju">광주</option>
+              <option value="junnam">전남</option>
+              <option value="busan">부산</option>
+              <option value="ulsan">울산</option>
+              <option value="gyeongnam">경남</option>
+              <option value="jeju">제주</option>
             </select>
           </div>
         </div>

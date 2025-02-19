@@ -99,7 +99,7 @@ const ShelterCampaign = () => {
         <div className="mx-4">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-[#191919] text-[22.50px] font-bold font-['Roboto'] leading-relaxed">
-              캠페인 후원 관리
+              캠페인 후원 대시보드
             </h1>
             <button
               onClick={handleClick}
@@ -107,6 +107,56 @@ const ShelterCampaign = () => {
             >
               캠페인 후원 등록하기
             </button>
+          </div>
+
+          <div className="w-full h-[130px] relative bg-gradient-to-r from-[#5e9dfc] via-[#6085ef] to-[#5c6efe] rounded-[10px] shadow-[3px_3px_10px_0px_rgba(151,152,159,0.25)] flex items-center justify-between px-16 mb-12">
+            {/* Today's Donation Amount */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                오늘 후원받은 금액
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">
+                  503,165
+                </span>
+                <span className="!text-white/70 text-lg ml-2">원</span>
+              </div>
+            </div>
+
+            {/* Total Donation Amount */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                총 후원받은 금액
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">
+                  623,503,165
+                </span>
+                <span className="!text-white/70 text-lg ml-2">원</span>
+              </div>
+            </div>
+
+            {/* Today's Donor Count */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                성공 캠페인 수
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">15</span>
+                <span className="!text-white/70 text-lg ml-2">개</span>
+              </div>
+            </div>
+
+            {/* Total Donor Count */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                전체 캠페인 수
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">255</span>
+                <span className="!text-white/70 text-lg ml-2">개</span>
+              </div>
+            </div>
           </div>
 
           <div className="w-full bg-white rounded shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-7 mb-12">
@@ -166,115 +216,88 @@ const ShelterCampaign = () => {
 
           {/* Donation List Table */}
           <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
-            {/* List Header */}
+            {/* 리스트 헤더 */}
             <div className="px-3 py-3 border-b border-[#dee1e8]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     [
-                  </span>
-                  <div className="mx-1">
-                    <span className="!text-[#191919] text-sm font-semibold">
-                      {selectedItems.length > 0
-                        ? `${selectedItems.length}개의 항목 선택됨`
-                        : `전체 항목 총 ${campaigns.length}건`}
-                    </span>
-                  </div>
-                  <span className="!text-[#191919] text-[15px] font-semibold">
+                    {selectedItems.length > 0
+                      ? `${selectedItems.length}개의 항목 선택됨`
+                      : `전체 항목 총 ${campaigns.length}건`}
                     ]
                   </span>
                 </div>
-                <div className="flex gap-3 items-center">
-                  {selectedItems.length > 0 && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleDelete}
-                        className="px-4 py-1.5 bg-red-500 text-white rounded text-xs"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  )}
-                  <select className="w-[131px] h-7 px-3 border border-[#cccccc] !text-[#191919] text-xs">
-                    <option>최신순</option>
-                  </select>
-                </div>
+                {selectedItems.length > 0 && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-1.5 bg-red-500 text-white rounded text-xs"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Table Container */}
-            <div className="mx-4 my-4">
-              {/* Table Header */}
-              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-                <div className="flex">
-                  <div className="w-[5%] p-4 border-r border-[#dee1e8] flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.length === campaigns.length}
-                      onChange={handleSelectAll}
-                    />
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    캠페인 번호
-                  </div>
-                  <div className="w-[23%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    제목
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    목표금액
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    달성금액
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    시작일시
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[13px] font-medium text-center">
-                    마감일시
-                  </div>
-                </div>
-              </div>
-
-              {/* Table Body */}
-              {campaigns.map((campaign) => (
-                <div
-                  key={campaign.campaignId}
-                  className="flex border-b border-[#dee1e8]"
-                >
-                  <div className="w-[5%] p-4 border-r border-[#dee1e8] flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.includes(campaign.campaignId)}
-                      onChange={() => handleSelectItem(campaign.campaignId)}
-                    />
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    <button
-                      onClick={() => handleCampaignClick(campaign)}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
-                    >
-                      {campaign.campaignId}
-                    </button>
-                  </div>
-                  <div className="w-[23%] p-4 border-r border-[#dee1e8] text-center">
-                    {campaign.title}
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] text-center">
-                    {campaign.targetAmount?.toLocaleString()}원
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] text-center">
-                    {campaign.achievedAmount?.toLocaleString()}원
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] text-center">
-                    {new Date(campaign.startedAt).toLocaleString()}
-                  </div>
-                  <div className="w-[15%] p-4 border-r border-[#dee1e8] text-center">
-                    {new Date(campaign.endedAt).toLocaleString()}
-                  </div>
-                </div>
-              ))}
+            {/* Table */}
+            <div className="relative overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#f0f3fc]">
+                  <tr>
+                    <th className="w-[4%] p-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.length === campaigns.length}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4"
+                      />
+                    </th>
+                    <th className="w-[12%] p-4 text-left">캠페인 번호</th>
+                    <th className="w-[23%] p-4 text-left">제목</th>
+                    <th className="w-[15%] p-4 text-left">목표금액</th>
+                    <th className="w-[15%] p-4 text-left">달성금액</th>
+                    <th className="w-[15%] p-4 text-left">시작일시</th>
+                    <th className="w-[15%] p-4 text-left">마감일시</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {campaigns.map((campaign) => (
+                    <tr key={campaign.campaignId} className="border-b">
+                      <td className="p-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(campaign.campaignId)}
+                          onChange={() => handleSelectItem(campaign.campaignId)}
+                          className="w-4 h-4"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => handleCampaignClick(campaign)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {campaign.campaignId}
+                        </button>
+                      </td>
+                      <td className="p-4">{campaign.title}</td>
+                      <td className="p-4">
+                        {campaign.targetAmount?.toLocaleString()}원
+                      </td>
+                      <td className="p-4">
+                        {campaign.achievedAmount?.toLocaleString()}원
+                      </td>
+                      <td className="p-4">
+                        {new Date(campaign.startedAt).toLocaleString()}
+                      </td>
+                      <td className="p-4">
+                        {new Date(campaign.endedAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

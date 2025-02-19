@@ -14,8 +14,9 @@ const LivePlayer = () => {
   const myName = jwtDecode(token).name;
   const state = location.state || {};
   const sessionId = state.sessionId;
-  const myUserName = myName || 'Viewer';
   const hostName = state.hostName || '';
+  const description = state.description || ''; // 추가된 부분
+  const myUserName = myName || 'Viewer';
 
   const [connectionStatus, setConnectionStatus] = useState('연결 안됨');
   const [ovSession, setOvSession] = useState(null);
@@ -97,7 +98,7 @@ const LivePlayer = () => {
   }, [subscriber]);
 
   return (
-    <div className="flex flex-col bg-gray-100">
+    <div className="flex flex-col bg-gray-100 gap-3">
       <div className="max-w-[1380px] w-full mx-auto mt-4 px-4 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex-1 bg-black relative flex justify-center items-center h-[500px]">
           {streamEnded ? (
@@ -126,11 +127,13 @@ const LivePlayer = () => {
         </div>
       </div>
 
-      <div className="max-w-[1380px] mx-auto w-full px-4 py-4">
+      <div className="max-w-[1380px] mx-auto w-full px-4 py-4 ">
+        <div className="bg-white p-3 rounded-md shadow-md">
         <h3 className="text-lg font-semibold mb-2">{hostName}</h3>
         <p className="text-gray-700 leading-relaxed mb-4">
-          여기에는 방송 설명, 진행 내용, 관련 링크 등이 들어갑니다.
+          {description}
         </p>
+        </div>
       </div>
     </div>
   );

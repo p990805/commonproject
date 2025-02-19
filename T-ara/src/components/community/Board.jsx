@@ -126,7 +126,7 @@ const Board = () => {
                 <th className="px-4 py-2 text-center w-1/6">글쓴이</th>
                 <th className="px-4 py-2 text-center w-1/6">날짜</th>
                 <th className="px-4 py-2 text-center w-1/12">조회</th>
-                <th className="px-4 py-2 text-center w-1/12">추천</th>
+                <th className="px-3 py-2 text-center w-1/12">좋아요</th>
               </tr>
             </thead>
             <tbody>

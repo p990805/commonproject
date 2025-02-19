@@ -40,7 +40,7 @@ const CommonComponent = () => {
   }, []);
 
   const goDonate = () => {
-    nav("/donate");
+    nav("/animal");
   };
 
   return (
@@ -78,7 +78,7 @@ const CommonComponent = () => {
         </h1>
         <button
           onClick={goDonate}
-          className="text-gray-700 hover:text-black transition font-bold border-2 px-6 py-2 rounded-2xl mt-4 flex items-center justify-center border-red-500 w-50"
+          className="text-gray-700 hover:text-black transition font-bold border-2 px-6 py-2 rounded-2xl mt-4 flex items-center justify-center border-red-500 w-50 hover:bg-red-500 hover:text-white"
         >
           후원하기
         </button>

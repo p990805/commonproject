@@ -1,9 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
+import api from "../api";
+import AnimalCard from "../components/animal/AnimalCard";
 
 const ShelterDetailPage = () => {
   const { id } = useParams();
+  const [shelter, setShelter] = useState(null);
+  const [animals, setAnimals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [shelterResponse, animalsResponse] = await Promise.all([
+          api.get(`/shelter/info/${id}`),
+          api.get(`/animal/list/user?shelterId=${id}`),
+        ]);
+
+        setShelter(shelterResponse.data.shelter);
+
+        // Directly use the message array from the response
+        setAnimals(animalsResponse.data.message || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const incomeData = [
     { name: "일시후원", value: 100, color: "#4B89DC" },
@@ -20,32 +48,56 @@ const ShelterDetailPage = () => {
     { name: "기타", value: 39, color: "#7950F2" },
   ];
 
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="text-center">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="text-red-500">에러: {error}</div>
+      </div>
+    );
+  }
+
+  if (!shelter) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="text-center">보호소 정보를 찾을 수 없습니다.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-8">
-      <h1 className="text-4xl font-bold mb-2">광주 동물보호센터</h1>
+      <h1 className="text-4xl font-bold mb-2">{shelter.name}</h1>
 
       <div className="bg-gray-50 p-6 rounded-lg mb-8">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-gray-600">고유번호</p>
-            <p className="font-bold">62-613-6770121</p>
+            <p className="font-bold">{shelter.uniqueNumber || "정보 없음"}</p>
           </div>
           <div>
             <p className="text-gray-600">전화번호</p>
-            <p className="font-bold">062-764-3708</p>
-          </div>
-          <div>
-            <p className="text-gray-600">관리기관</p>
-            <p className="font-bold">광주광역시 북구</p>
+            <p className="font-bold">{shelter.phone || "정보 없음"}</p>
           </div>
           <div>
             <p className="text-gray-600">이메일</p>
-            <p className="font-bold">gwangjuanimals@gmail.com</p>
+            <p className="font-bold">{shelter.email || "정보 없음"}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">설명</p>
+            <p className="font-bold">{shelter.description || "정보 없음"}</p>
           </div>
         </div>
         <div className="mt-4">
           <p className="text-gray-600">보호센터주소</p>
-          <p className="font-bold">광주광역시 북구 본촌마을길 25-1(본촌동)</p>
+          <p className="font-bold">{shelter.address || "정보 없음"}</p>
         </div>
       </div>
 
@@ -172,6 +224,32 @@ const ShelterDetailPage = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 보호 동물 리스트 섹션 */}
+      <div className="mt-12">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">보호중인 동물</h2>
+          <span className="text-gray-500">총 {animals.length}마리</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {animals.map((animal) => (
+            <AnimalCard
+              key={animal.animalId}
+              animal={{
+                ...animal,
+                thumbnailUrl: animal.thumbnailUrl || null,
+                shelterName: shelter.name,
+              }}
+            />
+          ))}
+          {animals.length === 0 && (
+            <div className="col-span-full text-center py-8 text-gray-500">
+              현재 보호중인 동물이 없습니다.
+            </div>
+          )}
         </div>
       </div>
     </div>

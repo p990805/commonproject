@@ -27,8 +27,13 @@ const MySponLive = () => {
       });
   }, []);
 
+  // donationLiveList에서 중복 제거 (streamId 기준)
+  const uniqueDonationLives = donationLiveList.filter((live, index, self) =>
+    index === self.findIndex((item) => item.streamId === live.streamId)
+  );
+
   // 검색 및 정렬 적용
-  const filteredAndSortedList = donationLiveList
+  const filteredAndSortedList = uniqueDonationLives
     .filter(live => {
       if (!searchTerm) return true;
       const lowerTerm = searchTerm.toLowerCase();

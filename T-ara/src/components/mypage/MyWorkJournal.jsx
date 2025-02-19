@@ -1,6 +1,7 @@
+// src/components/mypage/mypage2/MyWorkJournal.jsx
 import React, { useState, useEffect } from 'react';
-import MyWorkJournalDetail from './MyWorkJournalDetail'
-
+import { useNavigate } from 'react-router-dom';
+import api from '../../api';
 
 const MyWorkJournal = () => {
   const [activities, setActivities] = useState([]);
@@ -8,50 +9,31 @@ const MyWorkJournal = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedActivity, setSelectedActivity] = useState(null);
+
+  const itemsPerPage = 5; // 한 페이지당 항목 수
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchActivities(currentPage);
   }, [currentPage]);
 
-  // API 호출 함수
+  // GET /diary/user/list API 호출 함수
   const fetchActivities = async (page) => {
     setLoading(true);
     try {
-      // API 연동 시
-      // const response = await axios.get(`/api/activities?page=${page}`);
-      // setActivities(response.data.activities);
-      // setTotalPages(response.data.totalPages);
+      const response = await api.get('/diary/user/list');
+      // 응답의 diaryList 배열을 원하는 형식으로 매핑
+      const mapped = response.data.diaryList.map(item => ({
+        id: item.diaryId,                 // diaryId를 id로 사용
+        username: item.animalName,          // animalName을 사용자명처럼 사용 (필요에 따라 조정)
+        title: item.title,                  // 다이어리 제목
+        content: "",                        // API에 내용이 없다면 빈 문자열 또는 다른 필드 사용
+        date: item.writtenDate,             // 작성일자(또는 createdAt)
+        imageUrl: "/assets/corgi.png"        // 이미지 URL이 없다면 기본 이미지 사용 (API에 이미지 필드가 있다면 그걸 사용)
+      }));
 
-      // 임시 데이터
-      const mockData = [
-        {
-          id: 1,
-          username: '김시원99',
-          title: '12월의 김시원99 일지',
-          content: '12월의 김시원의 활동일지 입니다. 칸채우기 용 내용 어쩌구저쩌구 어쩌구저저구 내용 채우기 내용 채우기',
-          date: '2025-01-25',
-          imageUrl: '/api/placeholder/300/200'
-        },
-        {
-          id: 2,
-          username: '김시원99',
-          title: '12월의 김시원99 일지',
-          content: '12월의 김시원의 활동일지 입니다. 칸채우기 용 내용 어쩌구저쩌구 어쩌구저저구 내용 채우기 내용 채우기',
-          date: '2025-01-25',
-          imageUrl: '/api/placeholder/300/200'
-        },
-        {
-          id: 3,
-          username: '김시원99',
-          title: '12월의 김시원99 일지',
-          content: '12월의 김시원의 활동일지 입니다. 칸채우기 용 내용 어쩌구저쩌구 어쩌구저저구 내용 채우기 내용 채우기',
-          date: '2025-01-25',
-          imageUrl: '/api/placeholder/300/200'
-        }
-      ];
-      setActivities(mockData);
-      setTotalPages(5); // 임시 총 페이지 수
+      setActivities(mapped);
+      setTotalPages(Math.ceil(mapped.length / itemsPerPage));
     } catch (err) {
       setError('활동 일지를 불러오는데 실패했습니다.');
       console.error('Error fetching activities:', err);
@@ -61,12 +43,8 @@ const MyWorkJournal = () => {
   };
 
   const handleActivityClick = (activityId) => {
-    const activity = activities.find(a => a.id === activityId);
-    setSelectedActivity(activity);
-  };
-
-  const handleBackToList = () => {
-    setSelectedActivity(null);
+    // workjournal/:diaryId 경로로 이동
+    navigate(`/mypage/workjournal/${activityId}`);
   };
 
   const handlePageChange = (page) => {
@@ -75,16 +53,6 @@ const MyWorkJournal = () => {
 
   if (loading) return <div className="text-center py-8">로딩 중...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
-
-  // 상세 보기 컴포넌트 렌더링
-  if (selectedActivity) {
-    return (
-      <MyWorkJournalDetail 
-        activity={selectedActivity}
-        onBack={handleBackToList}
-      />
-    );
-  }
 
   return (
     <div className="w-full max-w-[1307px] mx-auto p-6 bg-white rounded-lg border border-gray-200">
@@ -103,16 +71,16 @@ const MyWorkJournal = () => {
             <div className="flex p-6 gap-8">
               {/* 이미지 */}
               <div 
-              className="w-[300px] h-[200px] relative shrink-0 cursor-pointer"
-              onClick={() => handleActivityClick(activity.id)}
+                className="w-[300px] h-[200px] relative shrink-0 cursor-pointer"
+                onClick={() => handleActivityClick(activity.id)}
               >
-              <img
-                  src="/assets/corgi.png"
+                <img
+                  src={activity.imageUrl}
                   alt="Activity"
                   className="w-full h-full object-cover opacity-50"
-              />
+                />
               </div>
-                          
+              
               {/* 콘텐츠 */}
               <div className="flex-1 flex flex-col justify-between py-2">
                 <div className="space-y-4">

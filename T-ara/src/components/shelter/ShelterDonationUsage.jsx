@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SidebarNavigation from "./SidebarNavigation";
-import QuillEditor from "../QuillEditor";
+import api from "../../api";
+import DonationUsageModal from "./DonationUsageModal";
 
 const ShelterDonationUsage = () => {
   const navigate = useNavigate();
@@ -12,34 +13,29 @@ const ShelterDonationUsage = () => {
 
   // 체크된 항목들을 관리하는 상태
   const [selectedItems, setSelectedItems] = useState([]);
-  // 임시 데이터 (나중에 DB에서 가져올 데이터)
-  const [donations] = useState([
-    {
-      id: 1,
-      category: "병원비",
-      amount: 150000,
-      useDate: "2024-02-11",
-      registerDate: "2024-02-11 14:30",
-      place: "동물병원",
-      receipt: "있음",
-      shelter: "싸피보호소",
-    },
-    {
-      id: 2,
-      category: "사료비",
-      amount: 200000,
-      useDate: "2024-02-10",
-      registerDate: "2024-02-10 15:20",
-      place: "펫샵",
-      receipt: "있음",
-      shelter: "싸피보호소",
-    },
-  ]);
+  // API로부터 가져온 후원금 사용 데이터
+  const [donations, setDonations] = useState([]);
+  const [selectedDonation, setSelectedDonation] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // 데이터 불러오기
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const response = await api.get("/shelter/donation/expense/list");
+        setDonations(response.data);
+      } catch (error) {
+        console.error("후원금 사용 데이터를 불러오는 중 오류 발생:", error);
+      }
+    };
+
+    fetchDonations();
+  }, []);
 
   // 전체 선택/해제 핸들러
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedItems(donations.map((item) => item.id));
+      setSelectedItems(donations.map((item) => item.expenseId));
     } else {
       setSelectedItems([]);
     }
@@ -54,6 +50,11 @@ const ShelterDonationUsage = () => {
         return [...prev, id];
       }
     });
+  };
+
+  const handleDonationClick = (donation) => {
+    setSelectedDonation(donation);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -204,129 +205,91 @@ const ShelterDonationUsage = () => {
             후원금 사용 전체 목록
           </div>
 
-          {/* Donation List Table */}
+          {/* 테이블 */}
           <div className="w-full bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
-            {/* List Header */}
+            {/* 리스트 헤더 */}
             <div className="px-3 py-3 border-b border-[#dee1e8]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <span className="!text-[#191919] text-[15px] font-semibold">
                     [
-                  </span>
-                  <div className="mx-1">
-                    <span className="!text-[#191919] text-sm font-semibold">
-                      {selectedItems.length > 0
-                        ? `${selectedItems.length}개의 항목 선택됨`
-                        : `전체 항목 총 ${donations.length}건`}
-                    </span>
-                  </div>
-                  <span className="!text-[#191919] text-[15px] font-semibold">
+                    {selectedItems.length > 0
+                      ? `${selectedItems.length}개의 항목 선택됨`
+                      : `전체 항목 총 ${donations.length}건`}
                     ]
                   </span>
-                </div>
-                <div className="flex gap-3 items-center">
-                  {selectedItems.length > 0 && (
-                    <div className="flex gap-2">
-                      {selectedItems.length === 1 && (
-                        <button className="px-4 py-1.5 bg-blue-500 text-white rounded text-xs">
-                          수정
-                        </button>
-                      )}
-                      <button className="px-4 py-1.5 bg-red-500 text-white rounded text-xs">
-                        삭제
-                      </button>
-                    </div>
-                  )}
-                  <select className="w-[131px] h-7 px-3 border border-[#cccccc] !text-[#191919] text-xs">
-                    <option>최신순</option>
-                  </select>
                 </div>
               </div>
             </div>
 
-            {/* Table Container with margin */}
-            <div className="mx-4 my-4">
-              {/* Table Header */}
-              <div className="w-full bg-[#f0f3fc] border-t border-[#dee1e8]">
-                <div className="flex">
-                  <div className="w-[4%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.length === donations.length}
-                      onChange={handleSelectAll}
-                    />
-                  </div>
-                  <div className="w-[8%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 번호
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 카테고리
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 금액
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용 일자
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    등록 일시
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    사용처
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    영수증 사진
-                  </div>
-                  <div className="w-[16%] p-4 border-r border-[#dee1e8] !text-[#191919] text-[10.31px] font-medium text-center">
-                    담당 보호소
-                  </div>
-                </div>
-              </div>
-              {/* 테이블 본문 */}
-              {donations.map((donation) => (
-                <div
-                  key={donation.id}
-                  className="flex border-b border-[#dee1e8]"
-                >
-                  <div className="w-[4%] p-4 border-r border-[#dee1e8] flex justify-center items-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 border border-[#767676] rounded-sm"
-                      checked={selectedItems.includes(donation.id)}
-                      onChange={() => handleSelectItem(donation.id)}
-                    />
-                  </div>
-                  <div className="w-[8%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.id}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.category}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.amount.toLocaleString()}원
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.useDate}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.registerDate}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.place}
-                  </div>
-                  <div className="w-[12%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.receipt}
-                  </div>
-                  <div className="w-[16%] p-4 border-r border-[#dee1e8] text-center">
-                    {donation.shelter}
-                  </div>
-                </div>
-              ))}
+            {/* Table */}
+            <div className="relative overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#f0f3fc]">
+                  <tr>
+                    <th className="w-[4%] p-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedItems.length === donations.length &&
+                          donations.length > 0
+                        }
+                        onChange={handleSelectAll}
+                        className="w-4 h-4"
+                      />
+                    </th>
+                    <th className="w-[10%] p-4 text-left">사용 번호</th>
+                    <th className="w-[15%] p-4 text-left">사용 카테고리</th>
+                    <th className="w-[15%] p-4 text-left">사용 금액</th>
+                    <th className="w-[15%] p-4 text-left">사용 일자</th>
+                    <th className="w-[40%] p-4 text-left">사용처</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {donations.map((donation) => (
+                    <tr key={donation.expenseId} className="border-b">
+                      <td className="p-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(donation.expenseId)}
+                          onChange={() => handleSelectItem(donation.expenseId)}
+                          className="w-4 h-4"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => handleDonationClick(donation)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {donation.expenseId}
+                        </button>
+                      </td>
+                      <td className="p-4">{donation.categoryName}</td>
+                      <td className="p-4">
+                        {donation.amount.toLocaleString()}원
+                      </td>
+                      <td className="p-4">{donation.expenseDate}</td>
+                      <td className="p-4">{donation.content}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 상세 모달 */}
+      {selectedDonation && (
+        <DonationUsageModal
+          donation={selectedDonation}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedDonation(null);
+          }}
+        />
+      )}
     </div>
   );
 };
