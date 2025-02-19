@@ -16,19 +16,38 @@ const AnimalPage = () => {
   const [species, setSpecies] = useState("all");
   const [searchValue, setSearchValue] = useState("");
 
+  // 정렬 상태: "newest" (animalId 높은 순) / "oldest" (낮은 순)
+  const [sortOrder, setSortOrder] = useState("newest");
+
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const animalsPerPage = 16; // 4*4 grid
+
   const fetchAnimals = async () => {
     setLoading(true);
     try {
       const response = await api.get("/animal/list/user", {
         params: {
-          cityCategoryId: region, // 예: "서울", "경기", "all" 등
-          shelterId: shelter,      // 예: "서울 보호소", "all" 등
-          speciesId: species,      // 예: "강아지", "all" 등
+          cityCategoryId: region,
+          shelterId: shelter,
+          speciesId: species,
           keyword: searchValue,
         },
       });
-      setAnimals(response.data.message);
+      let fetchedAnimals = response.data.message;
+      console.log(fetchedAnimals);
+
+      // animalId를 기준으로 정렬 (정렬 상태에 따라)
+      if (sortOrder === "newest") {
+        fetchedAnimals.sort((a, b) => Number(b.animalId) - Number(a.animalId));
+      } else {
+        fetchedAnimals.sort((a, b) => Number(a.animalId) - Number(b.animalId));
+      }
+
+      setAnimals(fetchedAnimals);
       setError(null);
+      // 필터나 검색 시 페이지를 1로 초기화
+      setCurrentPage(1);
     } catch (err) {
       console.error("Error fetching animals:", err);
       setError("Failed to load animals. Please try again later.");
@@ -36,13 +55,25 @@ const AnimalPage = () => {
     setLoading(false);
   };
 
-  // 검색 버튼 클릭 시 또는 필터 상태, 검색어 변경 시 동물 목록 재요청
+  // 필터 또는 정렬 상태, 검색어 변경 시 재요청
   useEffect(() => {
     fetchAnimals();
-  }, [region, shelter, species]);
+  }, [region, shelter, species, sortOrder]);
 
   const handleSearch = () => {
     fetchAnimals();
+  };
+
+  // 페이지네이션 관련 계산
+  const indexOfLastAnimal = currentPage * animalsPerPage;
+  const indexOfFirstAnimal = indexOfLastAnimal - animalsPerPage;
+  const currentAnimals = animals.slice(indexOfFirstAnimal, indexOfLastAnimal);
+  const totalPages = Math.ceil(animals.length / animalsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // 페이지 변경 시 최상단으로 스크롤
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -80,8 +111,46 @@ const AnimalPage = () => {
           setShelter={setShelter}
           species={species}
           setSpecies={setSpecies}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
         />
-        <AnimalGrid animals={animals} />
+        {/* 한 페이지에 currentAnimals(최대 16개)를 전달 */}
+        <AnimalGrid animals={currentAnimals} />
+
+        {/* 페이지네이션 컨트롤 */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+              (pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === pageNumber
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

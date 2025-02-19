@@ -71,7 +71,7 @@ const ReservationStatus = () => {
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-lg font-bold">산책 예약현황</h2>
         <Link
-          to="/reservation"
+          to="/reservation-status"
           className="text-gray-400 hover:underline text-sm font-medium"
         >
           +더보기

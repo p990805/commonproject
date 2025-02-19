@@ -32,11 +32,32 @@ const CampaignDonation = () => {
   const amounts = [10000, 30000, 50000, 100000];
   const [customAmount, setCustomAmount] = useState("");
 
-  const donor = {
-    name: "박주찬",
-    phone: "010-8508-8650",
-    email: "p990805@naver.com",
-  };
+  const [donor, setDonor] = useState({
+    id: "",
+    name: "",
+    phone: "",
+    email: "",
+  });
+
+  // 사용자 정보 불러오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await api.get("/member/myinfo");
+        setDonor({
+          id: response.data.id,
+          name: response.data.name,
+          phone: response.data.phone,
+          email: response.data.email,
+        });
+      } catch (error) {
+        console.error("사용자 정보 로딩 실패:", error);
+        alert("사용자 정보를 불러오는데 실패했습니다.");
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   // Extract first image from Quill content
   const getFirstQuillImage = () => {
@@ -149,7 +170,7 @@ const CampaignDonation = () => {
           const serverData = {
             ...response,
             donationType: "campaign",
-            relationalId: campaign.id,
+            relationalId: campaign.campaignId,
             amount: selectedAmount,
           };
 
@@ -181,7 +202,7 @@ const CampaignDonation = () => {
   const calculateAchievement = () => {
     if (!campaign) return 0;
     const { targetAmount, achievedAmount } = campaign;
-    if (!targetAmount) return 0;
+    if (!targetAmount || targetAmount <= 0) return 0;
     return (((achievedAmount || 0) / targetAmount) * 100).toFixed(1);
   };
 

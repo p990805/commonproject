@@ -14,14 +14,14 @@ const ShelterFinder = () => {
   };
 
   return (
-    <div className="h-[900px] bg-white">
+    <div className="h-screen bg-white">
       {selectedRegion ? (
         // 지역이 선택된 경우: 지도(왼쪽) + 리스트(오른쪽)
-        <div className="max-w-[1800px] mx-auto h-full flex py-12 px-8 gap-16">
-          {/* 왼쪽 영역 */}
-          <div className="shrink-0 flex flex-col mr-15">
-            <div className="flex items-center gap-4 p-4 ml-25">
-              <h1 className="text-4xl font-bold text-[#333333] text-center items-center">
+        <div className="max-w-7xl mx-auto h-full flex py-8 px-6 gap-8">
+          {/* 왼쪽 영역: 지도 */}
+          <div className="w-1/2 flex flex-col">
+            <div className="flex items-center gap-4 p-4">
+              <h1 className="text-2xl font-bold text-gray-800">
                 {selectedRegion}
               </h1>
               <button
@@ -32,28 +32,34 @@ const ShelterFinder = () => {
               </button>
             </div>
 
-            <div className="w-[640px] h-full mr-50 ml-0">
+            <div className="w-full h-full">
+              <div className="scale-75 -ml-60">
+                <RegionMap
+                  selectedRegion={selectedRegion}
+                  onRegionSelect={handleRegionSelect}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 오른쪽 영역: 보호소 리스트 */}
+          <div className="w-2/3 h-[600px] shadow-lg rounded-2xl border border-gray-200 overflow-auto">
+            <ShelterList regionName={selectedRegion} />
+          </div>
+        </div>
+      ) : (
+        // 지역이 선택되지 않은 경우: 지도만 표시
+        <div className="max-w-7xl mx-auto h-full flex justify-start pt-8 px-6">
+          <div className="w-2/3">
+            <h1 className="text-2xl font-bold mb-4 ml-20 mt-6">
+              지역을 선택하세요
+            </h1>
+            <div className="scale-75 ml-10">
               <RegionMap
                 selectedRegion={selectedRegion}
                 onRegionSelect={handleRegionSelect}
               />
             </div>
-          </div>
-
-          {/* 오른쪽 영역: 보호소 리스트 */}
-          <div className="flex-1 shadow-sm rounded-2xl border border-[#00000014]">
-            <ShelterList regionName={selectedRegion} />
-          </div>
-        </div>
-      ) : (
-        // 지역이 선택되지 않은 경우: 지도만 화면 중앙 → 왼쪽으로 조금 치우치게 배치
-        <div className="max-w-[1800px] mx-auto h-full flex  justify-start pl-30 pt-30">
-          <div className="w-[640px] h-full">
-            <h1 className="text-4xl font-black">지역을 선택하세요</h1>
-            <RegionMap
-              selectedRegion={selectedRegion}
-              onRegionSelect={handleRegionSelect}
-            />
           </div>
         </div>
       )}

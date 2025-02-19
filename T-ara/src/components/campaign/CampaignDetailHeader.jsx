@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CampaignDetailHeader = ({ campaign = {} }) => {
-  const [showDonateButton, setShowDonateButton] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -25,7 +24,6 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
     setImageError(true);
   };
 
-  // Extract first image from Quill content
   const getFirstQuillImage = () => {
     if (campaign.content && campaign.content.ops) {
       const firstImage = campaign.content.ops.find(
@@ -40,39 +38,12 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
     if (imageError) {
       return "https://via.placeholder.com/800x600?text=No+Image+Available";
     }
-
-    // Try to get the first image from Quill content
     const quillImage = getFirstQuillImage();
-
-    // Use Quill image if available, otherwise use imageUrl
     const finalUrl = quillImage || url;
-
     if (!finalUrl) {
       return "https://via.placeholder.com/800x600?text=No+Image+Available";
     }
-
     return finalUrl;
-  };
-
-  // 캠페인 달성률 계산
-  const calculateAchievement = () => {
-    const targetAmount = campaign.targetAmount || 0;
-    const achievedAmount = campaign.achievedAmount || 0;
-
-    if (targetAmount === 0) return 0;
-
-    const achievement = (achievedAmount / targetAmount) * 100;
-    return achievement.toFixed(1);
-  };
-
-  // 남은 날짜 계산
-  const calculateDaysLeft = () => {
-    if (!campaign.startedAt || !campaign.endedAt) return 14;
-    const end = new Date(campaign.endedAt);
-    const today = new Date();
-    const diffTime = end - today;
-    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    return diffDays;
   };
 
   return (
@@ -95,47 +66,77 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
             {/* 캠페인 정보 */}
             <div className="lg:w-2/5">
               {/* 캠페인 제목 */}
-              <h1 className="text-[20px] leading-6 text-[#212529] font-bold mb-4">
-                {campaign.title || "제목 없음"}
+              <h1 className="text-[20px] leading-10 text-[#212529] font-bold mb-4">
+                {campaign.title}
               </h1>
+              <div className="border-[0.3px] border-[#f3f4f5] my-[10px] w-full mb-6"></div>
 
-              {/* 달성률 정보 */}
-              <div className="text-[#00C4C4] font-bold text-lg mb-4">
-                {(
-                  ((campaign.achievedAmount || 0) /
-                    (campaign.targetAmount || 1)) *
-                  100
-                ).toFixed(0)}
-                % 달성
+              {/* 달성 금액 정보 */}
+              <div className="flex items-center gap-4 mb-2">
+                <div className="text-[#F86D7D] font-bold text-2xl">
+                  {campaign.achievement}% 달성
+                </div>
+                <div className="text-[14px] text-[#495057]">
+                  {campaign.daysLeft}일 남음
+                </div>
               </div>
 
-              {/* 참여 정보 */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-black text-xl font-bold">
-                    {(
-                      ((campaign.achievedAmount || 0) /
-                        (campaign.targetAmount || 1)) *
-                      100
-                    ).toFixed(0)}
+              <div className="mb-10">
+                <div className="flex items-center gap-4 mb-1">
+                  <span className="text-2xl font-bold">
+                    {campaign.achievedAmount?.toLocaleString() || 0}원 달성
                   </span>
-                  <span className="text-[#868E96] text-[11.25px]">달성</span>
-                </div>
-                <div className="text-[#868E96] text-[11.25px]">
-                  {calculateDaysLeft()}일 남음
+                  <span className="text-[14px] text-[#495057]">
+                    목표금액 {campaign.targetAmount?.toLocaleString() || 0}원
+                  </span>
                 </div>
               </div>
 
-              {/* 모금액 정보 */}
-              <div className="mb-6">
-                <div className="flex gap-1">
-                  <div className="px-2 py-1 bg-[#F2F4F6] rounded text-[10px] text-[#495057]">
-                    1명 후원
-                  </div>
-                  <div className="px-2 py-1 bg-[#F2F4F6] rounded text-[10px] text-[#495057]">
-                    {calculateDaysLeft()}일 남음
-                  </div>
-                </div>
+              {/* 문의하기 버튼 */}
+              <button
+                onClick={() => navigate(`/shelter/${campaign.shelterId}`)}
+                className="w-full mb-4 mt-4 flex items-center justify-center gap-2 py-4 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-600"
+                >
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span className="font-semibold text-gray-800">
+                  {campaign.shelterName} 보호소
+                </span>
+                <p>보러가기</p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-500"
+                >
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </button>
+
+              <div className="bg-gray-100 rounded-lg p-4 text-center mb-4">
+                <span>
+                  👥 {campaign.donatePersonNum?.toLocaleString() || 0} 명이 함께
+                  후원중
+                </span>
               </div>
 
               {/* 후원하기 버튼 */}
@@ -145,30 +146,10 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
               >
                 캠페인 후원하기
               </button>
-
-              {/* 문의하기 버튼 */}
-              <button className="w-full mt-4 flex items-center justify-center gap-2 py-4 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition-colors">
-                <span className="text-lg">✉</span>
-                문의하기
-              </button>
             </div>
           </div>
         </div>
       </div>
-      {/* 스크롤 시 나타나는 둥근 후원하기 버튼 */}
-      {showDonateButton && (
-        <div className="fixed bottom-8 right-8 z-50">
-          <button
-            onClick={handleClick}
-            className="w-16 h-16 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 flex items-center justify-center transition-transform hover:scale-110"
-          >
-            <div className="text-center text-sm leading-tight">
-              <p>후원</p>
-              <p>하기</p>
-            </div>
-          </button>
-        </div>
-      )}
     </>
   );
 };

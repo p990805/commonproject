@@ -1,3 +1,4 @@
+// src/components/streaming/StartLive.jsx
 import { useState } from "react";
 import { OpenVidu } from "openvidu-browser";
 import { toast } from "react-toastify";
@@ -7,13 +8,12 @@ import LiveSessionForm from "./LiveSessionForm";
 import { jwtDecode } from "jwt-decode";
 
 const StartLive = () => {
-  
   const token = localStorage.getItem("authToken");
   const hostNameFromToken = token ? jwtDecode(token).name : "anonymous";
 
- 
   const [form, setForm] = useState({
     shelterId: "",
+    relationalId: "", // animal 선택 시 사용
     dataSource: "shelter", 
     title: "",
     description: "",
@@ -36,15 +36,28 @@ const StartLive = () => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/stream/new", {
-        shelterId: Number(form.shelterId),
+      // dataSource에 따라 전송할 필드가 달라집니다.
+      const payload = {
         dataSource: form.dataSource,
         title: form.title,
         description: form.description,
         participantName: form.participantName,
-      });
+      };
+
+      if (form.dataSource === "shelter") {
+        payload.shelterId = Number(form.shelterId);
+      } else if (form.dataSource === "animal") {
+        payload.relationalId = Number(form.relationalId);
+      }
+
+      const response = await api.post("/stream/new", payload);
       const streamData = response.data;
-      setStreamingInfo(streamData);
+      // streamingInfo에 form.description과 hostName를 추가하여 전달
+      setStreamingInfo({ 
+        ...streamData, 
+        description: form.description, 
+        hostName: form.participantName 
+      });
 
       const OV = new OpenVidu();
       const newSession = OV.initSession();
@@ -109,7 +122,7 @@ const StartLive = () => {
           myUserName={form.participantName}
           hostName={form.participantName} 
           title={form.title} 
-          description={form.description}
+          description={streamingInfo.description}  // 전달된 방송 설명 사용
           mainStreamManager={publisher}
           publisher={publisher}
           subscribers={subscribers}

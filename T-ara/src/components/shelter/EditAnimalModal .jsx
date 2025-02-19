@@ -123,12 +123,14 @@ const EditAnimalModal = ({ animal, isOpen, onClose, onSave }) => {
             });
 
             // 썸네일 및 추가 이미지 설정
-            if (animalInfo.animalImages && animalInfo.animalImages.length > 0) {
-              // 첫 번째 이미지를 썸네일로 설정
-              setThumbnailPreview(animalInfo.animalImages[0]);
+            if (animalInfo.thumbnail) {
+              // 썸네일 이미지를 대표 사진으로 설정
+              setThumbnailPreview(animalInfo.thumbnail);
+            }
 
-              // 나머지 이미지를 추가 이미지로 설정
-              setAdditionalImagePreviews(animalInfo.animalImages.slice(1));
+            if (animalInfo.animalImages && animalInfo.animalImages.length > 0) {
+              // 추가 이미지 설정
+              setAdditionalImagePreviews(animalInfo.animalImages);
             }
           }
         }

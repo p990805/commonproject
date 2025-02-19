@@ -1,30 +1,41 @@
 // src/components/streaming/LiveSessionForm.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import api from "../../../api";
 
 const LiveSessionForm = ({ form, handleChange, handleSubmit }) => {
-  // 뒤로가기 버튼 클릭 시 호출하는 핸들러
+  const [donatedAnimalList, setDonatedAnimalList] = useState([]);
+
   const handleBack = () => {
     window.history.back();
   };
 
-  // JWT 토큰에서 참가자명 추출 (토큰이 localStorage에 저장되어 있다고 가정)
   let participantName = "";
   try {
     const token = localStorage.getItem("authToken");
     if (token) {
       const decodedToken = jwtDecode(token);
-      participantName = decodedToken['name']; // payload에 name 필드가 있다고 가정
-      console.log(decodedToken);
-      console.log(participantName);
+      participantName = decodedToken["name"];
     }
   } catch (error) {
     console.error("토큰 디코딩 오류:", error);
   }
 
+  // 데이터 소스가 'animal'인 경우 후원 가능한 동물 목록을 가져옵니다.
+  useEffect(() => {
+    if (form.dataSource === "animal") {
+      api.get("/stream/donated-animal-list?dataSource=animal")
+        .then((response) => {
+          setDonatedAnimalList(response.data);
+        })
+        .catch((error) => {
+          console.error("동물 목록 조회 에러:", error);
+        });
+    }
+  }, [form.dataSource]);
+
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-md rounded">
-      {/* 뒤로가기 버튼 */}
       <button
         type="button"
         onClick={handleBack}
@@ -32,7 +43,6 @@ const LiveSessionForm = ({ form, handleChange, handleSubmit }) => {
       >
         뒤로가기
       </button>
-      
       <h2 className="text-2xl font-bold mb-4">라이브 방송 시작</h2>
       <form onSubmit={handleSubmit}>
         {/* 데이터 소스 선택 */}
@@ -51,6 +61,29 @@ const LiveSessionForm = ({ form, handleChange, handleSubmit }) => {
             <option value="animal">동물</option>
           </select>
         </div>
+
+        {/* 데이터 소스가 animal인 경우 후원 가능한 동물 선택 */}
+        {form.dataSource === "animal" && (
+          <div className="mb-4">
+            <label htmlFor="relationalId" className="block text-gray-700 mb-2">
+              후원 동물 선택
+            </label>
+            <select
+              id="relationalId"
+              name="relationalId"  // animalId 대신 relationalId로 값을 전달합니다.
+              value={form.relationalId || ""}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+            >
+              <option value="">동물을 선택하세요</option>
+              {donatedAnimalList.map((animal) => (
+                <option key={animal.animalId} value={animal.animalId}>
+                  {animal.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* 방송 제목 입력 */}
         <div className="mb-4">
@@ -86,11 +119,7 @@ const LiveSessionForm = ({ form, handleChange, handleSubmit }) => {
         </div>
 
         {/* JWT 토큰에서 추출한 참가자명을 hidden input으로 전달 */}
-        <input
-          type="hidden"
-          name="participantName"
-          value={participantName}
-        />
+        <input type="hidden" name="participantName" value={participantName} />
 
         {/* 방송 시작 버튼 */}
         <button

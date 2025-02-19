@@ -25,35 +25,18 @@ const ReservationTable = ({ reservations, onSelectReservation }) => {
           </span>
           <span className="text-sm font-semibold">건</span>
         </div>
-        <div className="relative">
-          <select className="w-32 h-7 px-4 text-sm border border-[#cccccc] rounded appearance-none">
-            <option>최신순</option>
-          </select>
-        </div>
       </div>
       <div className="bg-white shadow-[3px_3px_10px_0px_rgba(151,152,159,0.15)] p-6">
         <div className="overflow-x-auto pb-8">
           <table className="w-full">
             <thead>
               <tr className="bg-[#fbfcfc] text-xs text-[#667084]">
-                <th className="px-6 py-3 font-medium text-left">
-                  신청일자
-                </th>
-                <th className="px-6 py-3 font-medium text-left">
-                  유기동물명
-                </th>
-                <th className="px-6 py-3 font-medium text-left">
-                  예약일자
-                </th>
-                <th className="px-6 py-3 font-medium text-left">
-                  신청자명
-                </th>
-                <th className="px-6 py-3 font-medium text-left">
-                  승인 상태
-                </th>
-                <th className="px-6 py-3 font-medium text-left">
-                  거절사유
-                </th>
+                <th className="px-6 py-3 font-medium text-left">신청일자</th>
+                <th className="px-6 py-3 font-medium text-left">유기동물명</th>
+                <th className="px-6 py-3 font-medium text-left">예약일자</th>
+                <th className="px-6 py-3 font-medium text-left">신청자명</th>
+                <th className="px-6 py-3 font-medium text-left">승인 상태</th>
+                <th className="px-6 py-3 font-medium text-left">거절사유</th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>

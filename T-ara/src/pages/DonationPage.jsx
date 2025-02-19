@@ -181,7 +181,7 @@ const DonationPage = () => {
     //시원이꺼
     //IMP.init("imp18166354");
     //희주
-    IMP.init("imp72516258");
+    IMP.init("imp18166354");
 
     const paymentData = {
       pg: selectedMethod === "card" ? "tosspayments" : "kakaopay.TCSUBSCRIP",

@@ -73,6 +73,7 @@ const PageNotFound = lazy(() => import("./components/PageNotFound"));
 const ShelterNoticeEdit = lazy(() => import("./components/shelter/notice/ShelterNoticeEdit"));
 const NoticeDetail = lazy(() => import("./components/shelter/notice/NoticeDetail"));
 const ReservationStatusPage = lazy(() => import("./pages/ReservationStatusPage"));
+const WorkJournalDetailPage = lazy(() => import("./pages/mypage/WorkJournalDetailPage"));
 
 
 const AppRouter = () => {
@@ -105,6 +106,7 @@ const AppRouter = () => {
         <Route path="/mypage/workjournal" element={<ProtectedRoute><WorkJournalPage /></ProtectedRoute>}/>
         <Route path="/mypage/photocard" element={<ProtectedRoute><PhotocardPage /></ProtectedRoute>}/>
         <Route path="/mypage/passwordcheck" element={<ProtectedRoute><PasswordCheckPage /></ProtectedRoute>}/>
+        <Route path="/mypage/workjournal/:diaryId" element={<ProtectedRoute><WorkJournalDetailPage /></ProtectedRoute>}/>
 
         {/* 보호소 관련 페이지는 ShelterProtectedRoute로 보호 */}
         <Route path="/shelter" element={<ShelterProtectedRoute><ShelterDonation /></ShelterProtectedRoute>}

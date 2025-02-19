@@ -1,6 +1,12 @@
 import { LiaLongArrowAltRightSolid } from "react-icons/lia";
+import { useNavigate } from "react-router-dom";
 
 const Gigwan = () => {
+  const nav = useNavigate();
+
+  const handleClick = () => {
+    nav("/shelter-finder");
+  }
   return (
     <div className="w-full max-w-[1500px]  my-auto mx-auto">
 
@@ -27,7 +33,9 @@ const Gigwan = () => {
           <h2 className="text-white text-2xl md:text-4xl font-bold mb-2">
             소중한 후원금 사용 내용을 투명하게 공개합니다.
           </h2>
-          <button className="flex gap-2 items-center px-6 py-2 bg-black/40  rounded-3xl shadow border border-white text-white hover:bg-white/80 hover:text-black cursor-pointer ">
+          <button 
+          onClick={handleClick}
+          className="flex gap-2 items-center px-6 py-2 bg-black/40  rounded-3xl shadow border border-white text-white hover:bg-white/80 hover:text-black cursor-pointer ">
             후원보고 보러가기 <LiaLongArrowAltRightSolid className="text-2xl"/>
           </button>
         </div>

@@ -27,19 +27,14 @@ const CampaignDonationSuccess = () => {
                 />
               </div>
               <div>
-                <h2 className="text-lg font-medium mb-4">
-                  오늘쯤 눈이 안떠지는 휘귀병에 걸린 이름모를 강아지의 치료비를
-                  함께 모아주세요!
-                </h2>
-                <p className="text-sm text-gray-600 mb-2">
-                  박주찬 후원자님, 캠페인 후원에 참여해주셔서 진심으로
-                  감사드립니다.
+                <p className="text-lg mb-2">
+                  캠페인 후원에 참여해주셔서 진심으로 감사드립니다.
                 </p>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-lg mb-2">
                   후원자님의 소중한 지원 덕분에 캠페인이 목표에 한 발짝 더
                   다가왔습니다.
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-lg">
                   앞으로도 많은 관심과 응원 부탁드리며, 후원자님과 함께하는 이
                   여정이 더욱 빛날 수 있도록 계속 힘쓰겠습니다.
                 </p>

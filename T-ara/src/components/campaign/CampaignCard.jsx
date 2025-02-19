@@ -10,21 +10,17 @@ const CampaignCard = ({ campaign }) => {
   };
 
   // 남은 날짜 계산
-  const calculateDaysLeft = (endDate) => {
-    if (!endDate) return 0;
-    const end = new Date(endDate);
+  const calculateDaysLeft = () => {
     const today = new Date();
-    const diffTime = end - today;
-    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    return diffDays;
+    const endDate = new Date(campaign.endedAt);
+    return Math.max(0, Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)));
   };
 
   // 달성률 계산
   const calculateAchievement = () => {
-    if (!campaign.targetAmount || campaign.targetAmount === 0) return 0;
-    const achievement =
-      ((campaign.achievedAmount || 0) / campaign.targetAmount) * 100;
-    return achievement.toFixed(1);
+    const targetAmount = parseFloat(campaign.targetAmount) || 300000;
+    const achievedAmount = parseFloat(campaign.achievedAmount) || 0;
+    return Math.round((achievedAmount / targetAmount) * 100);
   };
 
   return (
@@ -44,12 +40,12 @@ const CampaignCard = ({ campaign }) => {
       {/* 컨텐츠 섹션 */}
       <div className="p-4">
         {/* 달성률 */}
-        <div className="text-[#00C4C4] text-2xl font-bold">
+        <div className="text-[#F86D7D] text-xl font-bold">
           {calculateAchievement()}% 달성
         </div>
 
         {/* 제목 */}
-        <h3 className="mt-2 text-base font-medium text-gray-900 line-clamp-2">
+        <h3 className="mt-2 text-base font-bold text-gray-900 line-clamp-2">
           {campaign.title}
         </h3>
 
@@ -59,7 +55,7 @@ const CampaignCard = ({ campaign }) => {
         {/* 하단 정보 */}
         <div className="mt-3">
           <span className="text-sm text-gray-700">
-            {calculateDaysLeft(campaign.endedAt)}일 남음
+            {calculateDaysLeft()}일 남음
           </span>
         </div>
       </div>

@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      [ /^\/(member|api|donation|animal|diary|campaigns|shelter)/ ]: {
+      [/^\/(member|api|donation|animal|diary|campaigns|shelter|list|walk)/]: {
         target: "http://localhost:8090",
         changeOrigin: true,
         secure: false,

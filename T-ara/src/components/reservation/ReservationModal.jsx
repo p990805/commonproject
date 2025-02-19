@@ -89,7 +89,8 @@ function ReservationModal({ isOpen, onClose, animalId }) {
                 </div>
               </div>
             </div>
-            <CalendarModule onSelectDate={setSelectedDate} />
+            {/* animalId를 prop으로 전달하여 불가능한 날짜(API)와 2주 제한 적용 */}
+            <CalendarModule onSelectDate={setSelectedDate} animalId={animalId} />
             <div className="w-full flex gap-7 mt-4">
               <button
                 onClick={() => setSelectedTime("15:00")}

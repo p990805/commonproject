@@ -1,3 +1,4 @@
+// src/components/reservation/ReservationList.jsx
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import api from "../../api";
@@ -6,6 +7,33 @@ const ReservationList = ({ handleOpenModal }) => {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [region, setRegion] = useState("all");
+
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // 지역 select 옵션에 따른 필터 키워드 매핑
+  const regionKeywordMapping = {
+    all: "",
+    seoul: "서울",
+    gyeongkido: "경기",
+    incheon: "인천",
+    gangwon: "강원",
+    choongbuk: "충북",
+    dejeon: "대전",
+    choongnam: "충남",
+    sejong: "세종",
+    deagu: "대구",
+    gyeongbuk: "경북",
+    junbuk: "전북",
+    gwangju: "광주",
+    junnam: "전남",
+    busan: "부산",
+    ulsan: "울산",
+    gyeongnam: "경남",
+    jeju: "제주",
+  };
 
   useEffect(() => {
     const fetchAnimals = async () => {
@@ -23,6 +51,38 @@ const ReservationList = ({ handleOpenModal }) => {
     fetchAnimals();
   }, []);
 
+  // 검색 및 지역 필터 적용
+  const filteredAnimals = animals.filter((animal) => {
+    // 지역 필터링: region이 "all"이 아니면, shelterName에 매핑된 키워드가 포함되어야 함
+    let matchesRegion = true;
+    if (region !== "all") {
+      const keyword = regionKeywordMapping[region];
+      matchesRegion = animal.shelterName.includes(keyword);
+    }
+    // 검색어 필터링: search가 있으면, animalName 또는 shelterName에 포함되어야 함 (대소문자 구분없이)
+    let matchesSearch = true;
+    if (search.trim() !== "") {
+      const searchLower = search.toLowerCase();
+      matchesSearch =
+        animal.animalName.toLowerCase().includes(searchLower) ||
+        animal.shelterName.toLowerCase().includes(searchLower);
+    }
+    return matchesRegion && matchesSearch;
+  });
+
+  // 페이지네이션 관련 계산
+  const totalPages = Math.ceil(filteredAnimals.length / itemsPerPage);
+  const paginatedAnimals = filteredAnimals.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // 페이지 변경 시 최상단으로 스크롤 (필요시)
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div>
       {/* 상단 헤더: 제목 및 검색 영역 */}
@@ -34,7 +94,10 @@ const ReservationList = ({ handleOpenModal }) => {
             placeholder="검색어를 입력해주세요."
             className="border p-2 rounded border-gray-400"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
           />
           <button className="flex items-center gap-1 border p-2 rounded border-gray-400 hover:bg-amber-100 cursor-pointer">
             <FaSearch className="w-4 h-4 text-gray-600" />
@@ -44,20 +107,41 @@ const ReservationList = ({ handleOpenModal }) => {
       </div>
       <hr className="border-gray-300" />
 
-      {/* 필터 영역 */}
+      {/* 필터 영역: 지역 select */}
       <div className="mb-4">
-        <div className="flex items-center justify-between border-x border-b border-gray-300">
-          <div className="flex">
-            <p className="border-x p-2 flex items-center border-gray-300">전체</p>
-            <div>
-              <select name="지역" id="지역" className="border-x p-3 border-gray-300 w-50">
-                <option value="지역">지역</option>
-              </select>
-              <select name="종" id="종" className="border-x p-3 border-gray-300 w-50">
-                <option value="종">종</option>
-              </select>
-            </div>
-          </div>
+        <div className="flex items-center justify-between border p-3 rounded border-gray-300">
+          <label htmlFor="region" className="mr-2 font-bold">
+            보호소 지역
+          </label>
+          <select
+            id="region"
+            name="region"
+            value={region}
+            onChange={(e) => {
+              setRegion(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="border p-2 rounded border-gray-400"
+          >
+            <option value="all">전체</option>
+            <option value="seoul">서울</option>
+            <option value="gyeongkido">경기</option>
+            <option value="incheon">인천</option>
+            <option value="gangwon">강원</option>
+            <option value="choongbuk">충북</option>
+            <option value="dejeon">대전</option>
+            <option value="choongnam">충남</option>
+            <option value="sejong">세종</option>
+            <option value="deagu">대구</option>
+            <option value="gyeongbuk">경북</option>
+            <option value="junbuk">전북</option>
+            <option value="gwangju">광주</option>
+            <option value="junnam">전남</option>
+            <option value="busan">부산</option>
+            <option value="ulsan">울산</option>
+            <option value="gyeongnam">경남</option>
+            <option value="jeju">제주</option>
+          </select>
         </div>
       </div>
 
@@ -67,8 +151,11 @@ const ReservationList = ({ handleOpenModal }) => {
           <p>로딩중...</p>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {animals.map((animal) => (
-              <div key={animal.animalId} className="border p-4 rounded border-gray-300">
+            {paginatedAnimals.map((animal) => (
+              <div
+                key={animal.animalId}
+                className="border p-4 rounded border-gray-300"
+              >
                 <img
                   src={animal.thumbnail || "/assets/corgi.png"}
                   alt={`${animal.animalName} 이미지`}
@@ -91,18 +178,40 @@ const ReservationList = ({ handleOpenModal }) => {
         )}
       </div>
 
-      {/* 페이징 버튼 */}
-      <div className="flex justify-center my-6">
-        <button className="px-3 py-1 mx-1 border rounded text-gray-500 hover:bg-gray-100">
-          &lt;&lt;
-        </button>
-        <button className="px-3 py-1 mx-1 border rounded text-gray-500 hover:bg-gray-100">
-          1
-        </button>
-        <button className="px-3 py-1 mx-1 border rounded text-gray-500 hover:bg-gray-100">
-          &gt;&gt;
-        </button>
-      </div>
+      {/* 페이지네이션 컨트롤 */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center items-center space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+            (pageNumber) => (
+              <button
+                key={pageNumber}
+                onClick={() => handlePageChange(pageNumber)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === pageNumber
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                {pageNumber}
+              </button>
+            )
+          )}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,6 +4,16 @@ import compressImage from "../../../utils/compressImage";
 import api from "../../../api"; // axios 인스턴스
 
 const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedImage }) => {
+  // 랜덤 문자열 생성 함수: 영문과 숫자 섞어서 반환
+  const generateRandomString = (length = 10) => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) {
@@ -13,10 +23,20 @@ const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedIma
     console.log("선택된 파일:", file);
     try {
       // 1. 파일 압축 (옵션은 필요에 따라 조정)
-      const compressedFile = await compressImage(file);
+      let compressedFile = await compressImage(file);
       console.log("압축된 파일:", compressedFile);
 
-      // 2. presigned URL 요청 (백엔드의 S3Controller 사용)
+      // 2. 한글이 있는 파일명인 경우, 랜덤한 파일명으로 교체 (확장자 유지)
+      const originalFileName = compressedFile.name;
+      if (/[ㄱ-ㅎ가-힣]/.test(originalFileName)) {
+        const extension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+        const randomName = generateRandomString(10) + extension;
+        // 새로운 File 객체 생성 (압축된 파일 내용을 그대로 사용)
+        compressedFile = new File([compressedFile], randomName, { type: compressedFile.type });
+        console.log("파일명이 한글 포함되어 변경됨:", compressedFile.name);
+      }
+
+      // 3. presigned URL 요청 (백엔드의 S3Controller 사용)
       const fileName = compressedFile.name;
       const fileType = compressedFile.type;
       const response = await api.get("/upload/presigned-url", {
@@ -25,7 +45,7 @@ const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedIma
       const { url, key } = response.data;
       console.log("Presigned URL:", url, "Key:", key);
 
-      // 3. S3에 파일 업로드 (PUT 요청)
+      // 4. S3에 파일 업로드 (PUT 요청)
       const uploadResponse = await fetch(url, {
         method: "PUT",
         headers: {
@@ -38,7 +58,7 @@ const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedIma
       }
       console.log("S3 업로드 성공");
 
-      // 4. 최종 S3 URL 구성  
+      // 5. 최종 S3 URL 구성  
       // 백엔드 S3Service에서 key를 생성할 때 "profile_img/" 폴더에 저장하도록 했으므로,
       // 최종 URL은 bucketUrl + "/profile_img/" + key 형태가 되어야 합니다.
       const urlObj = new URL(url);
@@ -46,7 +66,7 @@ const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedIma
       const finalUrl = `${bucketUrl}/profile_img/${key}`;
       console.log("최종 S3 URL:", finalUrl);
 
-      // 5. 부모 상태 업데이트: 미리보기 및 압축 이미지 URL(객체 키가 아니라 최종 URL) 전달
+      // 6. 부모 상태 업데이트: 미리보기 및 압축 이미지 URL(객체 키가 아니라 최종 URL) 전달
       setProfilePreview(finalUrl);
       if (onCompressedImage) {
         onCompressedImage(finalUrl);
@@ -62,9 +82,9 @@ const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedIma
       // 파일 키는 S3 URL에서 "profile_img/" 이후의 파일명을 추출
       const urlObj = new URL(profilePreview);
       const pathName = urlObj.pathname; // 예: "/profile_img/gigwan2.png"
-      const key = pathName.startsWith("/profile_img/") 
-                    ? pathName.substring("/profile_img/".length)
-                    : pathName.substring(1);
+      const key = pathName.startsWith("/profile_img/")
+        ? pathName.substring("/profile_img/".length)
+        : pathName.substring(1);
       console.log("삭제할 파일명:", key);
 
       // 백엔드의 삭제 API 호출 (DELETE 요청)

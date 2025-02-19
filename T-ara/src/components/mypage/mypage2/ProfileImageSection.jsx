@@ -3,6 +3,16 @@ import React, { useState } from "react";
 import compressImage from "../../../utils/compressImage";
 import api from "../../../api";
 
+// 랜덤 문자열 생성 함수: 영문과 숫자 섞어서 반환
+const generateRandomString = (length = 10) => {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const ProfileImageSection = ({ 
   profileImg: initialProfileImg, 
   onProfileImgChange, 
@@ -22,10 +32,20 @@ const ProfileImageSection = ({
     console.log("선택된 파일:", file);
     try {
       // 1. 파일 압축
-      const compressedFile = await compressImage(file);
+      let compressedFile = await compressImage(file);
       console.log("압축된 파일:", compressedFile);
 
-      // 2. presigned URL 요청
+      // 2. 파일명에 한글이 있는 경우, 랜덤한 파일명으로 교체 (확장자 유지)
+      const originalFileName = compressedFile.name;
+      if (/[ㄱ-ㅎ가-힣]/.test(originalFileName)) {
+        const extension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+        const randomName = generateRandomString(10) + extension;
+        // 새로운 File 객체 생성 (압축된 파일 내용을 그대로 사용)
+        compressedFile = new File([compressedFile], randomName, { type: compressedFile.type });
+        console.log("한글 파일명 감지되어 변경됨:", compressedFile.name);
+      }
+
+      // 3. presigned URL 요청
       const fileName = compressedFile.name;
       const fileType = compressedFile.type;
       const response = await api.get("/upload/presigned-url", {
@@ -34,7 +54,7 @@ const ProfileImageSection = ({
       const { url, key } = response.data;
       console.log("Presigned URL:", url, "Key:", key);
 
-      // 3. S3에 파일 업로드 (PUT 요청)
+      // 4. S3에 파일 업로드 (PUT 요청)
       const uploadResponse = await fetch(url, {
         method: "PUT",
         headers: {
@@ -47,13 +67,13 @@ const ProfileImageSection = ({
       }
       console.log("S3 업로드 성공");
 
-      // 4. 최종 S3 URL 구성 (S3Service에서 "profile_img/" 폴더에 저장되도록 했다고 가정)
+      // 5. 최종 S3 URL 구성 (S3Service에서 "profile_img/" 폴더에 저장되도록 했다고 가정)
       const urlObj = new URL(url);
       const bucketUrl = `${urlObj.protocol}//${urlObj.host}`;
       const finalUrl = `${bucketUrl}/profile_img/${key}`;
       console.log("최종 S3 URL:", finalUrl);
 
-      // 5. 업로드 전에 원래 이미지가 기본 이미지가 아니라면 보관
+      // 6. 업로드 전에 원래 이미지가 기본 이미지가 아니라면 보관
       if (currentImage !== "/assets/placeholder.png" && currentImage !== originalImage) {
         // 이미 새 이미지가 있다면, 이전 이미지도 삭제 대상에 추가
         onFlagForDeletion(currentImage);
@@ -61,7 +81,7 @@ const ProfileImageSection = ({
         // 처음 변경하는 경우, 보관
         onFlagForDeletion(originalImage);
       }
-      // 6. 현재 이미지 업데이트 및 부모 콜백 호출
+      // 7. 현재 이미지 업데이트 및 부모 콜백 호출
       setCurrentImage(finalUrl);
       onProfileImgChange(finalUrl);
     } catch (error) {

@@ -78,7 +78,7 @@ const ShelterUsageRegister = () => {
       formData.append("file", file);
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/ocr`,
+        `https://tara-receipt-server.fly.dev/ocr`,
         formData,
         {
           headers: {

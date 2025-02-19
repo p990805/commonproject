@@ -63,7 +63,7 @@ const MyInformation = () => {
             console.error("삭제 대상 이미지 삭제 오류:", err);
           }
         }
-        nav("/");
+        nav("/mypage");
       } else {
         alert("정보 수정에 실패했습니다. 다시 시도해주세요.");
       }
@@ -92,6 +92,8 @@ const MyInformation = () => {
   // ProfileImageSection에서 이미지 변경 시 호출되는 콜백
   const handleProfileImgChange = (newImgUrl) => {
     setUserInfo({ ...userInfo, profileImg: newImgUrl });
+    // 프로필 사진이 변경되었으면 localStorage에 업데이트
+    localStorage.setItem("userProfile", newImgUrl);
   };
 
   // ProfileImageSection에서 삭제 대상으로 지정된 이미지 URL을 받는 콜백
