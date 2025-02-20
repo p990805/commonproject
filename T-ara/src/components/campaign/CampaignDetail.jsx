@@ -104,7 +104,7 @@ const CampaignDetail = () => {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
             onClick={() => navigate("/campaign")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-600 hover:text-gray-900 cursor-pointer"
           >
             ← 캠페인 목록으로 돌아가기
           </button>

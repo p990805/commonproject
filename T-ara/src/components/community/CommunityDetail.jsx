@@ -5,6 +5,7 @@ import api from "../../api";
 import { deltaToHtml } from "../../utils/quillParser";
 import CommentForm from "./CommentForm";
 import CommentList from "./CommentList";
+import { IoArrowBackCircleSharp } from "react-icons/io5";
 
 const CommunityDetail = ({ communityId, onBack }) => {
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ const CommunityDetail = ({ communityId, onBack }) => {
     api
       .get(`/community/detail/${communityId}`, { headers: authHeader })
       .then((response) => {
+        console.log('서버에서 받아온 댓글 목록:', response.data.commentList);
         setCommentList(response.data.commentList || []);
       })
       .catch((err) => console.error("댓글 새로고침 오류:", err));
@@ -82,7 +84,8 @@ const CommunityDetail = ({ communityId, onBack }) => {
   // 댓글 삭제 완료 후 호출되는 콜백: 삭제된 댓글 ID를 제외하도록 상태 업데이트
   const handleCommentDelete = (deletedCommentId) => {
     setCommentList((prev) =>
-      prev.filter((comment) => comment.commentId !== deletedCommentId)
+      prev.filter((comment) => comment.commentId !== deletedCommentId && comment.personId !== deletedCommentId)
+
     );
   };
 
@@ -119,8 +122,8 @@ const CommunityDetail = ({ communityId, onBack }) => {
 
   return (
     <div className="w-full p-6 bg-white rounded-md shadow-md">
-      <button className="mb-4 text-blue-500 underline" onClick={onBack}>
-        ← 목록으로 돌아가기
+      <button className="mb-4 text-red-500 underline cursor-pointer " onClick={onBack}>
+       <IoArrowBackCircleSharp className="w-5 h-5 hover:text-red-400"/>
       </button>
       <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
       <div className="flex items-center mb-4">
@@ -154,7 +157,7 @@ const CommunityDetail = ({ communityId, onBack }) => {
       <div className="flex items-center mb-4 space-x-4">
         <button
           onClick={handleLike}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
+          className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer hover:bg-red-400"
         >
           {likeStatus ? "좋아요 취소" : "좋아요"}
         </button>
@@ -163,13 +166,13 @@ const CommunityDetail = ({ communityId, onBack }) => {
           <>
             <button
               onClick={handleModify}
-              className="px-4 py-2 bg-green-500 text-white rounded"
+              className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer hover:bg-red-400"
             >
               수정
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded"
+              className="px-4 py-2 bg-neutral-500 text-white rounded cursor-pointer hover:bg-neutral-400"
             >
               삭제
             </button>
@@ -183,9 +186,10 @@ const CommunityDetail = ({ communityId, onBack }) => {
           authHeader={authHeader}
         />
         <CommentList
-          commentList={topLevelComments}
+          commentList={commentList}
           onCommentDelete={handleCommentDelete}
           onCommentModifySuccess={handleCommentModifySuccess}
+          refreshComments={refreshComments}
         />
       </div>
     </div>

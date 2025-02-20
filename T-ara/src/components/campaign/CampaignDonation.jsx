@@ -174,12 +174,18 @@ const CampaignDonation = () => {
             amount: selectedAmount,
           };
 
-          const result = await api.post(
-            "/donation/campaign/register",
-            serverData
-          );
+          await api.post("/donation/campaign/register", serverData);
           alert("✅ 결제가 완료되었습니다!");
-          navigate("/campaign/success");
+
+          // 성공 페이지로 데이터와 함께 이동
+          navigate("/campaign/success", {
+            state: {
+              campaignTitle: campaign?.title,
+              shelterName: campaign?.shelterName,
+              donorName: donor.name,
+            },
+            replace: true, // 뒤로가기 방지
+          });
         } catch (error) {
           console.error("상세 에러 정보:", error);
           alert(`결제 처리 중 오류가 발생했습니다.\n${error.message}`);

@@ -104,14 +104,14 @@ const ModifyInquiry = () => {
           <div className="flex gap-5 mt-4">
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="bg-red-500 hover:bg-red-400 cursor-pointer text-white px-4 py-2 rounded"
               disabled={loading}
             >
               수정하기
             </button>
             <button
               type="button"
-              className="border border-gray-400 text-gray-700 px-4 py-2 rounded"
+              className="bg-neutral-500 hover:bg-neutral-400 cursor-pointer text-white px-4 py-2 rounded"
               onClick={() => navigate("/community/inquiry")}
               disabled={loading}
             >

@@ -5,8 +5,7 @@ const CampaignCard = ({ campaign }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    console.log("카드 클릭됨:", campaign.id);
-    navigate(`/campaign/${campaign.id}`);
+    navigate(`/campaign/${campaign.id}`); // campaignId 대신 id 사용
   };
 
   // 남은 날짜 계산
@@ -23,16 +22,23 @@ const CampaignCard = ({ campaign }) => {
     return Math.round((achievedAmount / targetAmount) * 100);
   };
 
+  // 이미지 에러 처리 추가
+  const handleImageError = (e) => {
+    e.target.src = "/placeholder-image.jpg"; // 적절한 플레이스홀더 이미지 경로로 변경하세요
+    e.target.alt = "이미지를 불러올 수 없습니다";
+  };
+
   return (
     <div
       onClick={handleClick}
-      className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer"
+      className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
     >
       {/* 이미지 컨테이너 */}
-      <div className="relative w-full pb-[75%] bg-red-500">
+      <div className="relative w-full pb-[75%] bg-gray-100">
         <img
           src={campaign.imageUrl}
           alt={campaign.title}
+          onError={handleImageError}
           className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
@@ -53,9 +59,12 @@ const CampaignCard = ({ campaign }) => {
         <p className="mt-3 text-sm text-gray-600">{campaign.shelterName}</p>
 
         {/* 하단 정보 */}
-        <div className="mt-3">
+        <div className="mt-3 flex justify-between items-center">
           <span className="text-sm text-gray-700">
             {calculateDaysLeft()}일 남음
+          </span>
+          <span className="text-sm text-gray-500">
+            {Number(campaign.achievedAmount).toLocaleString()}원
           </span>
         </div>
       </div>

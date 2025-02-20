@@ -38,7 +38,8 @@ const DonationRecord = () => {
             id: item.historyId,
             type,
             where,
-            content: `후원금 ${item.donationAmount}원`,
+            // 천 단위 콤마 적용: Number(item.donationAmount).toLocaleString()
+            content: `후원금 ${Number(item.donationAmount).toLocaleString()}원`,
             date: dateStr,
           };
         });

@@ -46,8 +46,9 @@ const MyPhotoCard = () => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     
     try {
-      await api.delete(`/photocard/delete/${photoCardId}`);
+      await api.get(`/photocard/delete/${photoCardId}`);
       setCards(cards.filter(card => card.id !== photoCardId));
+      alert("포토카드가 성공적으로 삭제되었습니다.");
     } catch (error) {
       console.error("포토카드 삭제 오류:", error);
       alert("포토카드 삭제 중 오류가 발생했습니다.");

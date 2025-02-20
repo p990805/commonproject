@@ -2,7 +2,12 @@
 import React from "react";
 import CommentItem from "./CommentItem";
 
-const CommentList = ({ commentList, onCommentDelete, onCommentModifySuccess }) => {
+const CommentList = ({ commentList, onCommentDelete, onCommentModifySuccess, refreshComments }) => {
+  // 상위 댓글 필터링
+  const topLevelComments = commentList.filter(
+    comment => comment.personId === null || comment.personId === ""
+  );
+
   return (
     <div className="mt-6">
       <h2 className="text-xl font-bold mb-2">댓글</h2>
@@ -14,8 +19,10 @@ const CommentList = ({ commentList, onCommentDelete, onCommentModifySuccess }) =
             <CommentItem
               key={comment.commentId}
               comment={comment}
+              allComments={commentList}
               onDelete={onCommentDelete}
               onModifySuccess={onCommentModifySuccess}
+              refreshComments={refreshComments} 
             />
           ))}
         </ul>

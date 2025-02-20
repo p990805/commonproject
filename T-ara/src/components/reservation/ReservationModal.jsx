@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { MdAlternateEmail } from "react-icons/md";
 import { IoCallOutline } from "react-icons/io5";
@@ -8,14 +8,52 @@ import CalendarModule from "./Calender";
 import SmallModal from "./SmallModal";
 import api from "../../api";
 
-function ReservationModal({ isOpen, onClose, animalId }) {
+// 로컬 날짜를 "YYYY-MM-DD" 형식으로 반환하는 함수
+function formatDate(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = ("0" + (d.getMonth() + 1)).slice(-2);
+  const day = ("0" + d.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+}
+
+// 예약 확인 메시지 형식 함수 (예: "2025년 2월 26일 15:00 입니다. 맞습니까?")
+function formatReservationDateMessage(selectedDate, selectedTime) {
+  if (!selectedDate) return "";
+  const dateString =
+    typeof selectedDate === "string" ? selectedDate : formatDate(selectedDate);
+  const [year, month, day] = dateString.split("-");
+  return `${year}년 ${parseInt(month)}월 ${parseInt(day)}일 ${
+    selectedTime ? selectedTime : "??:00"
+  } 입니다. 맞습니까?`;
+}
+
+function ReservationModal({ isOpen, onClose, animalId, thumbnail }) {
   if (!isOpen) return null;
 
+  const [reservationInfo, setReservationInfo] = useState(null);
   const [alertOpen, setAlertOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [answerModalOpen, setAnswerModalOpen] = useState(false);
+  // 선택된 날짜를 문자열("YYYY-MM-DD")로 받습니다.
+  const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState(null);
+
+  // animalId가 변경되면 예약 정보 API 호출
+  useEffect(() => {
+    if (animalId) {
+      api
+        .get(`/walk/reservation-info/${animalId}`)
+        .then((response) => {
+          if (response.data && response.data.info) {
+            setReservationInfo(response.data.info);
+          }
+        })
+        .catch((error) => {
+          console.error("예약 정보 조회 에러:", error);
+        });
+    }
+  }, [animalId]);
 
   const handleAnswer = () => {
     setAnswerModalOpen(true);
@@ -26,6 +64,34 @@ function ReservationModal({ isOpen, onClose, animalId }) {
       setAlertOpen(true);
     } else {
       alert("예약할 날짜와 시간을 선택해주세요.");
+    }
+  };
+
+  // 예약 확인 모달에서 onConfirm 시 예약 요청을 보냅니다.
+  const handleConfirmReservation = async () => {
+    setAlertOpen(false);
+    // selectedDate가 문자열이 아니라면 변환
+    const dateString =
+      typeof selectedDate === "string" ? selectedDate : formatDate(selectedDate);
+    const payload = {
+      animalId,
+      walkAt: `${dateString} ${selectedTime}:00`,
+    };
+
+    console.log("예약 요청 payload:", payload);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      await api.post("/walk/register", payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+      });
+      setCompleteModalOpen(true);
+    } catch (error) {
+      console.error("예약 오류:", error);
+      alert("예약 요청에 실패하였습니다.");
     }
   };
 
@@ -42,39 +108,43 @@ function ReservationModal({ isOpen, onClose, animalId }) {
           ✕
         </button>
         <div className="flex">
-          {/* 왼쪽 섹션 */}
+          {/* 왼쪽 섹션 - 예약 정보 표시 */}
           <div className="flex flex-col w-1/2 border-r border-gray-300 gap-2 p-5">
-            <img src="/assets/corgi.png" alt="예약 이미지" className="w-70 h-40" />
-            <h1 className="text-xl text-gray-500 font-bold">시원</h1>
-            <h1 className="text-2xl font-bold">산책 예약</h1>
+            <img
+              src={
+                thumbnail ||
+                (reservationInfo && reservationInfo.thumbnail) ||
+                "/assets/corgi.png"
+              }
+              alt="동물 이미지"
+              className="w-full h-60 object-fill rounded"
+            />
+            <h1 className="text-xl font-bold text-gray-700">
+              {reservationInfo ? reservationInfo.animalName : "동물 이름"}
+            </h1>
+            <h2 className="text-2xl font-bold mb-2">산책 예약</h2>
             <p className="flex items-center text-gray-500 gap-1">
               <MdOutlineAccessTime className="w-6 h-6" />
-              산책 가능시간 15:00 ~ 17:00
+              산책 가능 시간 15:00 ~ 17:00
             </p>
-            <p>소중한 후원 동물에게 즐거운 산책 시간을 선물하세요.</p>
+            <p className="text-gray-600">
+              소중한 동물에게 즐거운 산책 시간을 선물하세요.
+            </p>
             <div>
-              <p className="font-bold">산책 예약 안내</p>
-              <ul className="list-disc list-inside leading-relaxed text-gray-700">
+              <p className="font-bold">예약 안내</p>
+              <ul className="list-disc list-inside text-gray-700 leading-relaxed">
                 <li>산책 시간은 1시간입니다.</li>
                 <li>
-                  예약 가능한 시간대에 산책이 가능한지 확인 부탁드리며,
-                  <br />
-                  정확한 산책 시간은 보호소에서 별도로 연락을 통해 드리겠습니다.
+                  예약 가능한 시간에 산책이 가능한지 확인 부탁드리며, <br />
+                  정확한 산책 시간은 보호소에서 별도로 안내드립니다.
                 </li>
-                <li>부득이한 사유로 예약이 불가능할 수 있는 점 양해 부탁드립니다.</li>
+                <li>
+                  부득이한 사유로 예약이 불가능할 수 있는 점 양해 부탁드립니다.
+                </li>
               </ul>
             </div>
-            <div>
-              <p>
-                편리한 예약 시스템을 통해 반려견과 함께하는 산책 시간을 더욱
-                <br />
-                즐겁고 안전하게 만들어 드리겠습니다.
-                <br />
-                예약 후 정확한 시간 안내를 기다려 주세요.
-              </p>
-            </div>
           </div>
-          {/* 오른쪽 섹션 */}
+          {/* 오른쪽 섹션 - 날짜 및 시간 선택 */}
           <div className="p-5 w-1/2">
             <div className="flex justify-between">
               <h1 className="text-xl font-bold">날짜를 선택하세요</h1>
@@ -89,7 +159,6 @@ function ReservationModal({ isOpen, onClose, animalId }) {
                 </div>
               </div>
             </div>
-            {/* animalId를 prop으로 전달하여 불가능한 날짜(API)와 2주 제한 적용 */}
             <CalendarModule onSelectDate={setSelectedDate} animalId={animalId} />
             <div className="w-full flex gap-7 mt-4">
               <button
@@ -120,13 +189,7 @@ function ReservationModal({ isOpen, onClose, animalId }) {
                 <p>보호소 상황에 따라 예약이 취소될 수 있습니다.</p>
               </div>
             </div>
-            <div className="mt-4 flex justify-between">
-              <button
-                onClick={handleAnswer}
-                className="underline underline-offset-2 cursor-pointer"
-              >
-                보호소 문의하기
-              </button>
+            <div className="mt-4 flex justify-end">
               <button
                 onClick={handleReservation}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded"
@@ -142,39 +205,8 @@ function ReservationModal({ isOpen, onClose, animalId }) {
         isOpen={alertOpen}
         onClose={() => setAlertOpen(false)}
         title="예약 날짜 확인"
-        message={`선택하신 날짜는 ${
-          selectedDate
-            ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
-            : ""
-        } 입니다.\n맞습니까?`}
-        onConfirm={async () => {
-          setAlertOpen(false);
-          const year = selectedDate.getFullYear();
-          const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
-          const day = selectedDate.getDate().toString().padStart(2, "0");
-          const walk_at = `${year}-${month}-${day} ${selectedTime}:00`;
-
-          const payload = {
-            animalId, // 부모에서 전달받은 animalId 사용
-            walkAt: walk_at,
-          };
-
-          console.log("예약 요청 payload:", payload);
-
-          try {
-            const token = localStorage.getItem("authToken");
-            await api.post("/walk/register", payload, {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: token,
-              },
-            });
-            setCompleteModalOpen(true);
-          } catch (error) {
-            console.error("예약 오류:", error);
-            alert("예약 요청에 실패하였습니다.");
-          }
-        }}
+        message={formatReservationDateMessage(selectedDate, selectedTime)}
+        onConfirm={handleConfirmReservation}
       />
       {/* 예약 완료 모달 */}
       <SmallModal
@@ -186,28 +218,6 @@ function ReservationModal({ isOpen, onClose, animalId }) {
           setCompleteModalOpen(false);
           onClose();
         }}
-      />
-      {/* 보호소 문의 모달 */}
-      <SmallModal
-        isOpen={answerModalOpen}
-        onClose={() => setAnswerModalOpen(false)}
-        title="보호소 문의하기"
-        message={
-          <div className="flex flex-col">
-            <p>자세한 사항은 아래 연락처로 문의해주시기 바랍니다.</p>
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-1 items-center">
-                <IoCallOutline />
-                <p>보호소 연락처 : 062-xxx-xxxx</p>
-              </div>
-              <div className="flex gap-1 items-center">
-                <MdAlternateEmail />
-                <p>보호소 이메일 : p9090@nave.co</p>
-              </div>
-            </div>
-          </div>
-        }
-        onConfirm={() => setAnswerModalOpen(false)}
       />
     </div>
   );

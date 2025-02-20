@@ -123,6 +123,11 @@ const Inquiry = () => {
       <hr className="border-gray-300" />
       {loading && <p>문의 내역을 불러오는 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
+      {!loading && !error && inquiries.length === 0 && (
+      <div className="text-center text-gray-500 py-8">
+        <p>아직 등록된 문의 내역이 없습니다.</p>
+      </div>
+    )}
       <InquiryList
         inquiries={inquiries}
         openIndex={openIndex}

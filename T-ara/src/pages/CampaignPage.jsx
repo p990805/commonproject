@@ -42,24 +42,21 @@ const CampaignPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCampaigns, setFilteredCampaigns] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("전체");
-
-  // 페이징 관련 상태
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 9;
+  const campaignsPerPage = 16; // 4*4 grid와 동일하게 설정
 
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
         const { data } = await api.get("/campaigns");
 
-        const transformedData = data.map((campaign, index) => {
+        const transformedData = data.map((campaign) => {
           const startDate = new Date(campaign.startedAt);
           const endDate = new Date(campaign.endedAt);
           const now = new Date();
 
           return {
-            id: index + 1,
+            id: campaign.campaignId.toString(),
             title: campaign.title,
             imageUrl: campaign.imageUrl,
             shelterName: campaign.shelterName,
@@ -75,7 +72,8 @@ const CampaignPage = () => {
         setCampaigns(transformedData);
         applyFilters(transformedData, searchTerm, currentFilter);
       } catch (error) {
-        setError(error.message);
+        console.error("Error fetching campaigns:", error);
+        setError(error.message || "캠페인을 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);
       }
@@ -84,18 +82,15 @@ const CampaignPage = () => {
     fetchCampaigns();
   }, []);
 
-  // 필터링 로직 통합
   const applyFilters = (campaignsToFilter, search, filter) => {
     let filtered = campaignsToFilter;
 
-    // 검색어 필터링
     if (search) {
       filtered = filtered.filter((campaign) =>
         campaign.title.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // 상태 필터링
     if (filter === "진행중") {
       filtered = filtered.filter((campaign) => campaign.status === "진행중");
     } else if (filter === "종료") {
@@ -103,103 +98,33 @@ const CampaignPage = () => {
     }
 
     setFilteredCampaigns(filtered);
-    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
-    setCurrentPage(1);
+    setCurrentPage(1); // 필터 변경시 첫 페이지로 이동
   };
 
-  // 검색어 변경 시 필터링
   useEffect(() => {
     applyFilters(campaigns, searchTerm, currentFilter);
   }, [searchTerm, currentFilter, campaigns]);
 
-  // 현재 페이지의 캠페인만 반환
-  const getCurrentPageCampaigns = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredCampaigns.slice(startIndex, endIndex);
-  };
+  // 현재 페이지의 캠페인들을 가져오는 로직
+  const indexOfLastCampaign = currentPage * campaignsPerPage;
+  const indexOfFirstCampaign = indexOfLastCampaign - campaignsPerPage;
+  const currentCampaigns = filteredCampaigns.slice(
+    indexOfFirstCampaign,
+    indexOfLastCampaign
+  );
+  const totalPages = Math.ceil(filteredCampaigns.length / campaignsPerPage);
 
-  // 검색어 입력 핸들러
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // 필터 변경 핸들러
   const handleFilterChange = (filter) => {
     setCurrentFilter(filter);
   };
 
-  // 페이지 변경 핸들러
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // 페이지네이션 렌더링
-  const renderPagination = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    return (
-      <div className="flex justify-center items-center mt-8 mb-8">
-        <PaginationButton
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          이전
-        </PaginationButton>
-
-        {startPage > 1 && (
-          <>
-            <PaginationButton
-              onClick={() => handlePageChange(1)}
-              active={currentPage === 1}
-            >
-              1
-            </PaginationButton>
-            {startPage > 2 && <span className="mx-2">...</span>}
-          </>
-        )}
-
-        {Array.from(
-          { length: endPage - startPage + 1 },
-          (_, i) => startPage + i
-        ).map((page) => (
-          <PaginationButton
-            key={page}
-            onClick={() => handlePageChange(page)}
-            active={currentPage === page}
-          >
-            {page}
-          </PaginationButton>
-        ))}
-
-        {endPage < totalPages && (
-          <>
-            {endPage < totalPages - 1 && <span className="mx-2">...</span>}
-            <PaginationButton
-              onClick={() => handlePageChange(totalPages)}
-              active={currentPage === totalPages}
-            >
-              {totalPages}
-            </PaginationButton>
-          </>
-        )}
-
-        <PaginationButton
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          다음
-        </PaginationButton>
-      </div>
-    );
   };
 
   if (loading) {
@@ -220,7 +145,6 @@ const CampaignPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="px-4 py-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold">캠페인 후원</h1>
@@ -239,10 +163,8 @@ const CampaignPage = () => {
         </div>
       </header>
 
-      {/* Carousel Section */}
       <Carousel />
 
-      {/* Filter Section */}
       <div className="max-w-7xl mx-auto mt-8">
         <div className="border-b border-gray-200">
           <div className="px-4 flex justify-between items-center h-14">
@@ -281,14 +203,12 @@ const CampaignPage = () => {
           </div>
         </div>
 
-        {/* Search Results Info */}
         {(searchTerm || currentFilter !== "전체") && (
           <div className="px-4 py-4 text-gray-600">
             검색결과: {filteredCampaigns.length}건
           </div>
         )}
 
-        {/* Campaign Cards Grid */}
         <div className="px-4 py-8">
           {filteredCampaigns.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -296,14 +216,44 @@ const CampaignPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-              {getCurrentPageCampaigns().map((campaign) => (
+              {currentCampaigns.map((campaign) => (
                 <CampaignCard key={campaign.id} campaign={campaign} />
               ))}
             </div>
           )}
 
-          {/* Pagination */}
-          {filteredCampaigns.length > 0 && renderPagination()}
+          {/* 페이지네이션 */}
+          <div className="mt-8 flex justify-center items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+              (pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === pageNumber
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

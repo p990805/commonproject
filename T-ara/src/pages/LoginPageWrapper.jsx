@@ -19,7 +19,7 @@ const LoginPageWrapper = () => {
     const decodedToken = jwtDecode(data.token);
     const role = decodedToken.role;
     dispatch(loginSuccess({ ...data, role }));
-    console.log(role);
+    // console.log(role);
     navigate(role === "ROLE_SHELTER" ? "/shelter" : "/");
   };
 

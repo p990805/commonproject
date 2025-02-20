@@ -168,7 +168,7 @@ const ChatWindow = ({ session, myUserName, hostName: propHostName, streamId }) =
         />
         <button
           type="submit"
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400 cursor-pointer"
         >
           전송
         </button>

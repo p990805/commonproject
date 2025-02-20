@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarNavigation from "./SidebarNavigation";
 import api from "../../api";
 import EditCampaignModal from "./EditCampaignModal";
+import CampaignDonationListModal from "./CampaignDonationListModal";
 
 const ShelterCampaign = () => {
   const navigate = useNavigate();
@@ -10,10 +11,106 @@ const ShelterCampaign = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [startDate, setStartDate] = useState(""); // 추가된 부분
+  const [endDate, setEndDate] = useState(""); // 추가된 부분
+  const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    todayDonation: 0,
+    totalDonation: 0,
+    successCampaigns: 0,
+    totalCampaigns: 0,
+  });
+
+  // 검색 버튼 클릭 핸들러
+  // 검색 버튼 클릭 핸들러
+  const handleSearch = () => {
+    let filtered = [...campaigns];
+
+    // 날짜 필터링
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
+      filtered = filtered.filter((campaign) => {
+        const campaignDate = new Date(campaign.startedAt);
+        return campaignDate >= start && campaignDate <= end;
+      });
+    }
+
+    // 검색어 필터링 (제목)
+    if (searchKeyword.trim()) {
+      filtered = filtered.filter((campaign) =>
+        campaign.title.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    }
+
+    setFilteredCampaigns(filtered);
+  };
+
+  const handleDonationListClick = (campaignId) => {
+    setSelectedCampaignId(campaignId);
+    setIsDonationModalOpen(true);
+  };
 
   useEffect(() => {
     fetchCampaigns();
   }, []);
+
+  // 대시보드 통계 계산
+  const calculateDashboardStats = async (campaignsList) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats = {
+      todayDonation: 0,
+      totalDonation: 0,
+      successCampaigns: 0,
+      totalCampaigns: campaignsList.length,
+    };
+
+    try {
+      // 각 캠페인에 대한 오늘의 후원금액을 가져오기 위한 API 호출들
+      const donationPromises = campaignsList.map((campaign) =>
+        api.get(`/analyze/campaign/${campaign.campaignId}`)
+      );
+
+      const donationResponses = await Promise.all(donationPromises);
+
+      donationResponses.forEach((response, index) => {
+        const campaign = campaignsList[index];
+        const userList = response.data?.userList || [];
+
+        // 오늘 후원금액 계산
+        const todayDonations = userList.filter((donation) => {
+          const donationDate = new Date(donation.donationDate);
+          donationDate.setHours(0, 0, 0, 0);
+          return donationDate.getTime() === today.getTime();
+        });
+
+        const todayAmount = todayDonations.reduce(
+          (sum, donation) => sum + Number(donation.amount),
+          0
+        );
+
+        stats.todayDonation += todayAmount;
+        stats.totalDonation += campaign.achievedAmount || 0;
+
+        // 성공 캠페인 수 계산
+        if (campaign.achievedAmount >= campaign.targetAmount) {
+          stats.successCampaigns += 1;
+        }
+      });
+
+      setDashboardStats(stats);
+    } catch (error) {
+      console.error("Error calculating dashboard stats:", error);
+    }
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -23,6 +120,8 @@ const ShelterCampaign = () => {
         (campaign) => campaign.shelterId === parseInt(shelterId)
       );
       setCampaigns(filteredCampaigns);
+      setFilteredCampaigns(filteredCampaigns); // 여기에 추가
+      await calculateDashboardStats(filteredCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
     }
@@ -117,7 +216,7 @@ const ShelterCampaign = () => {
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
-                  503,165
+                  {dashboardStats.todayDonation.toLocaleString()}
                 </span>
                 <span className="!text-white/70 text-lg ml-2">원</span>
               </div>
@@ -130,30 +229,34 @@ const ShelterCampaign = () => {
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
-                  623,503,165
+                  {dashboardStats.totalDonation.toLocaleString()}
                 </span>
                 <span className="!text-white/70 text-lg ml-2">원</span>
               </div>
             </div>
 
-            {/* Today's Donor Count */}
+            {/* Success Campaign Count */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
                 성공 캠페인 수
               </span>
               <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">15</span>
+                <span className="!text-white text-[32px] font-bold">
+                  {dashboardStats.successCampaigns}
+                </span>
                 <span className="!text-white/70 text-lg ml-2">개</span>
               </div>
             </div>
 
-            {/* Total Donor Count */}
+            {/* Total Campaign Count */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
                 전체 캠페인 수
               </span>
               <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">255</span>
+                <span className="!text-white text-[32px] font-bold">
+                  {dashboardStats.totalCampaigns}
+                </span>
                 <span className="!text-white/70 text-lg ml-2">개</span>
               </div>
             </div>
@@ -173,13 +276,15 @@ const ShelterCampaign = () => {
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2024-10-23"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span className="mx-4 !text-[#575757]">-</span>
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2025-01-23"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
                     />
                   </div>
                 </div>
@@ -194,12 +299,18 @@ const ShelterCampaign = () => {
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
+                    <select
+                      className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
+                      disabled
+                    >
+                      <option>제목</option>
                     </select>
                     <input
                       type="text"
                       className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
+                      placeholder="검색어를 입력하세요"
                     />
                   </div>
                 </div>
@@ -208,7 +319,10 @@ const ShelterCampaign = () => {
 
             {/* Search Button */}
             <div className="flex justify-center mt-5">
-              <button className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]">
+              <button
+                onClick={handleSearch}
+                className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]"
+              >
                 검색
               </button>
             </div>
@@ -224,7 +338,7 @@ const ShelterCampaign = () => {
                     [
                     {selectedItems.length > 0
                       ? `${selectedItems.length}개의 항목 선택됨`
-                      : `전체 항목 총 ${campaigns.length}건`}
+                      : `전체 항목 총 ${filteredCampaigns.length}건`}
                     ]
                   </span>
                 </div>
@@ -254,16 +368,17 @@ const ShelterCampaign = () => {
                         className="w-4 h-4"
                       />
                     </th>
-                    <th className="w-[12%] p-4 text-left">캠페인 번호</th>
-                    <th className="w-[23%] p-4 text-left">제목</th>
-                    <th className="w-[15%] p-4 text-left">목표금액</th>
-                    <th className="w-[15%] p-4 text-left">달성금액</th>
-                    <th className="w-[15%] p-4 text-left">시작일시</th>
-                    <th className="w-[15%] p-4 text-left">마감일시</th>
+                    <th className="w-[10%] p-4 text-left">캠페인 번호</th>
+                    <th className="w-[20%] p-4 text-left">제목</th>
+                    <th className="w-[13%] p-4 text-left">목표금액</th>
+                    <th className="w-[13%] p-4 text-left">달성금액</th>
+                    <th className="w-[13%] p-4 text-left">시작일시</th>
+                    <th className="w-[13%] p-4 text-left">마감일시</th>
+                    <th className="w-[13%] p-4 text-left">후원 리스트</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {campaigns.map((campaign) => (
+                  {filteredCampaigns.map((campaign) => (
                     <tr key={campaign.campaignId} className="border-b">
                       <td className="p-4 text-center">
                         <input
@@ -294,6 +409,16 @@ const ShelterCampaign = () => {
                       <td className="p-4">
                         {new Date(campaign.endedAt).toLocaleString()}
                       </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() =>
+                            handleDonationListClick(campaign.campaignId)
+                          }
+                          className="px-4 py-1.5 bg-[#2f69dd] text-white rounded text-xs hover:bg-[#1e51b8]"
+                        >
+                          보기
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -312,6 +437,12 @@ const ShelterCampaign = () => {
           onSave={handleSave}
         />
       )}
+
+      <CampaignDonationListModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        campaignId={selectedCampaignId}
+      />
     </div>
   );
 };

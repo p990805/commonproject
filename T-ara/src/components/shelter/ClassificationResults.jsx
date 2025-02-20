@@ -46,35 +46,88 @@ const ClassificationResults = ({
       alert('동물을 선택해주세요.');
       return;
     }
+
+    // 선택된 이미지가 있는지 확인
+    const hasSelectedImages = Object.values(selectedImages).some(
+      imageObject => Object.values(imageObject).some(isSelected => isSelected)
+    );
+    
+    if (!hasSelectedImages) {
+      alert('하나 이상의 사진을 선택해주세요.');
+      return;
+    }
   
     setIsSaving(true);
     try {
-      // Base64로 인코딩된 이미지 데이터 수집
-      const imageDataList = Object.entries(selectedImages).flatMap(([breed, images]) => 
-        Object.entries(images)
-          .filter(([_, isSelected]) => isSelected)
-          .map(([index]) => {
-            const image = classificationResults.classified[breed][index];
-            return {
-              photocardPath: image.preview // Base64 형식 가정
+      // Blob URL을 Base64로 변환하는 함수
+      const convertBlobUrlToBase64 = async (blobUrl) => {
+        try {
+          const response = await fetch(blobUrl);
+          const blob = await response.blob();
+          
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve(reader.result);
             };
-          })
-      );
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error("Blob URL 변환 오류:", error);
+          return null;
+        }
+      };
+  
+      // 이미지 변환 Promise 배열 생성
+      const conversionPromises = [];
+      
+      // 모든 선택된 이미지에 대해 Base64 변환 작업 예약
+      for (const [breed, images] of Object.entries(selectedImages)) {
+        for (const [indexStr, isSelected] of Object.entries(images)) {
+          if (isSelected) {
+            const index = parseInt(indexStr);
+            let image;
+            
+            if (breed === 'unclassified') {
+              image = classificationResults.unclassified[index];
+            } else {
+              image = classificationResults.classified[breed][index];
+            }
+            
+            if (image && image.preview) {
+              const conversionPromise = convertBlobUrlToBase64(image.preview)
+                .then(base64Data => ({ photoPath: base64Data }));
+              conversionPromises.push(conversionPromise);
+            }
+          }
+        }
+      }
+      
+      // 모든 이미지 변환이 완료될 때까지 대기
+      const convertedImages = await Promise.all(conversionPromises);
+      
+      // 변환 실패한 항목 제거
+      const validImages = convertedImages.filter(img => img.photoPath !== null);
+      
+      if (validImages.length === 0) {
+        throw new Error("이미지 변환에 실패했습니다.");
+      }
   
       const payload = {
         animalId: selectedAnimal.animalId,
         animalName: selectedAnimal.animalName,
-        imagess: imageDataList
+        images: validImages
       };
   
-      // TODO: 실제 API 호출
-      // await api.post("/diary/save-animal-images", payload);
+      console.log("서버로 전송되는 페이로드:", payload);
+      await api.post("/shelter/categorize", payload);
       
       alert('선택한 이미지가 저장되었습니다.');
       onSaveComplete();
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
-      alert('저장 중 오류가 발생했습니다.');
+      alert('저장 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
     } finally {
       setIsSaving(false);
     }

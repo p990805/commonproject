@@ -27,18 +27,21 @@ function App() {
       try {
         const decoded = jwtDecode(actualToken);
         const userRole = decoded.role; // 예: "ROLE_SHELTER" 또는 "ROLE_USER"
-        
+
         if (userRole === "ROLE_USER") {
           // 개인회원 로그인일 경우에만 /member/myinfo 호출
-          api.get("/member/myinfo", {
-            headers: { Authorization: token },
-          })
+          api
+            .get("/member/myinfo", {
+              headers: { Authorization: token },
+            })
             .then((response) => {
-              console.log(response.data);
+              // console.log(response.data);
               // 응답이 { user: { name, profileImg, ... } } 형태라고 가정합니다.
               const { name, profileImg } = response.data.user;
               // 프로필 이미지가 없으면 기본값 처리
-              const finalProfileImg = profileImg ? profileImg : "/assets/placeholder.png";
+              const finalProfileImg = profileImg
+                ? profileImg
+                : "/assets/placeholder.png";
               // Redux 상태 업데이트
               dispatch(
                 loginSuccess({
@@ -122,7 +125,7 @@ function App() {
         <Header
           isLoggedIn={isLoggedIn}
           userName={userName}
-          userProfile={userProfile}  // 이 값은 전체 URL 또는 파일 키일 수 있음
+          userProfile={userProfile} // 이 값은 전체 URL 또는 파일 키일 수 있음
           handleLogout={handleLogout}
         />
       )}

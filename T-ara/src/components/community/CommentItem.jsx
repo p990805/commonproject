@@ -1,10 +1,20 @@
 // src/components/community/CommentItem.jsx
 import React, { useState } from "react";
 import api from "../../api";
+import CommentForm from "./CommentForm";
 
-const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
+const CommentItem = ({ comment, allComments, onDelete, onModifySuccess, refreshComments }) => {
+
+  
   const [editing, setEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
+  // 대댓글 폼 토글 상태
+  const [showReplyForm, setShowReplyForm] = useState(false);
+
+  const childComments = allComments?.filter(
+    (c) => String(c.personId) === String(comment.commentId)
+  ) || [];
+
   // 현재 로그인한 사용자의 ID를 localStorage에서 가져옵니다.
   const currentUserId = localStorage.getItem("userId");
 
@@ -72,8 +82,26 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
     }
   };
 
+  const handleReplyAdded = () => {
+    setShowReplyForm(false);
+    // refreshComments가 함수인지 확인 후 호출
+    if (typeof refreshComments === 'function') {
+      refreshComments();
+    } else {
+      console.warn('refreshComments is not a function or not provided');
+      // 대체 방법으로 onDelete 호출 (임시)
+      if (typeof onDelete === 'function') {
+        onDelete(comment.commentId);
+      }
+    }
+  };
+
+  const handleReplyClick = () => {
+    setShowReplyForm(!showReplyForm);
+  };
+
   return (
-    <li className="mb-2 border-b pb-2">
+    <li className={`mb-2 border-b pb-2 ${comment.personId ? "ml-8 bg-gray-50" : ""}`}>
       <p className="text-sm font-bold">
         {comment.userName || comment.userId || "익명"}
       </p>
@@ -87,13 +115,13 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
           <div className="mt-2">
             <button
               onClick={handleSaveEdit}
-              className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+              className="bg-red-500 text-white px-3 py-1 rounded mr-2 cursor-pointer hover:bg-red-400"
             >
               저장
             </button>
             <button
               onClick={handleCancelEdit}
-              className="bg-gray-500 text-white px-3 py-1 rounded"
+              className="bg-neutral-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-neutral-400"
             >
               취소
             </button>
@@ -102,24 +130,62 @@ const CommentItem = ({ comment, onDelete, onModifySuccess }) => {
       ) : (
         <>
           <p className="text-sm">{comment.content}</p>
-          {/* 댓글 작성자와 현재 로그인한 사용자의 ID가 일치할 때만 수정/삭제 버튼 렌더링 */}
-          {String(currentUserId) === String(comment.userId) && (
-            <div className="mt-2">
-              <button
-                onClick={handleEditClick}
-                className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
-              >
-                수정
-              </button>
-              <button
-                onClick={handleDelete}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                삭제
-              </button>
-            </div>
-          )}
+          <div className="mt-2 flex space-x-2">
+            {/* 답글 버튼 추가: 모든 댓글에 표시 */}
+            <button
+              onClick={handleReplyClick}
+              className="bg-neutral-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-neutral-400"
+            >
+              답글
+            </button>
+            
+            {String(currentUserId) === String(comment.userId) && (
+              <>
+                <button
+                  onClick={handleEditClick}
+                  className="bg-red-500 text-white px-3 py-1 rounded mr-2 cursor-pointer hover:bg-red-400"
+                >
+                  수정
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-neutral-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-neutral-400"
+                >
+                  삭제
+                </button>
+              </>
+            )}
+          </div>
         </>
+      )}
+    
+      {/* 답글 작성 폼 */}
+      {showReplyForm && (
+        <div className="mt-3">
+          <CommentForm
+            communityId={comment.communityId}
+            onCommentAdded={handleReplyAdded}
+            authHeader={{ Authorization: localStorage.getItem("authToken") }}
+            parentCommentId={comment.commentId}
+            isReply={true}
+          />
+        </div>
+      )}
+      
+      {/* 대댓글 표시 */}
+      {childComments.length > 0 && (
+        <ul className="mt-3">
+          {childComments.map((childComment) => (
+            <CommentItem
+              key={childComment.commentId}
+              comment={childComment}
+              allComments={allComments}
+              onDelete={onDelete}
+              onModifySuccess={onModifySuccess}
+              refreshComments={refreshComments}
+            />
+          ))}
+        </ul>
       )}
     </li>
   );

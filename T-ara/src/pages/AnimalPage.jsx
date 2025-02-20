@@ -35,7 +35,7 @@ const AnimalPage = () => {
         },
       });
       let fetchedAnimals = response.data.message;
-      console.log(fetchedAnimals);
+      // console.log(fetchedAnimals);
 
       // animalId를 기준으로 정렬 (정렬 상태에 따라)
       if (sortOrder === "newest") {

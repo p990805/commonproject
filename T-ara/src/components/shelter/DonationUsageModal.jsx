@@ -61,7 +61,7 @@ const DonationUsageModal = ({ donation, isOpen, onClose }) => {
             <div className="grid grid-cols-1 gap-4 p-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">구매 품목</p>
-                <p className="font-medium">{donation.content}</p>
+                <p className="font-medium">{donation.usagePlace}</p>
               </div>
             </div>
           </div>

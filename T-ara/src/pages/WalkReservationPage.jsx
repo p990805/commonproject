@@ -1,4 +1,3 @@
-// WalkReservationPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ReservationModal from "../components/reservation/ReservationModal";
@@ -10,6 +9,7 @@ const WalkReservationPage = () => {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnimalId, setSelectedAnimalId] = useState(null);
+  const [selectedThumbnail, setSelectedThumbnail] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
@@ -21,9 +21,10 @@ const WalkReservationPage = () => {
     };
   }, []);
 
-  // ReservationList에서 버튼 클릭 시, animalId를 인자로 받아 상태에 저장하고 모달 오픈
-  const handleOpenModal = (animalId) => {
+  // ReservationList에서 버튼 클릭 시, animalId와 thumbnail을 받아 상태에 저장 후 모달 오픈
+  const handleOpenModal = (animalId, thumbnail) => {
     setSelectedAnimalId(animalId);
+    setSelectedThumbnail(thumbnail);
     setIsModalOpen(true);
   };
 
@@ -84,11 +85,12 @@ const WalkReservationPage = () => {
         </div>
       </div>
 
-      {/* 산책 예약 모달 - 선택한 animalId를 prop으로 전달 */}
+      {/* 산책 예약 모달 - animalId와 thumbnail을 prop으로 전달 */}
       <ReservationModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         animalId={selectedAnimalId}
+        thumbnail={selectedThumbnail}
       />
     </div>
   );

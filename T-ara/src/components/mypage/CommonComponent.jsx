@@ -6,7 +6,7 @@ const CommonComponent = () => {
   const nav = useNavigate();
 
   const [userName, setUserName] = useState("사용자");
-  const [userProfile, setUserProfile] = useState("/assets/default-profile.png");
+  const [userProfile, setUserProfile] = useState("/assets/placeholder.png");
   const [joinDays, setJoinDays] = useState(null);
 
   useEffect(() => {

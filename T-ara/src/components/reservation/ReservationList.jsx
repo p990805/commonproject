@@ -40,7 +40,6 @@ const ReservationList = ({ handleOpenModal }) => {
       try {
         setLoading(true);
         const response = await api.get("/walk/reservation");
-        // response.data.walkLists 를 상태로 저장
         setAnimals(response.data.walkLists);
       } catch (error) {
         console.error("동물 데이터를 불러오는 중 에러 발생:", error);
@@ -53,13 +52,11 @@ const ReservationList = ({ handleOpenModal }) => {
 
   // 검색 및 지역 필터 적용
   const filteredAnimals = animals.filter((animal) => {
-    // 지역 필터링: region이 "all"이 아니면, shelterName에 매핑된 키워드가 포함되어야 함
     let matchesRegion = true;
     if (region !== "all") {
       const keyword = regionKeywordMapping[region];
       matchesRegion = animal.shelterName.includes(keyword);
     }
-    // 검색어 필터링: search가 있으면, animalName 또는 shelterName에 포함되어야 함 (대소문자 구분없이)
     let matchesSearch = true;
     if (search.trim() !== "") {
       const searchLower = search.toLowerCase();
@@ -79,13 +76,11 @@ const ReservationList = ({ handleOpenModal }) => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // 페이지 변경 시 최상단으로 스크롤 (필요시)
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div>
-      {/* 상단 헤더: 제목 및 검색 영역 */}
       <div className="flex items-center justify-between pb-5">
         <h1 className="text-3xl font-bold">산책 동물 선택</h1>
         <div className="flex gap-3 items-center">
@@ -106,8 +101,6 @@ const ReservationList = ({ handleOpenModal }) => {
         </div>
       </div>
       <hr className="border-gray-300" />
-
-      {/* 필터 영역: 지역 select */}
       <div className="mb-4">
         <div className="flex items-center justify-between border p-3 rounded border-gray-300">
           <label htmlFor="region" className="mr-2 font-bold">
@@ -144,8 +137,6 @@ const ReservationList = ({ handleOpenModal }) => {
           </select>
         </div>
       </div>
-
-      {/* 산책 예약 동물 목록 */}
       <div className="my-5">
         {loading ? (
           <p>로딩중...</p>
@@ -167,7 +158,9 @@ const ReservationList = ({ handleOpenModal }) => {
                   <p>{animal.gender === "M" ? "수컷" : "암컷"}</p>
                 </div>
                 <button
-                  onClick={() => handleOpenModal(animal.animalId)}
+                  onClick={() =>
+                    handleOpenModal(animal.animalId, animal.thumbnail)
+                  }
                   className="w-full py-2 border rounded border-gray-400 hover:bg-gray-100 cursor-pointer"
                 >
                   산책 예약하기
@@ -177,8 +170,6 @@ const ReservationList = ({ handleOpenModal }) => {
           </div>
         )}
       </div>
-
-      {/* 페이지네이션 컨트롤 */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center items-center space-x-2">
           <button

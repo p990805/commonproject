@@ -121,7 +121,7 @@ const ShelterDetail = ({ shelter, onClose, regionId }) => {
       <div className="px-8 pb-8 pt-4 flex justify-end">
         <button
           onClick={handleDetailClick}
-          className="px-8 py-3 bg-[#ff3b2f] hover:bg-[#ff2c1f] rounded-md text-white font-medium text-base transition-colors"
+          className="px-8 py-3 bg-[#ff3b2f] hover:bg-red-400 cursor-pointer rounded-md text-white font-medium text-base transition-colors"
         >
           보호소 상세보기
         </button>

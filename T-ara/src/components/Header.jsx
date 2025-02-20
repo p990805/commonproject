@@ -13,18 +13,18 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        // "Bearer " 접두어가 있다면 제거
-        const actualToken = token.startsWith("Bearer ")
-          ? token.slice(7)
-          : token;
-        try {
-          const decoded = jwtDecode(actualToken);
-          const exp = decoded.exp; // 만료 시간(초 단위)
+      let intervalId = null;
 
-          let intervalId = null;
-          const updateRemainingTime = () => {
+      const updateRemainingTime = () => {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          // "Bearer " 접두어가 있다면 제거
+          const actualToken = token.startsWith("Bearer ")
+            ? token.slice(7)
+            : token;
+          try {
+            const decoded = jwtDecode(actualToken);
+            const exp = decoded.exp; // 만료 시간(초 단위)
             const now = Date.now(); // 현재 시간 (ms)
             const timeLeft = Math.floor((exp * 1000 - now) / 1000); // 남은 시간(초)
 
@@ -35,16 +35,16 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
             } else {
               setRemainingTime(timeLeft);
             }
-          };
-
-          updateRemainingTime();
-          intervalId = setInterval(updateRemainingTime, 1000);
-
-          return () => clearInterval(intervalId);
-        } catch (error) {
-          console.error("토큰 디코딩 실패:", error);
+          } catch (error) {
+            console.error("토큰 디코딩 실패:", error);
+          }
         }
-      }
+      };
+
+      updateRemainingTime();
+      intervalId = setInterval(updateRemainingTime, 1000);
+
+      return () => clearInterval(intervalId);
     }
   }, [isLoggedIn, handleLogout]);
 
@@ -99,9 +99,6 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
               className="flex items-center space-x-2 cursor-pointer"
               onClick={toggleDropdown}
             >
-              {/* 기존 <img> 대신 ProfileImage 컴포넌트를 사용합니다.
-                  userProfile에는 S3에 저장된 전체 URL 또는 파일 키가 들어올 수 있으므로,
-                  ProfileImage 컴포넌트가 적절한 presigned URL을 받아와 표시합니다. */}
               <ProfileImage 
                 imageIdentifier={userProfile}
                 alt="프로필"
@@ -109,11 +106,11 @@ const Header = ({ isLoggedIn, userName, userProfile, handleLogout }) => {
               />
               <span className="text-gray-700">
                 {userName}님{" "}
-                {remainingTime !== null && (
+                {/* {remainingTime !== null && (
                   <span className="text-sm text-red-500">
                     ({remainingTime}초 남음)
                   </span>
-                )}
+                )} */}
               </span>
               <p className="text-xl">▼</p>
             </div>
