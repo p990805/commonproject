@@ -9,9 +9,16 @@ const api = axios.create({
 
 console.log("VITE_API_BASE_URL", import.meta.env.VITE_API_BASE_URL);
 
-// 요청 인터셉터: 토큰 만료 시간이 60초 미만이면 /reissue 호출 후 Authorization 헤더 업데이트
+// 요청 인터셉터: 토큰 만료 시간이 60초 미만이면 /member/reissue 호출 후 Authorization 헤더 업데이트
 api.interceptors.request.use(
   async (config) => {
+    // 재발급 요청일 경우, 인터셉터 로직을 건너뛰기 위해 커스텀 헤더 체크
+    if (config.headers && config.headers['X-Skip-Interceptor']) {
+      // 해당 헤더는 재발급 요청용이므로 삭제 후 그대로 config 반환
+      delete config.headers['X-Skip-Interceptor'];
+      return config;
+    }
+
     const token = localStorage.getItem("authToken"); // "Bearer ..." 형식으로 저장되어 있다고 가정
     if (token) {
       // 토큰에서 Bearer 접두어 제거
@@ -19,19 +26,16 @@ api.interceptors.request.use(
       try {
         const decoded = jwtDecode(actualToken);
         const currentTime = Date.now() / 1000; // 초 단위
-        // 토큰 만료 시간까지 남은 시간이 60초 미만이면 reissue 호출
-        if (decoded.exp - currentTime < 60) {
+        // 토큰 만료 시간까지 남은 시간이 60초 미만이면 재발급 요청
+        if (decoded.exp - currentTime < 300) {
           console.log("토큰 만료 임박, 재발급 요청 시작");
           try {
-            // 재발급 요청: 재발급 엔드포인트는 인터셉터의 영향을 피하기 위해 기본 axios 인스턴스를 사용
-            const reissueResponse = await axios.get("/member/reissue", {
-              baseURL: import.meta.env.VITE_API_BASE_URL,
+            // 재발급 요청 시, X-Skip-Interceptor 헤더를 추가하여 인터셉터 로직이 실행되지 않도록 함
+            const reissueResponse = await api.get('/member/reissue', {
               withCredentials: true,
+              headers: { 'X-Skip-Interceptor': true }
             });
-            console.log("재발급 응답:", reissueResponse);
-            const newToken =
-              reissueResponse.headers.authorization ||
-              reissueResponse.headers["Authorization"];
+            const newToken = reissueResponse.headers.authorization || reissueResponse.headers['Authorization'];
             if (newToken) {
               localStorage.setItem("authToken", newToken);
               config.headers.Authorization = newToken;
@@ -42,7 +46,7 @@ api.interceptors.request.use(
             }
           } catch (reissueError) {
             console.error("토큰 재발급 실패:", reissueError);
-            // 재발급 실패 시 기존 토큰 사용 또는 로그아웃 처리할 수 있음
+            // 재발급 실패 시 기존 토큰 사용 또는 추가 로그아웃 처리를 할 수 있음
             config.headers.Authorization = token;
           }
         } else {
@@ -54,8 +58,6 @@ api.interceptors.request.use(
         config.headers.Authorization = token;
       }
     }
-    // // 디버깅: 최종 요청 헤더 출력
-    // console.log("최종 요청 config.headers:", config.headers);
     return config;
   },
   (error) => Promise.reject(error)

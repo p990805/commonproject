@@ -32,7 +32,7 @@ const NicknameInput = ({
         </button>
       </div>
       <span className="text-sm text-gray-400 block pt-1">
-        5~10자로 한글,영어,숫자로 입력해주세요.
+        2~10자로 한글,영어,숫자로 입력해주세요.
       </span>
     </div>
   );

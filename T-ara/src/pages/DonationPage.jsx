@@ -35,7 +35,7 @@ const DonationPage = () => {
   useEffect(() => {
     const state = location.state;
 
-    console.log("전체 location.state:", state);
+    // console.log("전체 location.state:", state);
 
     if (state && state.animalInfo) {
       // 개별 유기동물 후원으로 고정
@@ -48,20 +48,20 @@ const DonationPage = () => {
         shelterId: state.animalInfo.shelterId,
       });
 
-      console.log("fixedDonationTarget 설정:", {
-        type: state.animalInfo.id,
-        id: state.animalInfo.id,
-        name: state.animalInfo.animalName,
-        shelterName: state.animalInfo.shelterName,
-        shelterId: state.animalInfo.shelterId,
-      });
+      // console.log("fixedDonationTarget 설정:", {
+      //   type: state.animalInfo.id,
+      //   id: state.animalInfo.id,
+      //   name: state.animalInfo.animalName,
+      //   shelterName: state.animalInfo.shelterName,
+      //   shelterId: state.animalInfo.shelterId,
+      // });
     }
 
     const fetchDonorInfo = async () => {
       setIsLoading(true);
       try {
         const response = await api.get("/member/myinfo");
-        console.log("API 응답 데이터:", JSON.stringify(response.data, null, 2));
+        // console.log("API 응답 데이터:", JSON.stringify(response.data, null, 2));
 
         const user = response.data.user || response.data; // user 객체가 있으면 사용
         setDonor({
@@ -71,12 +71,12 @@ const DonationPage = () => {
           email: user.email,
         });
 
-        console.log("donor 상태 설정 직후:", {
-          id: user.userId,
-          name: user.name,
-          phone: user.phone,
-          email: user.email,
-        });
+        // console.log("donor 상태 설정 직후:", {
+        //   id: user.userId,
+        //   name: user.name,
+        //   phone: user.phone,
+        //   email: user.email,
+        // });
       } catch (error) {
         console.error("사용자 정보 조회 실패:", error);
       } finally {
@@ -196,7 +196,7 @@ const DonationPage = () => {
     };
 
     IMP.request_pay(paymentData, async (response) => {
-      console.log("포트원 응답:", response);
+      // console.log("포트원 응답:", response);
 
       if (response.success) {
         try {
@@ -213,15 +213,16 @@ const DonationPage = () => {
             amount: selectedAmount,
           };
 
-          console.log("서버로 전송할 데이터:", serverData);
+          // console.log("서버로 전송할 데이터:", serverData);
 
           const result = await api.post(
             "/donation/monthly/register",
             serverData
           );
-          console.log("서버 성공 응답:", result.data);
+          // console.log("서버 성공 응답:", result.data);
 
           alert("✅ 결제수단 등록이 완료되었습니다!");
+          navigate("/animal/success");
         } catch (error) {
           console.error("상세 에러 정보:", error);
           alert(`결제수단 등록 중 오류가 발생했습니다.\n${error.message}`);
@@ -250,7 +251,7 @@ const DonationPage = () => {
     };
 
     IMP.request_pay(paymentData, async (response) => {
-      console.log("포트원 응답:", response);
+      // console.log("포트원 응답:", response);
 
       if (response.success) {
         try {
@@ -264,16 +265,16 @@ const DonationPage = () => {
                 : fixedDonationTarget.id,
           };
 
-          console.log("서버로 전송할 데이터:", serverData);
+          // console.log("서버로 전송할 데이터:", serverData);
 
           const result = await api.post(
             "/donation/general/register",
             serverData
           );
-          console.log("서버 성공 응답:", result.data);
+          // console.log("서버 성공 응답:", result.data);
 
           alert("✅ 결제가 완료되었습니다!");
-          navigate("/animal");
+          navigate("/animal/success");
         } catch (error) {
           console.error("상세 에러 정보:", error);
           alert(`결제 처리 중 오류가 발생했습니다.\n${error.message}`);

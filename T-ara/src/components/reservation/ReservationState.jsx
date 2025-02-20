@@ -81,8 +81,8 @@ const ReservationState = () => {
         setStartDate(todayStr);
         setEndDate(oneMonthLaterStr);
 
-        console.log("기본 시작일:", todayStr);
-        console.log("기본 종료일:", oneMonthLaterStr);
+        // console.log("기본 시작일:", todayStr);
+        // console.log("기본 종료일:", oneMonthLaterStr);
       })
       .catch((error) => {
         console.error("Error fetching reservations", error);
@@ -131,7 +131,10 @@ const ReservationState = () => {
         return false;
       if (selectedRegion === "ulsan" && !item.shelterName.includes("울산"))
         return false;
-      if (selectedRegion === "gyeongnam" && !item.shelterName.includes("경남남"))
+      if (
+        selectedRegion === "gyeongnam" &&
+        !item.shelterName.includes("경남남")
+      )
         return false;
       if (selectedRegion === "jeju" && !item.shelterName.includes("제주"))
         return false;
@@ -248,12 +251,12 @@ const ReservationState = () => {
                 <p>{formatDate(item.walkAt)}</p>
               </div>
             </div>
-            <button
+            {/* <button
               className="text-red-500 hover:underline flex items-center gap-1"
               onClick={() => handleShowDetail(item)}
             >
               상세보기 <IoIosArrowForward />
-            </button>
+            </button> */}
           </div>
         ))}
       </div>
@@ -273,7 +276,9 @@ const ReservationState = () => {
               key={i}
               onClick={() => setCurrentPage(i + 1)}
               className={`px-3 py-1 border rounded hover:bg-gray-100 ${
-                currentPage === i + 1 ? "bg-red-500 text-white" : "text-gray-700"
+                currentPage === i + 1
+                  ? "bg-red-500 text-white"
+                  : "text-gray-700"
               }`}
             >
               {i + 1}

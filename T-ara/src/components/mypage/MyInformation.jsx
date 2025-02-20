@@ -1,28 +1,29 @@
 // src/pages/MyInformation.jsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../api';
-import PasswordChangeSection from '../mypage/mypage2/PasswordChangeSection';
-import PhoneChangeSection from '../mypage/mypage2/PhoneChangeSection';
-import NicknameChangeSection from '../mypage/mypage2/NicknameChangeSection';
-import SubscriptionConsentSection from '../mypage/mypage2/SubscriptionConsentSection';
-import ProfileImageSection from '../mypage/mypage2/ProfileImageSection';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../api";
+import PasswordChangeSection from "../mypage/mypage2/PasswordChangeSection";
+import PhoneChangeSection from "../mypage/mypage2/PhoneChangeSection";
+import NicknameChangeSection from "../mypage/mypage2/NicknameChangeSection";
+import SubscriptionConsentSection from "../mypage/mypage2/SubscriptionConsentSection";
+import ProfileImageSection from "../mypage/mypage2/ProfileImageSection";
 
 const MyInformation = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [originalNickname, setOriginalNickname] = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [nicknameChecked, setNicknameChecked] = useState(true); // 초기에는 기존 값이 체크된 것으로 가정
   // flaggedImage: 삭제 대상으로 지정된 이미지 URL (추후 회원정보 수정 성공 후 삭제할 대상)
   const [flaggedImage, setFlaggedImage] = useState(null);
   const nav = useNavigate();
- 
+
   useEffect(() => {
-    api.get('/member/myinfo')
+    api
+      .get("/member/myinfo")
       .then((response) => {
         const data = response.data;
-        console.log("내 정보", data.user);
+        // console.log("내 정보", data.user);
         if (data.user) {
           setUserInfo(data.user);
           setOriginalNickname(data.user.nickname);
@@ -30,10 +31,10 @@ const MyInformation = () => {
           setUserInfo(data.shelter);
           setOriginalNickname(data.shelter.nickname);
         } else {
-          setError('사용자 정보를 찾을 수 없습니다.');
+          setError("사용자 정보를 찾을 수 없습니다.");
         }
       })
-      .catch(() => setError('데이터를 불러오는 중 오류가 발생했습니다.'))
+      .catch(() => setError("데이터를 불러오는 중 오류가 발생했습니다."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -44,7 +45,7 @@ const MyInformation = () => {
       return;
     }
     try {
-      const response = await api.put('/member/modify/user', userInfo, {
+      const response = await api.put("/member/modify/user", userInfo, {
         headers: { "Content-Type": "application/json" },
       });
       if (response.status === 200) {
@@ -54,10 +55,12 @@ const MyInformation = () => {
           try {
             const urlObj = new URL(flaggedImage);
             const pathname = urlObj.pathname;
-            const key = pathname.startsWith("/profile_img/") 
-                          ? pathname.substring("/profile_img/".length)
-                          : pathname.substring(1);
-            await api.delete("/upload/delete-file", { params: { fileName: key } });
+            const key = pathname.startsWith("/profile_img/")
+              ? pathname.substring("/profile_img/".length)
+              : pathname.substring(1);
+            await api.delete("/upload/delete-file", {
+              params: { fileName: key },
+            });
             console.log("삭제 대상 이미지 삭제 성공:", flaggedImage);
           } catch (err) {
             console.error("삭제 대상 이미지 삭제 오류:", err);
@@ -102,7 +105,7 @@ const MyInformation = () => {
   };
 
   if (loading) return <div>로딩중...</div>;
-  if (error)   return <div>{error}</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="bg-white w-full mx-auto p-5 rounded shadow-md">
@@ -121,18 +124,20 @@ const MyInformation = () => {
           <div className="flex flex-col gap-16">
             <div className="flex items-center gap-10">
               <p className="w-32 font-black text-lg">성명</p>
-              <p className="text-lg">{userInfo.name || '정보 없음'}</p>
+              <p className="text-lg">{userInfo.name || "정보 없음"}</p>
             </div>
             <div className="flex items-center gap-10">
               <p className="w-32 font-black text-lg">아이디</p>
-              <p className="text-lg">{userInfo.loginId || '정보 없음'}</p>
+              <p className="text-lg">{userInfo.loginId || "정보 없음"}</p>
             </div>
             <PasswordChangeSection />
-            <PhoneChangeSection 
+            <PhoneChangeSection
               phone={userInfo.phone}
-              onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+              onChange={(e) =>
+                setUserInfo({ ...userInfo, phone: e.target.value })
+              }
             />
-            <NicknameChangeSection 
+            <NicknameChangeSection
               nickname={userInfo.nickname}
               onNicknameChange={handleNicknameChange}
               onNicknameCheckSuccess={handleNicknameCheckSuccess}
@@ -140,22 +145,20 @@ const MyInformation = () => {
             <SubscriptionConsentSection />
           </div>
         </div>
-        <ProfileImageSection 
+        <ProfileImageSection
           profileImg={userInfo.profileImg}
           onProfileImgChange={handleProfileImgChange}
           onFlagForDeletion={handleFlagForDeletion}
         />
       </div>
       <div className="flex justify-center gap-5 mt-8">
-        <button 
+        <button
           onClick={handleUpdate}
           className="bg-red-500 text-white w-[250px] rounded font-bold cursor-pointer"
         >
           회원정보 수정
         </button>
-        <button 
-          className="border px-6 py-3 w-[250px] rounded font-bold cursor-pointer"
-        >
+        <button className="border px-6 py-3 w-[250px] rounded font-bold cursor-pointer">
           취소
         </button>
       </div>

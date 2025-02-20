@@ -1,9 +1,9 @@
 // src/components/live/DailyLive.jsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../api'; // axios 인스턴스
-import { toast } from 'react-toastify';
-import ThumbnailCapture from './ThumbnailCapture';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../api"; // axios 인스턴스
+import { toast } from "react-toastify";
+import ThumbnailCapture from "./ThumbnailCapture";
 
 const DailyLive = () => {
   const [liveList, setLiveList] = useState([]);
@@ -15,14 +15,15 @@ const DailyLive = () => {
 
   // 백엔드에서 라이브 스트림 목록 불러오기
   useEffect(() => {
-    api.get('/stream')
+    api
+      .get("/stream")
       .then((response) => {
         setLiveList(response.data);
         setLoading(false);
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((err) => {
-        console.error('라이브 스트림 데이터 불러오기 에러:', err);
+        console.error("라이브 스트림 데이터 불러오기 에러:", err);
         setError(err);
         setLoading(false);
       });
@@ -31,7 +32,7 @@ const DailyLive = () => {
   // 검색어와 정렬 옵션에 따라 라이브 목록 필터링 및 정렬
   const filteredAndSortedList = liveList
     // 검색 필터: title이나 description에 검색어가 포함되어 있으면 남김
-    .filter(live => {
+    .filter((live) => {
       if (!searchTerm) return true;
       const lowerTerm = searchTerm.toLowerCase();
       return (
@@ -55,14 +56,15 @@ const DailyLive = () => {
 
   // 라이브 아이템 클릭 시 라이브 플레이어 페이지로 이동
   const handleLiveClick = (streamId) => {
-    api.get(`/stream/lives/${streamId}`)
+    api
+      .get(`/stream/lives/${streamId}`)
       .then((response) => {
         // response.data에는 JoinStreamDTO 정보가 있다고 가정
         navigate(`/live/${streamId}`, { state: response.data });
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((err) => {
-        console.error('라이브 접속 에러:', err);
+        console.error("라이브 접속 에러:", err);
         toast.error("라이브 접속 중 오류가 발생했습니다.");
       });
   };
@@ -116,7 +118,11 @@ const DailyLive = () => {
               <h2 className="font-semibold">{live.title}</h2>
               {/* 백엔드에서 각 라이브 객체에 previewUrl(스트림 미리보기 URL)을 제공한다고 가정 */}
               {live.previewUrl ? (
-                <ThumbnailCapture imageUrl={live.previewUrl} width={320} height={260} />
+                <ThumbnailCapture
+                  imageUrl={live.previewUrl}
+                  width={320}
+                  height={260}
+                />
               ) : (
                 <div className="w-full h-40 bg-gray-300 flex items-center justify-center">
                   <p>썸네일 없음</p>
@@ -126,7 +132,9 @@ const DailyLive = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">현재 진행 중인 라이브 방송이 없습니다.</p>
+        <p className="text-center text-gray-500">
+          현재 진행 중인 라이브 방송이 없습니다.
+        </p>
       )}
     </div>
   );

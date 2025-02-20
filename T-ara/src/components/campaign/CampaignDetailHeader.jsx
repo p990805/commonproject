@@ -95,7 +95,7 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
               {/* 문의하기 버튼 */}
               <button
                 onClick={() => navigate(`/shelter/${campaign.shelterId}`)}
-                className="w-full mb-4 mt-4 flex items-center justify-center gap-2 py-4 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
+                className="w-full mb-4 mt-4 flex items-center justify-center gap-2 py-4 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -142,7 +142,7 @@ const CampaignDetailHeader = ({ campaign = {} }) => {
               {/* 후원하기 버튼 */}
               <button
                 onClick={handleClick}
-                className="w-full bg-red-500 text-white py-4 rounded-md font-bold hover:bg-red-600 transition-colors"
+                className="w-full bg-red-500 text-white py-4 rounded-md font-bold hover:bg-red-600 transition-colors cursor-pointer"
               >
                 캠페인 후원하기
               </button>

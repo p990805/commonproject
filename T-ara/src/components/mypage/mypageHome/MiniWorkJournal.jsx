@@ -17,7 +17,8 @@ const MiniWorkJournal = () => {
         // 최대 5개만 사용
         setJournals(sortedList.slice(0, 5));
       } catch (error) {
-        console.error("다이어리 목록 조회 실패:", error);
+        // 에러가 발생하면 콘솔에는 남기지 않고 빈 배열로 처리
+        setJournals([]);
       }
     };
 
@@ -37,24 +38,30 @@ const MiniWorkJournal = () => {
       </div>
 
       <div className="space-y-2">
-        {journals.map((item) => (
-          <Link
-            key={item.diaryId}
-            to={`/mypage/workjournal/${item.diaryId}`}
-            className="cursor-pointer"
-          >
-            <div className="flex items-center justify-between border-b p-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">{item.title}</span>
+        {journals.length > 0 ? (
+          journals.map((item) => (
+            <Link
+              key={item.diaryId}
+              to={`/mypage/workjournal/${item.diaryId}`}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center justify-between border-b p-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-700">{item.title}</span>
+                </div>
+                <div>
+                  <span className="text-gray-700 text-sm">
+                    후원일 {item.writtenDate}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-gray-700 text-sm">
-                  후원일 {item.writtenDate}
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))
+        ) : (
+          <div className="flex items-center justify-center mt-4">
+            <p className="text-gray-500 text-md">활동일지 내역이 없습니다.</p>
+          </div>
+        )}
       </div>
     </div>
   );

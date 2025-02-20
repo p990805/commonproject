@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/components/signup/Individual/Individual.jsx
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../api";
 
@@ -32,9 +33,8 @@ const Individual = () => {
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [isUserIdChecked, setIsUserIdChecked] = useState(false);
 
-  // 이미지 상태 (미리보기와 S3 URL)
+  // 이미지 상태 (미리보기 및 S3 URL)
   const [profilePreview, setProfilePreview] = useState("/assets/placeholder.png");
-  // profileImg: 최종 S3 URL (문자열)
   const [profileImg, setProfileImg] = useState(null);
 
   // 약관 동의 상태
@@ -42,14 +42,17 @@ const Individual = () => {
   const [agreeTerm, setAgreeTerm] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
 
+  // 프로필 이미지 컴포넌트 ref
+  const profileImageRef = useRef();
+
   // 닉네임 중복 확인
   const handleCheckNickname = async () => {
     if (!nickname || typeof nickname !== "string") {
       alert("닉네임을 올바르게 입력해 주세요.");
       return;
     }
-    if (nickname.length < 5 || nickname.length > 10) {
-      alert("닉네임은 5~10자 영문 소문자/숫자 조합이어야 합니다.");
+    if (nickname.length < 2 || nickname.length > 10) {
+      alert("닉네임은 2~10자 사이여야 합니다.");
       return;
     }
     if (isLoadingNickname) return;
@@ -119,7 +122,7 @@ const Individual = () => {
     }
   };
 
-  // onCompressedImage 콜백: ProfileImageUpload에서 압축 및 S3 업로드 후 최종 URL 전달받음
+  // onCompressedImage 콜백: ProfileImageUpload에서 업로드 후 최종 S3 URL 전달받음
   const handleCompressedImage = (s3Url) => {
     setProfileImg(s3Url);
   };
@@ -163,7 +166,8 @@ const Individual = () => {
       alert("아이디 중복확인을 해주세요.");
       return;
     }
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
     if (!passwordRegex.test(password)) {
       alert("비밀번호는 영어, 숫자, 특수문자 조합으로 8~15자여야 합니다.");
       return;
@@ -177,7 +181,20 @@ const Individual = () => {
       return;
     }
     const email = `${emailLocal}@${emailDomain}`;
-    let payload = {
+
+    // 프로필 이미지가 선택되지 않은 경우, finalizeUpload를 호출하여 기본 이미지도 S3 업로드
+    let finalProfileUrl = profileImg;
+    if (!finalProfileUrl) {
+      try {
+        finalProfileUrl = await profileImageRef.current.finalizeUpload();
+      } catch (error) {
+        console.error("프로필 이미지 최종 업로드 실패:", error);
+        alert("프로필 이미지 처리 중 오류가 발생했습니다.");
+        return;
+      }
+    }
+
+    const payload = {
       name,
       email,
       loginId: userId,
@@ -185,22 +202,18 @@ const Individual = () => {
       phone,
       nickname,
     };
-    if (profileImg) {
-      payload.profileImg = profileImg;
+    if (finalProfileUrl) {
+      payload.profileImg = finalProfileUrl;
     }
     console.log("전송할 payload:", payload);
     try {
       const res = await api.post("/member/join/user", payload, {
         headers: { "Content-Type": "application/json" },
       });
-      console.log("회원가입 응답:", res.data);
       alert("회원가입이 완료되었습니다.");
       navigate("/signup/successfulsignup");
     } catch (err) {
       console.error("회원가입 오류:", err);
-      if (err.response && err.response.data) {
-        console.error("서버 응답 에러 데이터:", err.response.data);
-      }
       alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
@@ -213,7 +226,9 @@ const Individual = () => {
     <div className="flex-grow">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center mb-2">회원가입</h1>
-        <p className="text-gray-600 text-center mb-8">회원정보를 입력해 주세요.</p>
+        <p className="text-gray-600 text-center mb-8">
+          회원정보를 입력해 주세요.
+        </p>
         <div className="max-w-3xl mx-auto bg-white p-8 rounded shadow">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <NameInput name={name} setName={setName} />
@@ -246,6 +261,7 @@ const Individual = () => {
               setConfirmPw={setConfirmPw}
             />
             <ProfileImageUpload
+              ref={profileImageRef}
               profilePreview={profilePreview}
               setProfilePreview={setProfilePreview}
               onCompressedImage={handleCompressedImage}

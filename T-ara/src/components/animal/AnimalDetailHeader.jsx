@@ -136,13 +136,13 @@ const AnimalDetailHeader = ({ animal }) => {
               </div>
             </div>
 
-            <div className="bg-gray-100 rounded-lg p-4 text-center">
+            <div className="bg-gray-100 rounded-lg p-4 text-center cursor-default">
               <span>👥 {animal.donationNumber} 명이 함께 후원중</span>
             </div>
 
             <button
               onClick={handleClick}
-              className="w-full bg-red-500 text-white py-4 rounded-lg font-bold hover:bg-red-600 transition-colors"
+              className="w-full bg-red-500 text-white py-4 rounded-lg font-bold hover:bg-red-600 transition-colors cursor-pointer"
             >
               후원하기
             </button>

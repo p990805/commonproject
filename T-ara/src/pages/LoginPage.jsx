@@ -8,7 +8,7 @@ import api from "../api"; // axios 인스턴스
 const extractFileKey = (url) => {
   try {
     const parsedUrl = new URL(url);
-    let key = parsedUrl.pathname.startsWith('/')
+    let key = parsedUrl.pathname.startsWith("/")
       ? parsedUrl.pathname.substring(1)
       : parsedUrl.pathname;
     if (key.startsWith("profile_img/")) {
@@ -39,7 +39,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       return;
     }
 
-    console.log("💡 [프론트] 로그인 요청 데이터:", { loginId, password });
+    // console.log("💡 [프론트] 로그인 요청 데이터:", { loginId, password });
 
     // memberType에 따라 엔드포인트 선택
     const endpoint =
@@ -55,17 +55,16 @@ const LoginPage = ({ onLoginSuccess }) => {
           withCredentials: true,
         }
       );
-      console.log("응답 헤더:", response.headers);
-      console.log("✅ [프론트] 로그인 응답 데이터:", response.data);
+      // console.log("응답 헤더:", response.headers);
+      // console.log("✅ [프론트] 로그인 응답 데이터:", response.data);
 
       // 토큰 추출
       const token =
-        response.headers.authorization ||
-        response.headers["Authorization"];
+        response.headers.authorization || response.headers["Authorization"];
       if (!token) {
         console.error("Authorization 헤더가 없습니다.");
       } else {
-        console.log("토큰", token);
+        // console.log("토큰", token);
       }
 
       // 로컬스토리지에 토큰 저장
@@ -75,7 +74,7 @@ const LoginPage = ({ onLoginSuccess }) => {
       const userInfoResponse = await api.get("/member/myinfo", {
         headers: { Authorization: token },
       });
-      console.log("✅ [프론트] 사용자 정보 응답:", userInfoResponse.data);
+      // console.log("✅ [프론트] 사용자 정보 응답:", userInfoResponse.data);
       // 응답 구조가 { user: { ... } } 또는 { shelter: { ... } }로 내려온다고 가정합니다.
       const userData =
         userInfoResponse.data.user || userInfoResponse.data.shelter || {};
@@ -92,12 +91,15 @@ const LoginPage = ({ onLoginSuccess }) => {
             presignedProfileUrl = originalProfileImg;
           } else {
             const fileKey = extractFileKey(originalProfileImg);
-            console.log("추출된 파일 키:", fileKey);
+            // console.log("추출된 파일 키:", fileKey);
             try {
-              const presignedResponse = await api.get("/upload/presigned-get-url", {
-                params: { fileName: fileKey },
-              });
-              console.log("presigned URL 응답:", presignedResponse.data);
+              const presignedResponse = await api.get(
+                "/upload/presigned-get-url",
+                {
+                  params: { fileName: fileKey },
+                }
+              );
+              // console.log("presigned URL 응답:", presignedResponse.data);
               presignedProfileUrl = presignedResponse.data.url;
             } catch (error) {
               console.error("presigned URL 가져오기 실패:", error);
@@ -136,7 +138,10 @@ const LoginPage = ({ onLoginSuccess }) => {
     } catch (error) {
       console.error("❌ [프론트] 로그인 요청 실패:", error);
       if (error.response) {
-        console.error("🛑 [프론트] 서버 응답 에러 데이터:", error.response.data);
+        console.error(
+          "🛑 [프론트] 서버 응답 에러 데이터:",
+          error.response.data
+        );
         alert(error.response.data.message || "로그인 실패. 다시 시도하세요.");
       } else if (error.request) {
         console.error("🚨 [프론트] 요청이 보내지지 않음:", error.request);
@@ -199,14 +204,14 @@ const LoginPage = ({ onLoginSuccess }) => {
             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-400"
           />
 
-          <div className="flex justify-end text-sm">
+          {/* <div className="flex justify-end text-sm">
             <a
               href="/forgot-password"
               className="text-blue-500 hover:underline"
             >
               비밀번호 찾기
             </a>
-          </div>
+          </div> */}
 
           <button
             type="submit"
@@ -223,13 +228,13 @@ const LoginPage = ({ onLoginSuccess }) => {
           >
             회원가입
           </a>
-          <span className="mx-2 text-black-500 font-bold">|</span>
+          {/* <span className="mx-2 text-black-500 font-bold">|</span>
           <a
             href="/find-id"
             className="text-black-500 hover:underline font-bold"
           >
             아이디 찾기
-          </a>
+          </a> */}
         </div>
       </div>
     </div>

@@ -1,157 +1,189 @@
 // src/components/signup/Individual/ProfileImageUpload.jsx
-import React from "react";
+import React, { useImperativeHandle, forwardRef } from "react";
 import compressImage from "../../../utils/compressImage";
 import api from "../../../api"; // axios 인스턴스
 
-const ProfileImageUpload = ({ profilePreview, setProfilePreview, onCompressedImage }) => {
-  // 랜덤 문자열 생성 함수: 영문과 숫자 섞어서 반환
-  const generateRandomString = (length = 10) => {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
+const DEFAULT_PLACEHOLDER = "/assets/placeholder.png";
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-      console.warn("파일이 선택되지 않았습니다.");
-      return;
-    }
-    console.log("선택된 파일:", file);
-    try {
-      // 1. 파일 압축 (옵션은 필요에 따라 조정)
-      let compressedFile = await compressImage(file);
-      console.log("압축된 파일:", compressedFile);
-
-      // 2. 한글이 있는 파일명인 경우, 랜덤한 파일명으로 교체 (확장자 유지)
-      const originalFileName = compressedFile.name;
-      if (/[ㄱ-ㅎ가-힣]/.test(originalFileName)) {
-        const extension = originalFileName.substring(originalFileName.lastIndexOf('.'));
-        const randomName = generateRandomString(10) + extension;
-        // 새로운 File 객체 생성 (압축된 파일 내용을 그대로 사용)
-        compressedFile = new File([compressedFile], randomName, { type: compressedFile.type });
-        console.log("파일명이 한글 포함되어 변경됨:", compressedFile.name);
+const ProfileImageUpload = forwardRef(
+  ({ profilePreview, setProfilePreview, onCompressedImage }, ref) => {
+    // 랜덤 문자열 생성 (영문/숫자 조합)
+    const generateRandomString = (length = 10) => {
+      const chars =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
+      return result;
+    };
 
-      // 3. presigned URL 요청 (백엔드의 S3Controller 사용)
-      const fileName = compressedFile.name;
-      const fileType = compressedFile.type;
+    // S3 프리사인드 URL 요청 후 파일 업로드
+    const uploadFileToS3 = async (file) => {
+      const fileName = file.name;
+      const fileType = file.type;
+      // presigned URL 요청
       const response = await api.get("/upload/presigned-url", {
         params: { fileName, fileType },
       });
       const { url, key } = response.data;
-      console.log("Presigned URL:", url, "Key:", key);
-
-      // 4. S3에 파일 업로드 (PUT 요청)
+      // S3에 PUT 방식 업로드
       const uploadResponse = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": fileType,
         },
-        body: compressedFile,
+        body: file,
       });
       if (!uploadResponse.ok) {
         throw new Error("S3 업로드 실패");
       }
-      console.log("S3 업로드 성공");
-
-      // 5. 최종 S3 URL 구성  
-      // 백엔드 S3Service에서 key를 생성할 때 "profile_img/" 폴더에 저장하도록 했으므로,
-      // 최종 URL은 bucketUrl + "/profile_img/" + key 형태가 되어야 합니다.
+      // 최종 S3 URL 구성 (S3Service에서 profile_img/ 폴더에 저장)
       const urlObj = new URL(url);
       const bucketUrl = `${urlObj.protocol}//${urlObj.host}`;
       const finalUrl = `${bucketUrl}/profile_img/${key}`;
-      console.log("최종 S3 URL:", finalUrl);
+      return finalUrl;
+    };
 
-      // 6. 부모 상태 업데이트: 미리보기 및 압축 이미지 URL(객체 키가 아니라 최종 URL) 전달
-      setProfilePreview(finalUrl);
-      if (onCompressedImage) {
-        onCompressedImage(finalUrl);
+    // 파일 선택 시 처리: 압축 → 파일명 랜덤화 → S3 업로드
+    const handleFileChange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        console.warn("파일이 선택되지 않았습니다.");
+        return;
       }
-    } catch (error) {
-      console.error("이미지 처리 중 오류:", error);
-    }
-  };
-
-  // 초기화 버튼 클릭 시, S3에서 파일 삭제 후 미리보기 및 부모 상태 초기화
-  const handleReset = async () => {
-    try {
-      // 파일 키는 S3 URL에서 "profile_img/" 이후의 파일명을 추출
-      const urlObj = new URL(profilePreview);
-      const pathName = urlObj.pathname; // 예: "/profile_img/gigwan2.png"
-      const key = pathName.startsWith("/profile_img/")
-        ? pathName.substring("/profile_img/".length)
-        : pathName.substring(1);
-      console.log("삭제할 파일명:", key);
-
-      // 백엔드의 삭제 API 호출 (DELETE 요청)
-      await api.delete("/upload/delete-file", { params: { fileName: key } });
-      console.log("파일 삭제 성공");
-
-      // 미리보기와 부모 상태 초기화
-      setProfilePreview("/assets/placeholder.png");
-      if (onCompressedImage) {
-        onCompressedImage(null);
+      try {
+        // 1. 파일 압축 (옵션은 필요에 따라 조정)
+        let compressedFile = await compressImage(file);
+        // 2. 파일명 랜덤화 (확장자 유지)
+        const originalFileName = compressedFile.name;
+        const extension = originalFileName.substring(
+          originalFileName.lastIndexOf(".")
+        );
+        const randomName = generateRandomString(10) + extension;
+        compressedFile = new File([compressedFile], randomName, {
+          type: compressedFile.type,
+        });
+        // 3. S3 업로드
+        const finalUrl = await uploadFileToS3(compressedFile);
+        // 4. 상태 업데이트
+        setProfilePreview(finalUrl);
+        if (onCompressedImage) {
+          onCompressedImage(finalUrl);
+        }
+      } catch (error) {
+        console.error("이미지 처리 중 오류:", error);
       }
-    } catch (error) {
-      console.error("파일 삭제 중 오류:", error);
-      alert("파일 삭제에 실패했습니다.");
-    }
-  };
+    };
 
-  return (
-    <div>
-      <label className="block font-medium mb-1">프로필 사진</label>
-      <div className="flex items-center space-x-4">
-        <div className="w-30 h-35 border border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 text-sm">
-          {profilePreview && profilePreview !== "/assets/placeholder.png" ? (
-            <img
-              src={profilePreview}
-              alt="프로필"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span>No Image</span>
-          )}
-        </div>
-        <div className="flex flex-col">
-          <h3 className="font-bold">사진 업로드 가이드</h3>
-          <p className="text-gray-400 text-xs">
-            권장 해상도: 200 x 200(px)
-            <br />
-            파일 양식: JPG, JPEG, PNG
-            <br />
-            최대 용량: 5MB 이하
-          </p>
-          <div className="flex gap-2">
-            <label
-              htmlFor="profileUpload"
-              className="whitespace-nowrap bg-gray-800 text-white px-4 py-3 rounded hover:bg-gray-600 mt-1 cursor-pointer text-center text-xs"
-            >
-              사진 업로드
-            </label>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="whitespace-nowrap bg-red-500 text-white px-4 py-3 rounded hover:bg-red-400 mt-1 cursor-pointer text-center text-xs"
-            >
-              초기화
-            </button>
+    // 기본 placeholder 이미지를 S3에 업로드
+    const uploadDefaultImage = async () => {
+      try {
+        const response = await fetch(DEFAULT_PLACEHOLDER);
+        if (!response.ok) {
+          throw new Error("placeholder 이미지 로드 실패");
+        }
+        const blob = await response.blob();
+        const fileType = blob.type || "image/png";
+        const fileName = "placeholder.png";
+        const placeholderFile = new File([blob], fileName, { type: fileType });
+        const finalUrl = await uploadFileToS3(placeholderFile);
+        setProfilePreview(finalUrl);
+        if (onCompressedImage) {
+          onCompressedImage(finalUrl);
+        }
+        return finalUrl;
+      } catch (error) {
+        console.error("기본 이미지 업로드 중 오류:", error);
+        throw error;
+      }
+    };
+
+    // 초기화: S3에 업로드된 파일 삭제 후 기본 placeholder로 복원
+    const handleReset = async () => {
+      try {
+        if (profilePreview && profilePreview !== DEFAULT_PLACEHOLDER) {
+          const urlObj = new URL(profilePreview);
+          const pathname = urlObj.pathname; // 예: "/profile_img/랜덤파일명.png"
+          const key = pathname.startsWith("/profile_img/")
+            ? pathname.substring("/profile_img/".length)
+            : pathname.substring(1);
+          // 백엔드 삭제 API 호출
+          await api.delete("/upload/delete-file", { params: { fileName: key } });
+        }
+        setProfilePreview(DEFAULT_PLACEHOLDER);
+        if (onCompressedImage) {
+          onCompressedImage(null);
+        }
+      } catch (error) {
+        console.error("파일 삭제 중 오류:", error);
+        alert("파일 삭제에 실패했습니다.");
+      }
+    };
+
+    // 부모 컴포넌트에서 회원가입 제출 시 호출하도록 finalizeUpload 함수 제공
+    useImperativeHandle(ref, () => ({
+      finalizeUpload: async () => {
+        if (profilePreview === DEFAULT_PLACEHOLDER) {
+          return await uploadDefaultImage();
+        }
+        return profilePreview;
+      },
+    }));
+
+    return (
+      <div>
+        <label className="block font-medium mb-1">프로필 사진</label>
+        <div className="flex items-center space-x-4">
+          <div className="w-30 h-35 border border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 text-sm">
+            {profilePreview &&
+            profilePreview !== DEFAULT_PLACEHOLDER &&
+            profilePreview.startsWith("http") ? (
+              <img
+                src={profilePreview}
+                alt="프로필"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>No Image</span>
+            )}
           </div>
-          <input
-            type="file"
-            id="profileUpload"
-            style={{ display: "none" }}
-            accept="image/*"
-            onChange={handleImageChange}
-          />
+          <div className="flex flex-col">
+            <h3 className="font-bold">사진 업로드 가이드</h3>
+            <p className="text-gray-400 text-xs">
+              권장 해상도: 200 x 200(px)
+              <br />
+              파일 양식: JPG, JPEG, PNG
+              <br />
+              최대 용량: 5MB 이하
+            </p>
+            <div className="flex gap-2">
+              <label
+                htmlFor="profileUpload"
+                className="whitespace-nowrap bg-gray-800 text-white px-4 py-3 rounded hover:bg-gray-600 mt-1 cursor-pointer text-center text-xs"
+              >
+                사진 업로드
+              </label>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="whitespace-nowrap bg-red-500 text-white px-4 py-3 rounded hover:bg-red-400 mt-1 cursor-pointer text-center text-xs"
+              >
+                초기화
+              </button>
+            </div>
+            <input
+              type="file"
+              id="profileUpload"
+              style={{ display: "none" }}
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
 
 export default ProfileImageUpload;

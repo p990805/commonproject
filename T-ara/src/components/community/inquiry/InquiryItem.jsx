@@ -44,24 +44,6 @@ const InquiryItem = ({ inquiry, isOpen, onToggle, onDelete }) => {
           ) : (
             <span className="ml-2 text-sm text-red-500">[답변 전]</span>
           )}
-          {/* 수정 버튼: 답변 전이고 삭제되지 않은 문의에만 노출 */}
-          {!hasAnswer && !inquiry.deleted && (
-            <>
-              <Link
-                to={`/community/inquiry/modifyinfo/${inquiry.inquiryId}`}
-                className="ml-2 bg-blue-500 text-white px-2 py-1 rounded text-sm"
-                onClick={(e) => e.stopPropagation()} // 리스트 토글 이벤트 방지
-              >
-                수정
-              </Link>
-              <button
-                className="ml-2 bg-red-500 text-white px-2 py-1 rounded text-sm"
-                onClick={handleDelete}
-              >
-                삭제
-              </button>
-            </>
-          )}
           <button
             className={`ml-2 cursor-pointer transform transition-transform ${
               isOpen ? "rotate-180" : "rotate-0"
@@ -92,6 +74,24 @@ const InquiryItem = ({ inquiry, isOpen, onToggle, onDelete }) => {
             <p className="italic text-red-500">해당 문의는 삭제되었습니다.</p>
           ) : (
             <>
+              {/* 수정/삭제 버튼 (답변 전이고 삭제되지 않은 경우에만 노출) */}
+              {!hasAnswer && !inquiry.deleted && (
+                <div className="flex justify-end mb-2">
+                  <Link
+                    to={`/community/inquiry/modifyinfo/${inquiry.inquiryId}`}
+                    className="bg-red-500 hover:bg-red-400 cursor-pointer text-white px-2 py-1 rounded text-sm mr-2"
+                    onClick={(e) => e.stopPropagation()} // 리스트 토글 이벤트 방지
+                  >
+                    수정
+                  </Link>
+                  <button
+                    className="bg-neutral-500 hover:bg-neutral-400 cursor-pointer text-white px-2 py-1 rounded text-sm"
+                    onClick={handleDelete}
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
               <p className="font-bold text-red-500 mb-2">문의 내용:</p>
               {inquiry.content ? (
                 <p>{inquiry.content}</p>

@@ -57,8 +57,8 @@ const AnimalDetail = () => {
           const diaryResponse = await api.get(
             `http://localhost:8090/diary/free/${id}`
           );
-          console.log("Diary Response:", diaryResponse.data);
-          console.log("Diary List:", diaryResponse.data.freeDiaryList);
+          // console.log("Diary Response:", diaryResponse.data);
+          // console.log("Diary List:", diaryResponse.data.freeDiaryList);
           setDiaries(diaryResponse.data.freeDiaryList || []);
         } catch (diaryError) {
           // 404 에러는 일지가 없는 정상적인 경우

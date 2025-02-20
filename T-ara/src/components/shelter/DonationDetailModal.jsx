@@ -1,12 +1,7 @@
 import React from "react";
 
-const DonationDetailModal = ({ donation, isOpen, onClose }) => {
+const DonationDetailModal = ({ donation, isOpen, onClose, formatAmount }) => {
   if (!isOpen) return null;
-
-  const formatAmount = (amount) => {
-    if (!amount && amount !== 0) return "0";
-    return amount.toLocaleString("ko-KR");
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -19,6 +14,8 @@ const DonationDetailModal = ({ donation, isOpen, onClose }) => {
         return "일반 후원";
       case "monthly":
         return "정기 후원";
+      case "campaign":
+        return "캠페인 후원";
       default:
         return "-";
     }
@@ -48,7 +45,9 @@ const DonationDetailModal = ({ donation, isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4 p-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">후원 번호</p>
-                <p className="font-medium">{donation.donationHistoryId}</p>
+                <p className="font-medium">
+                  {donation.donationHistoryId || "-"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">후원 일시</p>
@@ -79,7 +78,7 @@ const DonationDetailModal = ({ donation, isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4 p-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">후원자 닉네임</p>
-                <p className="font-medium">{donation.userNickname || "-"}</p>
+                <p className="font-medium">{donation.userName || "-"}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">회원 번호</p>
@@ -98,11 +97,13 @@ const DonationDetailModal = ({ donation, isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4 p-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">후원 대상 ID</p>
-                <p className="font-medium">{donation.relationId || "-"}</p>
+                <p className="font-medium">
+                  {donation.donationCategoryId || "-"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">후원 대상</p>
-                <p className="font-medium">{donation.relationName || "-"}</p>
+                <p className="font-medium">{donation.relationalName || "-"}</p>
               </div>
             </div>
           </div>

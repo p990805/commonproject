@@ -6,7 +6,7 @@ const RegionMap = ({ selectedRegion, onRegionSelect }) => {
 
   const handleClickRegion = (region) => {
     onRegionSelect(region);
-    console.log("Clicked region:", region);
+    // console.log("Clicked region:", region);
     // 필요하다면 페이지 이동 등 추가 로직 가능
     // nav("/somewhere");
   };
@@ -29,7 +29,9 @@ const RegionMap = ({ selectedRegion, onRegionSelect }) => {
           src="/assets/map/광주2.png"
           alt="광주(호버)"
           className={`w-full h-full ${
-            selectedRegion === "광주/전남" ? "block" : "hidden group-hover:block"
+            selectedRegion === "광주/전남"
+              ? "block"
+              : "hidden group-hover:block"
           } transition-all`}
         />
       </div>
@@ -43,14 +45,18 @@ const RegionMap = ({ selectedRegion, onRegionSelect }) => {
           src="/assets/map/부산.png"
           alt="부산/울산/경남"
           className={`w-full h-full ${
-            selectedRegion === "부산/울산/경남" ? "hidden" : "group-hover:hidden"
+            selectedRegion === "부산/울산/경남"
+              ? "hidden"
+              : "group-hover:hidden"
           } transition-all`}
         />
         <img
           src="/assets/map/부산2.png"
           alt="부산(호버)"
           className={`w-full h-full ${
-            selectedRegion === "부산/울산/경남" ? "block" : "hidden group-hover:block"
+            selectedRegion === "부산/울산/경남"
+              ? "block"
+              : "hidden group-hover:block"
           } transition-all`}
         />
       </div>
@@ -92,7 +98,9 @@ const RegionMap = ({ selectedRegion, onRegionSelect }) => {
           src="/assets/map/대구2.png"
           alt="대구(호버)"
           className={`w-full h-full ${
-            selectedRegion === "대구/경북" ? "block" : "hidden group-hover:block"
+            selectedRegion === "대구/경북"
+              ? "block"
+              : "hidden group-hover:block"
           } transition-all`}
         />
       </div>
@@ -211,14 +219,18 @@ const RegionMap = ({ selectedRegion, onRegionSelect }) => {
           src="/assets/map/대전.png"
           alt="대전/충남/세종"
           className={`w-full h-full ${
-            selectedRegion === "대전/충남/세종" ? "hidden" : "group-hover:hidden"
+            selectedRegion === "대전/충남/세종"
+              ? "hidden"
+              : "group-hover:hidden"
           } transition-all`}
         />
         <img
           src="/assets/map/대전2.png"
           alt="대전(호버)"
           className={`w-full h-full ${
-            selectedRegion === "대전/충남/세종" ? "block" : "hidden group-hover:block"
+            selectedRegion === "대전/충남/세종"
+              ? "block"
+              : "hidden group-hover:block"
           } transition-all`}
         />
       </div>

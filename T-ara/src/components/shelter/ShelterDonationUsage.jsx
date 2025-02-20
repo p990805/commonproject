@@ -7,16 +7,21 @@ import DonationUsageModal from "./DonationUsageModal";
 const ShelterDonationUsage = () => {
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate(`/shelter/usage-register`);
-  };
-
-  // 체크된 항목들을 관리하는 상태
+  // State 관리
   const [selectedItems, setSelectedItems] = useState([]);
-  // API로부터 가져온 후원금 사용 데이터
   const [donations, setDonations] = useState([]);
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredDonations, setFilteredDonations] = useState([]);
+  const [stats, setStats] = useState({
+    todayAmount: 0,
+    weekAmount: 0,
+    monthAmount: 0,
+    totalAmount: 0,
+  });
 
   // 데이터 불러오기
   useEffect(() => {
@@ -24,6 +29,7 @@ const ShelterDonationUsage = () => {
       try {
         const response = await api.get("/shelter/donation/expense/list");
         setDonations(response.data);
+        setFilteredDonations(response.data);
       } catch (error) {
         console.error("후원금 사용 데이터를 불러오는 중 오류 발생:", error);
       }
@@ -32,7 +38,72 @@ const ShelterDonationUsage = () => {
     fetchDonations();
   }, []);
 
-  // 전체 선택/해제 핸들러
+  // 통계 데이터 계산
+  useEffect(() => {
+    const calculateStats = () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // 시간 정보 제거
+
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const stats = donations.reduce(
+        (acc, donation) => {
+          const donationDate = new Date(donation.expenseDate);
+          donationDate.setHours(0, 0, 0, 0); // 시간 정보 제거
+          const amount = donation.amount;
+
+          // 오늘 사용한 금액
+          if (donationDate.getTime() === today.getTime()) {
+            acc.todayAmount += amount;
+          }
+
+          // 이번 주 사용한 금액
+          if (
+            donationDate.getTime() >= startOfWeek.getTime() &&
+            donationDate.getTime() <= today.getTime()
+          ) {
+            acc.weekAmount += amount;
+          }
+
+          // 이번 달 사용한 금액
+          if (
+            donationDate.getTime() >= startOfMonth.getTime() &&
+            donationDate.getTime() <= today.getTime()
+          ) {
+            acc.monthAmount += amount;
+          }
+
+          // 총 사용 금액
+          acc.totalAmount += amount;
+
+          return acc;
+        },
+        {
+          todayAmount: 0,
+          weekAmount: 0,
+          monthAmount: 0,
+          totalAmount: 0,
+        }
+      );
+
+      setStats(stats);
+    };
+
+    if (donations.length > 0) {
+      calculateStats();
+    }
+  }, [donations]);
+
+  // 이벤트 핸들러
+  const handleClick = () => {
+    navigate(`/shelter/usage-register`);
+  };
+
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       setSelectedItems(donations.map((item) => item.expenseId));
@@ -41,7 +112,6 @@ const ShelterDonationUsage = () => {
     }
   };
 
-  // 개별 항목 선택/해제 핸들러
   const handleSelectItem = (id) => {
     setSelectedItems((prev) => {
       if (prev.includes(id)) {
@@ -55,6 +125,32 @@ const ShelterDonationUsage = () => {
   const handleDonationClick = (donation) => {
     setSelectedDonation(donation);
     setIsDetailModalOpen(true);
+  };
+
+  const handleSearch = () => {
+    let filtered = [...donations];
+
+    // 날짜 필터링
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
+      filtered = filtered.filter((donation) => {
+        const donationDate = new Date(donation.expenseDate);
+        return donationDate >= start && donationDate <= end;
+      });
+    }
+
+    // 검색어 필터링 (사용처)
+    if (searchKeyword.trim()) {
+      filtered = filtered.filter((donation) =>
+        donation.content.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    }
+
+    setFilteredDonations(filtered);
   };
 
   return (
@@ -77,53 +173,58 @@ const ShelterDonationUsage = () => {
               후원금 사용 등록하기
             </button>
           </div>
+
           {/* Dashboard Stats */}
           <div className="w-full h-[130px] relative bg-gradient-to-r from-[#5e9dfc] via-[#6085ef] to-[#5c6efe] rounded-[10px] shadow-[3px_3px_10px_0px_rgba(151,152,159,0.25)] flex items-center justify-between px-16 mb-12">
-            {/* Today's Donation Amount */}
+            {/* Today's Usage Amount */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
                 오늘 사용한 금액
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
-                  503,165
+                  {stats.todayAmount.toLocaleString()}
                 </span>
                 <span className="!text-white/70 text-lg ml-2">원</span>
               </div>
             </div>
 
-            {/* Total Donation Amount */}
+            {/* This Week's Usage Amount */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                이번주 사용한 금액
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">
+                  {stats.weekAmount.toLocaleString()}
+                </span>
+                <span className="!text-white/70 text-lg ml-2">원</span>
+              </div>
+            </div>
+
+            {/* This Month's Usage Amount */}
+            <div className="flex flex-col">
+              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
+                이번달 사용한 금액
+              </span>
+              <div className="flex items-baseline">
+                <span className="!text-white text-[32px] font-bold">
+                  {stats.monthAmount.toLocaleString()}
+                </span>
+                <span className="!text-white/70 text-lg ml-2">원</span>
+              </div>
+            </div>
+
+            {/* Total Usage Amount */}
             <div className="flex flex-col">
               <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
                 총 사용한 금액
               </span>
               <div className="flex items-baseline">
                 <span className="!text-white text-[32px] font-bold">
-                  623,503,165
+                  {stats.totalAmount.toLocaleString()}
                 </span>
                 <span className="!text-white/70 text-lg ml-2">원</span>
-              </div>
-            </div>
-
-            {/* Today's Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                오늘 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">15</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
-              </div>
-            </div>
-
-            {/* Total Donor Count */}
-            <div className="flex flex-col">
-              <span className="!text-[#d6fffb] text-[13.12px] font-semibold mb-2">
-                전체 후원자 수
-              </span>
-              <div className="flex items-baseline">
-                <span className="!text-white text-[32px] font-bold">255</span>
-                <span className="!text-white/70 text-lg ml-2">명</span>
               </div>
             </div>
           </div>
@@ -143,30 +244,16 @@ const ShelterDonationUsage = () => {
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2024-10-23"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span className="mx-4 !text-[#575757]">-</span>
                     <input
                       type="date"
                       className="w-32 h-[25.64px] px-3 bg-white border border-[#cccccc] text-[#575757] text-xs"
-                      defaultValue="2025-01-23"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
                     />
-                  </div>
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex">
-                <div className="w-40 h-[50px] bg-[#f0f3fc] border border-[#dee1e8] flex items-center">
-                  <span className="ml-5 !text-[#191919] text-[10.31px] font-normal font-['Roboto']">
-                    사용 카테고리
-                  </span>
-                </div>
-                <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
-                  <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
-                    </select>
                   </div>
                 </div>
               </div>
@@ -180,21 +267,24 @@ const ShelterDonationUsage = () => {
                 </div>
                 <div className="flex-1 h-[50px] border border-[#dee1e8] flex items-center">
                   <div className="flex gap-4 ml-5">
-                    <select className="w-24 h-7 px-3 bg-white border border-[#cccccc] text-[#575757] text-xs">
-                      <option>전체</option>
-                    </select>
                     <input
                       type="text"
+                      placeholder="사용처를 입력하세요"
                       className="w-64 h-7 px-3 bg-white border border-[#cccccc]"
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Search Button */}
-            <div className="flex justify-center mt-5">
-              <button className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]">
+            {/* Search Buttons */}
+            <div className="flex justify-center mt-5 gap-2">
+              <button
+                onClick={handleSearch}
+                className="w-[68px] h-[33px] bg-[#191919] text-white text-xs font-normal font-['Roboto'] hover:bg-[#666]"
+              >
                 검색
               </button>
             </div>
@@ -215,7 +305,7 @@ const ShelterDonationUsage = () => {
                     [
                     {selectedItems.length > 0
                       ? `${selectedItems.length}개의 항목 선택됨`
-                      : `전체 항목 총 ${donations.length}건`}
+                      : `전체 항목 총 ${filteredDonations.length}건`}
                     ]
                   </span>
                 </div>
@@ -246,7 +336,7 @@ const ShelterDonationUsage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {donations.map((donation) => (
+                  {filteredDonations.map((donation) => (
                     <tr key={donation.expenseId} className="border-b">
                       <td className="p-4 text-center">
                         <input
@@ -269,7 +359,7 @@ const ShelterDonationUsage = () => {
                         {donation.amount.toLocaleString()}원
                       </td>
                       <td className="p-4">{donation.expenseDate}</td>
-                      <td className="p-4">{donation.content}</td>
+                      <td className="p-4">{donation.usagePlace}</td>
                     </tr>
                   ))}
                 </tbody>
