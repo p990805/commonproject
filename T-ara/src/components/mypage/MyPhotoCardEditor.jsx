@@ -150,7 +150,8 @@ const MyPhotoCardEditor = ({ composedImage }) => {
       console.log('Photocard registration response:', response);
 
       // 성공적으로 등록되면 포토카드 목록 페이지로 이동
-      navigate('/mypage/photocard');
+      navigate('/mypage/photocard', { replace: true });
+      window.location.reload();
     } catch (error) {
       console.error('Error registering photocard:', error);
       setError('포토카드 등록에 실패했습니다. 다시 시도해주세요.');

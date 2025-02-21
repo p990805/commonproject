@@ -17,11 +17,11 @@ const MyPhotoCard = () => {
         const photoCards = response.data?.photoCardList || [];
         
         // 데이터 구조 변환
-        const formattedCards = photoCards.map(card => ({
+        const formattedCards = photoCards.map((card, index) => ({
           id: card.photoCardId,
           photocardPath: card.photoCardPath,
           date: formatDate(card.registeredAt),
-          title: `포토카드 #${card.photoCardId}`
+          title: `${index + 1}번째 포토카드`
         }));
         
         setCards(formattedCards);
@@ -102,13 +102,23 @@ const MyPhotoCard = () => {
                     <button 
                       className="flex items-center gap-2 border border-red-500 rounded-md px-3 py-1.5 text-sm hover:bg-red-50"
                       onClick={() => {
-                        // 다운로드 링크 생성
-                        const link = document.createElement('a');
-                        link.href = card.photocardPath;
-                        link.download = `포토카드_${card.id}.png`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        try {
+                          const link = document.createElement('a');
+                          link.href = card.photocardPath;
+                          link.download = `포토카드_${card.id}.png`;
+                          link.target = '_blank'; // 새 창에서 열기
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          
+                          // 자동으로 열린 창 닫기
+                          setTimeout(() => {
+                            window.close();
+                          }, 100);
+                        } catch (error) {
+                          console.error('다운로드 중 오류 발생:', error);
+                          alert('다운로드에 실패했습니다.');
+                        }
                       }}
                     >
                       <FaDownload size={12} className="text-red-500" />

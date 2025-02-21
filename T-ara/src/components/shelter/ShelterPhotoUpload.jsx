@@ -66,22 +66,47 @@ const ShelterPhotoUpload = () => {
         })
       );
   
-      const processedResults = {};
+      // 종이 아닌 강아지/고양이로만 분류하도록 수정
+      const processedResults = {
+        '강아지': [],
+        '고양이': []
+      };
       const unclassifiedImages = [];
   
       results.forEach(({ classified, unclassified, originalImage }) => {
         if (classified && Object.keys(classified).length > 0) {
+          // 각 종을 확인해서 강아지인지 고양이인지만 판단
           Object.entries(classified).forEach(([breedName, images]) => {
-            if (!processedResults[breedName]) {
-              processedResults[breedName] = [];
-            }
-            images.forEach(image => {
-              processedResults[breedName].push({
-                ...image,
-                preview: originalImage.preview,
-                file: originalImage.file
+            // 강아지 종인 경우
+            if (breedName.includes('dog') || breedName.toLowerCase().includes('puppy') || 
+                breedName.includes('개') || breedName.includes('강아지')) {
+              images.forEach(image => {
+                processedResults['강아지'].push({
+                  ...image,
+                  preview: originalImage.preview,
+                  file: originalImage.file
+                });
               });
-            });
+            } 
+            // 고양이 종인 경우
+            else if (breedName.includes('cat') || breedName.toLowerCase().includes('kitten') || 
+                    breedName.includes('고양이')) {
+              images.forEach(image => {
+                processedResults['고양이'].push({
+                  ...image,
+                  preview: originalImage.preview,
+                  file: originalImage.file
+                });
+              });
+            }
+            // 위 조건에 해당하지 않는 경우 (다른 동물이거나 종을 감지하지 못한 경우)
+            else {
+              unclassifiedImages.push({
+                preview: originalImage.preview,
+                file: originalImage.file,
+                filename: originalImage.filename
+              });
+            }
           });
         }
   
@@ -93,7 +118,15 @@ const ShelterPhotoUpload = () => {
           });
         }
       });
-
+  
+      // 빈 카테고리는 삭제
+      if (processedResults['강아지'].length === 0) {
+        delete processedResults['강아지'];
+      }
+      if (processedResults['고양이'].length === 0) {
+        delete processedResults['고양이'];
+      }
+  
       setClassificationResults({
         classified: processedResults,
         unclassified: unclassifiedImages

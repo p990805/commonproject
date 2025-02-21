@@ -54,9 +54,7 @@ const AnimalDetail = () => {
 
         // 동물일지 가져오기
         try {
-          const diaryResponse = await api.get(
-            `http://localhost:8090/diary/free/${id}`
-          );
+          const diaryResponse = await api.get(`/diary/free/${id}`);
           // console.log("Diary Response:", diaryResponse.data);
           // console.log("Diary List:", diaryResponse.data.freeDiaryList);
           setDiaries(diaryResponse.data.freeDiaryList || []);
