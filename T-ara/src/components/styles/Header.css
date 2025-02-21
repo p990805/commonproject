@@ -1,0 +1,90 @@
+/* 헤더 레이아웃 */
+.header {
+    display: flex;
+    align-items: center;          /* 세로 정렬 */
+    justify-content: space-between;  /* 좌우 공간 분배 */
+    padding: 10px 20px;          /* 공간 확보 */
+    background-color: #fff;       /* 흰색 배경 */
+    border-bottom: 1px solid #eee; /* 아랫줄 구분선 */
+  }
+  
+  /* 왼쪽 로고 영역 */
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 40px;  /* 로고 크기 */
+    height: auto;
+  }
+  
+  /* 중앙 메뉴 */
+  .header-nav ul {
+    display: flex;
+    gap: 20px;  /* 메뉴 간 간격 */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .header-nav li {
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .header-nav li:hover {
+    text-decoration: underline;
+  }
+  
+  /* 오른쪽 영역 */
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* 요소 간 간격 */
+  }
+  
+  /* 공통 아이콘 버튼 스타일 */
+  .icon-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* 검색 아이콘 크기 */
+  .icon-button img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* 로그인 / 회원가입 */
+  .login-join {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .login-join .divider {
+    margin: 0 6px; /* 수평 간격 */
+  }
+  
+  /* 후원하기 버튼 */
+  .donate-button {
+    background-color: #ff4d4d;  /* 빨간색 */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .donate-button:hover {
+    background-color: #e84343;  /* hover 시 조금 진하게 */
+  }
+  

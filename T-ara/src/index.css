@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    
+    font-family: Arial, sans-serif;
+    background-color: rgb(246, 246, 246);
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 auto;
+    
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+@media (max-width: 768px) {
+    #root {
+        padding: 10px;
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
