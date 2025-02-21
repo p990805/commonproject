@@ -1,17 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import { FaUpload, FaArrowLeft, FaArrowRight, FaPaw } from "react-icons/fa";
-import axios from 'axios';
-import api from '../../api';
-import MyPhotoCardEditor from './MyPhotoCardEditor'; 
+import axios from "axios";
+import api from "../../api";
+import MyPhotoCardEditor from "./MyPhotoCardEditor";
 
 const MyPhotoCardImageUpload = ({ onClose }) => {
   const [personImage, setPersonImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [progress, setProgress] = useState({ status: '', percent: 0 });
+  const [progress, setProgress] = useState({ status: "", percent: 0 });
   const sessionIdRef = useRef(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
 
   const API_URL = 'https://tara-photo-server.onrender.com'; 
@@ -21,78 +22,108 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
   const photoApi = axios.create({
     baseURL: API_URL,
     headers: {
-      'Content-Type': 'application/json'
-    }
+      "Content-Type": "application/json",
+    },
   });
-  
+
   // 후원 동물 상태
   const [donationAnimals, setDonationAnimals] = useState([]);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [animalCarouselPage, setAnimalCarouselPage] = useState(0);
-  
+
   // 동물 사진 상태
   const [isAnimalPhotoModalOpen, setIsAnimalPhotoModalOpen] = useState(false);
   const [animalPhotos, setAnimalPhotos] = useState([]);
   const [selectedAnimalPhoto, setSelectedAnimalPhoto] = useState(null);
 
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  };
+
   useEffect(() => {
     // 후원 동물 목록 불러오기
     const fetchDonationAnimals = async () => {
       try {
-        const response = await api.get('http://localhost:8090/animal/donation-animal');
-        
-        // 응답 구조에 따라 동물 목록 설정
+        setIsLoading(true);
+        const response = await api.get("/animal/donation-animal");
         const animalList = response.data?.animalList || response.data || [];
-        setDonationAnimals(animalList);
-      } catch (err) {
-        console.error('후원 동물 목록 불러오기 실패:', err);
-        setError('후원 동물 목록을 불러오는 데 실패했습니다.');
+        
+        // 데이터 구조 변환
+        const formattedAnimals = animalList.map((animal, index) => ({
+          id: animal.animalId,
+          animalId: animal.animalId,
+          animalPath: animal.animalPath,
+          date: formatDate(animal.registeredAt),
+          title: `${index + 1}번째 후원 동물`,
+          animalName: animal.animalName || `동물 ${index + 1}`
+        }));
+        
+        setDonationAnimals(formattedAnimals);
+      } catch (error) {
+        console.error("후원 동물 목록 불러오기 실패:", error);
+        setError("후원 동물 목록을 불러오는 데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
       }
     };
-
+  
     fetchDonationAnimals();
     
     // 세션 ID 생성
     sessionIdRef.current = Math.random().toString(36).substring(7);
   }, []);
-
+  
   // 동물 사진 불러오기
   const fetchAnimalPhotos = async (animalId) => {
     try {
-      const response = await api.get(`http://localhost:8090/animal/donation-animal/${animalId}`);
-      
+      setIsLoading(true);
+      const response = await api.get(`/animal/donation-animal/${animalId}`);
+  
       // 응답 구조에 따라 사진 목록 설정
-      const photosData = response.data?.animalPhoto?.animalPhoto || 
-        response.data?.animalPhoto?.photo || 
-        response.data?.animalPhoto || 
+      const photosData =
+        response.data?.animalPhoto?.animalPhoto ||
+        response.data?.animalPhoto?.photo ||
+        response.data?.animalPhoto ||
         [];
-
+  
       // 안전한 배열 변환 및 필터링
-      const photos = Array.isArray(photosData) 
-        ? photosData.filter(photoUrl => {
-            if (typeof photoUrl !== 'string') {
-              console.warn('유효하지 않은 사진 URL:', photoUrl);
+      const photos = Array.isArray(photosData)
+        ? photosData.filter((photoUrl) => {
+            if (typeof photoUrl !== "string") {
+              console.warn("유효하지 않은 사진 URL:", photoUrl);
               return false;
             }
-            const ext = photoUrl.toLowerCase().split('.').pop();
-            return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+            const ext = photoUrl.toLowerCase().split(".").pop();
+            return ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
           })
-        : typeof photosData === 'object'
-          ? Object.values(photosData).filter(photoUrl => 
-              typeof photoUrl === 'string' && 
-              ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(photoUrl.toLowerCase().split('.').pop())
-            )
-          : [];
-      
-      console.log('추출된 사진들:', photos);
-      
+        : typeof photosData === "object"
+        ? Object.values(photosData).filter(
+            (photoUrl) =>
+              typeof photoUrl === "string" &&
+              ["jpg", "jpeg", "png", "gif", "webp"].includes(
+                photoUrl.toLowerCase().split(".").pop()
+              )
+          )
+        : [];
+  
+      console.log("추출된 사진들:", photos);
+  
       setAnimalPhotos(photos);
       setIsAnimalPhotoModalOpen(true);
-    } catch (err) {
-      console.error('동물 사진 불러오기 실패:', err);
-      console.error('응답 데이터:', err.response?.data);
-      setError('동물 사진을 불러오는 데 실패했습니다.');
+    } catch (error) {
+      console.error("동물 사진 불러오기 실패:", error);
+      console.error("응답 데이터:", error.response?.data);
+      setError("동물 사진을 불러오는 데 실패했습니다.");
       setAnimalPhotos([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -245,7 +276,7 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
         try {
           const response = await photoApi.get(`/predictions/${predictionId}`);
           const prediction = response.data;
-      
+
           const statusMap = {
             'starting': { status: '시작하는 중...', percent: 10 },
             'processing': { status: '이미지 처리중...', percent: 50 },
@@ -291,7 +322,7 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
       console.error('합성 요청 오류:', error);
       setError(error?.response?.data?.detail || error?.message || '서버 연결 중 오류가 발생했습니다');
       setLoading(false);
-      setProgress({ status: '', percent: 0 });
+      setProgress({ status: "", percent: 0 });
     }
   };
 
@@ -333,11 +364,15 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
       {(loading || progress.status) && (
         <div className="mb-6">
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">{progress.status}</span>
-            <span className="text-sm font-medium text-gray-700">{progress.percent}%</span>
+            <span className="text-sm font-medium text-gray-700">
+              {progress.status}
+            </span>
+            <span className="text-sm font-medium text-gray-700">
+              {progress.percent}%
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
+            <div
               className="bg-red-500 h-2.5 rounded-full transition-all duration-300"
               style={{ width: `${progress.percent}%` }}
             ></div>
@@ -354,30 +389,38 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
 
       {/* 후원 동물 선택 섹션 (이미지 업로드 위) */}
       <div className="relative mb-6 px-4">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">내가 후원하는 동물 선택</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">
+          내가 후원하는 동물 선택
+        </h2>
         <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
           {donationAnimals.map((animal) => (
-            <div 
+            <div
               key={animal.animalId}
               onClick={() => handleAnimalSelect(animal)}
               className={`
                 flex flex-col items-center cursor-pointer
-                ${selectedAnimal?.animalId === animal.animalId 
-                  ? 'opacity-100' 
-                  : 'opacity-50 hover:opacity-75'}
+                ${
+                  selectedAnimal?.animalId === animal.animalId
+                    ? "opacity-100"
+                    : "opacity-50 hover:opacity-75"
+                }
               `}
             >
-              <div 
+              <div
                 className={`
                   w-20 h-20 rounded-full border-2 flex items-center justify-center
-                  ${selectedAnimal?.animalId === animal.animalId 
-                    ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-300 bg-gray-100'}
+                  ${
+                    selectedAnimal?.animalId === animal.animalId
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300 bg-gray-100"
+                  }
                 `}
               >
                 <FaPaw className="text-2xl text-gray-600" />
               </div>
-              <span className="mt-2 text-sm text-center">{animal.animalName}</span>
+              <span className="mt-2 text-sm text-center">
+                {animal.animalName}
+              </span>
             </div>
           ))}
         </div>
@@ -399,8 +442,12 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
               ) : (
                 <div className="text-center p-6">
                   <FaUpload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600">클릭하여 이미지를 업로드하세요</p>
-                  <p className="text-sm text-gray-500 mt-2">또는 파일을 여기로 드래그하세요</p>
+                  <p className="text-gray-600">
+                    클릭하여 이미지를 업로드하세요
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    또는 파일을 여기로 드래그하세요
+                  </p>
                 </div>
               )}
               <input
@@ -437,10 +484,12 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
         <div className="flex justify-center gap-4">
           <button
             onClick={handleSubmit}
-            disabled={!personImage || !selectedAnimal || !selectedAnimalPhoto || loading}
+            disabled={
+              !personImage || !selectedAnimal || !selectedAnimalPhoto || loading
+            }
             className="px-6 py-2.5 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors duration-200 disabled:bg-gray-400"
           >
-            {loading ? '처리중...' : '합성하기'}
+            {loading ? "처리중..." : "합성하기"}
           </button>
         </div>
 
@@ -494,8 +543,8 @@ const MyPhotoCardImageUpload = ({ onClose }) => {
                         alt={`동물 사진 ${index + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = '/placeholder-image.png';
-                          e.target.alt = '이미지를 불러올 수 없습니다';
+                          e.target.src = "/placeholder-image.png";
+                          e.target.alt = "이미지를 불러올 수 없습니다";
                         }}
                       />
                     </div>

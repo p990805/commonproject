@@ -3,14 +3,6 @@ import React, { useState, useEffect } from "react";
 import CommonComponent from "./CommonComponent";
 import api from "../../api";
 
-// 로컬 날짜를 "YYYY-MM-DD" 형식으로 반환하는 함수
-function formatDate(date) {
-  const year = date.getFullYear();
-  const month = ("0" + (date.getMonth() + 1)).slice(-2);
-  const day = ("0" + date.getDate()).slice(-2);
-  return `${year}-${month}-${day}`;
-}
-
 const MyRegularSpon = () => {
   // 정렬 관련 state
   const [selectedSort, setSelectedSort] = useState("latest");
@@ -19,71 +11,62 @@ const MyRegularSpon = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 실제 사용자 ID (localStorage의 userId 사용)
+  // localStorage의 userId 사용
   const userId = localStorage.getItem("userId");
 
   const handleSortChange = (sortKey) => {
     setSelectedSort(sortKey);
   };
 
-  // // 후원 취소 핸들러
-  // const handleCancel = async (donationHistoryId) => {
-  //   if (!window.confirm("후원을 취소하시겠습니까?")) return;
-  //   try {
-  //     // 예시: 취소 API 엔드포인트 호출 (요청 방식은 상황에 맞게 조정)
-  //     const response = await api.get(`/donation/cancel/${monthlyId}`);
-  //     alert(response.data.message);
-  //     // 취소 완료 후 목록에서 해당 항목 제거
-  //     setData((prev) =>
-  //       prev.filter((item) => item.donationHistoryId !== donationHistoryId)
-  //     );
-  //   } catch (error) {
-  //     console.error("후원 취소 오류:", error);
-  //     alert("후원 취소에 실패하였습니다. 다시 시도해주세요.");
-  //   }
-  // };
+  // 후원 취소 핸들러 (POST /donation/monthly/cancel/{monthlyId})
+  const handleCancel = async (monthlyId) => {
+    if (!window.confirm("후원을 취소하시겠습니까?")) return;
+    try {
+      const response = await api.post(`/donation/monthly/cancel/${monthlyId}`);
+      alert(response.data.message || "취소가 완료되었습니다.");
+      // 취소 완료 후 해당 항목의 상태를 '후원 종료'로 업데이트
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.monthlyId === monthlyId ? { ...item, status: "후원 종료" } : item
+        )
+      );
+    } catch (error) {
+      console.error("후원 취소 오류:", error);
+      alert("후원 취소에 실패하였습니다. 다시 시도해주세요.");
+    }
+  };
 
   useEffect(() => {
-    // API 호출 전 상태 초기화
     setData([]);
     setLoading(true);
     setError(null);
 
+    // 새로운 API 엔드포인트 사용: /donation/user/{userId}
     api
-      .get(`/donation/search?userId=${userId}&limit=100`)
+      .get(`/donation/user/${userId}`)
       .then((response) => {
-        const donationHistory = response.data;
-        // 전체 후원 내역 배열에서 정기 후원 (monthly)만 필터링
-        const monthlyDonations = donationHistory.filter(
-          (item) => item.donationCategory === "monthly"
-        );
-        // console.log("전체 후원 내역:", donationHistory);
-        // API 데이터를 테이블에서 사용할 형태로 변환
-        const defaultStart = "2025-02-18";
-        const mappedData = monthlyDonations.map((item, index) => {
-          let startDate;
-          if (item.createdAt) {
-            const datePart = item.createdAt.split(" ")[0];
-            startDate = datePart.replace(/-/g, ".");
-          } else {
-            startDate = defaultStart.replace(/-/g, ".");
-          }
-          // 후원내역: dataSource가 "animal"이면 "동물", 그렇지 않으면 "보호소"
+        const donations = response.data;
+        const mappedData = donations.map((item, index) => {
+          // 시작일은 startedAt을 사용하며, "YYYY-MM-DD"를 "YYYY.MM.DD"로 변환
+          const startDate = item.startedAt.replace(/-/g, ".");
+          // 후원내역: dataSource가 "animal"이면 "동물", "shelter"이면 "보호소"
           const donationDetails =
             item.dataSource === "animal" ? "동물" : "보호소";
-          // 후원상태: status가 "active"이면 "후원중", 그렇지 않으면 "후원 종료"
-          const donationStatus =
-            item.status === "active" ? "후원중" : "후원 종료";
+          // 후원금액 포맷 (원 단위 천단위 콤마 추가)
+          const amountFormatted = Number(item.amount).toLocaleString() + "원";
+          // 후원상태: canceledAt이 없으면 "후원중", 있으면 "후원 종료"
+          const donationStatus = !item.canceledAt ? "후원중" : "후원 종료";
+
           return {
             no: index + 1,
-            category: "정기후원", // 후원분야 고정
-            startDate, // 후원시작일
-            details: donationDetails, // 후원내역
-            amount: Number(item.donationAmount).toLocaleString() + "원", // 후원금액
-            status: donationStatus, // 후원상태
-            donationHistoryId: item.donationHistoryId, // 후원 취소에 필요
-            donationAt: item.createdAt, // 정렬 등에 사용
-            donationAmount: item.donationAmount,
+            category: "정기후원",
+            startDate,
+            details: donationDetails,
+            amount: amountFormatted,
+            status: donationStatus,
+            monthlyId: item.monthlyId, // 후원 취소에 사용
+            donationAt: item.startedAt, // 정렬 기준 날짜
+            donationAmount: item.amount,
           };
         });
         setData(mappedData);
@@ -92,12 +75,12 @@ const MyRegularSpon = () => {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  // 정렬 적용
+  // 선택한 정렬 방식에 따라 데이터 정렬
   const sortedData = [...data].sort((a, b) => {
     if (selectedSort === "latest") {
-      return new Date(b.donationAt || 0) - new Date(a.donationAt || 0);
+      return new Date(b.donationAt) - new Date(a.donationAt);
     } else if (selectedSort === "oldest") {
-      return new Date(a.donationAt || 0) - new Date(b.donationAt || 0);
+      return new Date(a.donationAt) - new Date(b.donationAt);
     } else if (selectedSort === "high") {
       return b.donationAmount - a.donationAmount;
     } else if (selectedSort === "low") {
@@ -232,7 +215,7 @@ const MyRegularSpon = () => {
                   <td className="border border-gray-200 px-4 py-2 text-sm">
                     {item.status === "후원중" ? (
                       <button
-                        onClick={() => handleCancel(item.donationHistoryId)}
+                        onClick={() => handleCancel(item.monthlyId)}
                         className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-400 text-xs"
                       >
                         후원취소
